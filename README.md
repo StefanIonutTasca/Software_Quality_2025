@@ -1,6 +1,23 @@
 # Jabberpoint Repair Project
 
-This project aims to repair and improve the Jabberpoint presentation software as part of a school assignment.
+Jabberpoint is a slide show presentation tool originally developed at the Open University as a teaching tool for software design and quality. This project aims to repair and improve the Jabberpoint presentation software as part of a software quality course assignment, with a focus on implementing proper CI/CD and quality assurance practices.
+
+## About Jabberpoint
+
+Jabberpoint is a simple Java-based presentation application that allows users to:
+- Create slide presentations with text elements
+- Navigate between slides
+- Load and save presentations in a custom format
+
+The application serves as an excellent case study for applying software design principles, refactoring techniques, and implementing quality assurance processes.
+
+## Documentation
+
+Detailed documentation can be found in the `docs` folder:
+- [DTAP Workflow](docs/DTAP_Workflow.md) - Explains our DTAP street implementation
+- [JaCoCo Setup](docs/JaCoCo_Setup.md) - Details on our code coverage configuration
+- [Contributing Guidelines](docs/Contributing.md) - How to contribute to this project
+- [CI/CD Pipeline](docs/CI_CD_Pipeline.md) - Overview of our continuous integration process
 
 ## DTAP Street
 
@@ -22,5 +39,44 @@ This project uses a DTAP (Development, Testing, Acceptance, Production) workflow
 ## Code Quality
 
 This project uses:
-- JaCoCo for code coverage reporting
-- CI/CD pipeline for automated testing and deployment
+- JaCoCo for code coverage reporting (minimum 70% instruction coverage, 60% branch coverage)
+- GitHub Actions for CI/CD pipeline implementation
+- Google Java Format for consistent code style
+- Maven Enforcer Plugin for dependency management
+- Automated integration testing across the DTAP pipeline
+
+Code quality is enforced at multiple levels:
+1. Pre-commit with local build validation
+2. During pull request reviews
+3. During automated testing on all DTAP environments
+
+## Getting Started
+
+### Prerequisites
+- Java 11 or higher
+- Maven 3.6.0+
+- Git
+
+### Build and Run
+1. Clone the repository
+```bash
+git clone https://github.com/YourUsername/Software_Quality_2025.git
+cd Software_Quality_2025
+```
+
+2. Build the project
+```bash
+mvn clean install
+```
+
+3. Run the application
+```bash
+mvn exec:java -Dexec.mainClass="org.jabberpoint.JabberPoint"
+```
+
+### Development Workflow
+1. Create a feature branch from `development`
+2. Make your changes
+3. Submit a pull request following the guidelines in [Contributing](docs/Contributing.md)
+4. Ensure all CI checks pass
+5. Get your PR reviewed and merged
