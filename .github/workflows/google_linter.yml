@@ -39,5 +39,10 @@ jobs:
         with:
           title: 'style: Format Java code with Google Java Format'
           commit-message: 'style: Format Java code with Google Java Format'
-          body: 'This PR formats the Java code according to Google Java Format standards'
+          body: |
+            This PR formats the Java code according to Google Java Format standards.
+            
+            If tests are failing, please verify that the formatting has not inadvertently changed test assertions or functionality.
           branch: automated-code-format
+          base: ${{ github.ref_name }}
+          delete-branch: true

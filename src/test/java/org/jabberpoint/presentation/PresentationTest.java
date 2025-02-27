@@ -76,12 +76,19 @@ public class PresentationTest {
     @Test
     public void testEmptyPresentation() {
         Presentation emptyPresentation = new Presentation("Empty");
+        
+        // Verify basic properties
+        assertEquals("Empty", emptyPresentation.getTitle());
         assertNull(emptyPresentation.getCurrentSlide());
         assertEquals(0, emptyPresentation.getSlideCount());
-        assertEquals("Empty", emptyPresentation.getTitle());
+        assertEquals(1, emptyPresentation.getCurrentSlideNumber()); // Should still report as 1
         
         // Navigation should fail on empty presentation
         assertFalse(emptyPresentation.nextSlide());
         assertFalse(emptyPresentation.previousSlide());
+        
+        // Verify that state remains consistent after navigation attempts
+        assertNull(emptyPresentation.getCurrentSlide());
+        assertEquals(0, emptyPresentation.getSlideCount());
     }
 }
