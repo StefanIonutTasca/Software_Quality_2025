@@ -1,0 +1,39 @@
+name: Google Java Format
+
+on:
+  push:
+    branches: [ development, testing, acceptance, main ]
+  pull_request:
+    branches: [ development, testing, acceptance, main ]
+
+jobs:
+  formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+      
+      - name: Google Java Format
+        uses: axel-op/googlejavaformat-action@v3
+        with:
+          args: "--replace"
+          skip-commit: true
+          
+      - name: Check for modified files
+        id: git-check
+        run: |
+          if [[ -n $(git status -s) ]]; then
+            echo "::set-output name=modified::true"
+          fi
+          
+      - name: Create Pull Request with formatting changes
+        if: steps.git-check.outputs.modified == 'true' && github.event_name != 'pull_request'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          title: 'style: Format Java code with Google Java Format'
+          commit-message: 'style: Format Java code with Google Java Format'
+          body: 'This PR formats the Java code according to Google Java Format standards'
+          branch: automated-code-format
