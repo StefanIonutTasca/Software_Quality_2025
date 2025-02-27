@@ -24,6 +24,10 @@ public   class   Theme {
         this.bodyFont = bodyFont;
     }
 
+    public Theme() {
+        // Default constructor
+    }
+
     // Default themes
     public static Theme createDefaultTheme() {
     return new Theme(
@@ -77,4 +81,19 @@ public   class   Theme {
     public void  setBodyFont(Font bodyFont){
     this.bodyFont = bodyFont;
     }
+
+    /** 
+     * A method with intentionally bad formatting to test the Google Java Format workflow
+    */
+    public   static   Theme  createCustomTheme(  Color   backgroundColor,Color  textColor,   
+    String fontName,   int 
+        fontSize)   {
+            Theme customTheme =    new Theme();
+        customTheme.setBackgroundColor(  backgroundColor);
+    customTheme.setTextColor(textColor   );
+                customTheme.setTitleFont(new Font(fontName, Font.BOLD, fontSize + 4));
+        customTheme.setBodyFont(new Font(fontName, Font.PLAIN, fontSize));
+            return     customTheme;
+    }
+
 }
