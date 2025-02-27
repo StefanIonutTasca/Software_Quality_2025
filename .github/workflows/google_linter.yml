@@ -6,11 +6,17 @@ on:
   pull_request:
     branches: [ development, testing, acceptance, main ]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   formatting:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
@@ -25,9 +31,7 @@ jobs:
       - name: Check for modified files
         id: git-check
         run: |
-          if [[ -n $(git status -s) ]]; then
-            echo "::set-output name=modified::true"
-          fi
+          git diff --exit-code || echo "modified=true" >> $GITHUB_OUTPUT
           
       - name: Create Pull Request with formatting changes
         if: steps.git-check.outputs.modified == 'true' && github.event_name != 'pull_request'
