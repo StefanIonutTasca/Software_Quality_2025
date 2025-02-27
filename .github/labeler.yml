@@ -1,0 +1,20 @@
+# Add 'documentation' label to any changes to markdown files
+documentation:
+  - '**/*.md'
+
+# Add 'test' label to any change to test files
+test:
+  - 'src/test/**/*'
+
+# Add 'source' label to any change to source files
+source:
+  - 'src/main/**/*'
+
+# Add 'ci' label to any change to workflow files
+ci:
+  - '.github/workflows/**/*'
+
+# Add 'configuration' label to any change to project configuration files
+configuration:
+  - 'pom.xml'
+  - '.github/labeler.yml'
