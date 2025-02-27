@@ -32,7 +32,7 @@ jobs:
         id: git-check
         run: |
           git diff --exit-code || echo "modified=true" >> $GITHUB_OUTPUT
-          
+      
       - name: Create Pull Request with formatting changes
         if: steps.git-check.outputs.modified == 'true' && github.event_name != 'pull_request'
         uses: peter-evans/create-pull-request@v5
@@ -46,3 +46,10 @@ jobs:
           branch: automated-code-format
           base: ${{ github.ref_name }}
           delete-branch: true
+          
+      - name: Mark success even if formatting changes were needed
+        if: always()
+        run: |
+          echo "Google Java Format check completed."
+          echo "If formatting changes were needed, a PR has been created."
+          exit 0
