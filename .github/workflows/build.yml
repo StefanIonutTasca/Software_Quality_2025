@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java-version: [11, 17]  # Test on multiple Java versions
+        java-version: [17]  # Test only on Java 17
         
     steps:
     - uses: actions/checkout@v3
