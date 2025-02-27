@@ -53,7 +53,7 @@ Code quality is enforced at multiple levels:
 ## Getting Started
 
 ### Prerequisites
-- Java 11 or higher
+- Java 17 or higher
 - Maven 3.6.0+
 - Git
 

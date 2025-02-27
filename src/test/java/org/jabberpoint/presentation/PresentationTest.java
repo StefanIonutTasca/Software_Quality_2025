@@ -78,6 +78,7 @@ public class PresentationTest {
         Presentation emptyPresentation = new Presentation("Empty");
         assertNull(emptyPresentation.getCurrentSlide());
         assertEquals(0, emptyPresentation.getSlideCount());
+        assertEquals("Empty", emptyPresentation.getTitle());
         
         // Navigation should fail on empty presentation
         assertFalse(emptyPresentation.nextSlide());
