@@ -1,59 +1,98 @@
 package  org.jabberpoint.presentation ;
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 import java.awt.Color;
 import java.awt.Font;
 
-public  class  ThemeTest {
+/**
+ * Theme class represents styling options for a presentation.
+ * This class is deliberately not formatted according to Google Java Format
+ * to demonstrate the automatic formatting workflow.
+ */
+public   class   Theme {
+    private   String   name;
+    private Color   backgroundColor;
+    private Color   textColor;
+    private   Font   titleFont;
+    private  Font  bodyFont;
+
+    public  Theme() {
+        // Default constructor
+    }
+
+    public  Theme(String name, Color backgroundColor, Color textColor,
+        Font titleFont,Font bodyFont) {
+        this.name   =  name;
+        this.backgroundColor   =  backgroundColor;
+        this.textColor  =   textColor;
+        this.titleFont  =  titleFont;
+        this.bodyFont = bodyFont;
+    }
+
+    // Default themes
+    public static Theme createDefaultTheme() {
+    return new Theme(
+            "Default",
+        Color.WHITE,
+            Color.BLACK,
+        new Font("Arial", Font.BOLD, 24),
+            new Font("Arial", Font.PLAIN, 18)
+    );
+    }
+
+    public static Theme  createDarkTheme() {
+        return new Theme(
+            "Dark",
+                Color.BLACK,
+            Color.WHITE,
+                new Font("Arial", Font.BOLD, 24),
+            new Font("Arial", Font.PLAIN, 18)
+        );
+    }
+
+    // Getters and setters with inconsistent formatting
+    public String getName() { return name; }
     
-    @Test
-    public void  testCreateDefaultTheme() {
-        Theme  defaultTheme  =   Theme.createDefaultTheme();
-        
-        assertEquals("Default", defaultTheme.getName());
-        assertEquals(Color.WHITE, defaultTheme.getBackgroundColor());
-        assertEquals(Color.BLACK, defaultTheme.getTextColor());
-        assertNotNull(defaultTheme.getTitleFont());
-        assertNotNull(defaultTheme.getBodyFont());
+    public  void  setName(String name)  {
+        this.name  =  name;
+    }
+
+    public Color getBackgroundColor(){return backgroundColor;}
+    
+    public   void setBackgroundColor  (Color backgroundColor) {
+        this.backgroundColor = backgroundColor;
+    }
+
+    public Color  getTextColor() {
+    return textColor;
     }
     
-    @Test
-    public void  testCreateDarkTheme () {
-      Theme darkTheme = Theme.createDarkTheme();
-      
-      assertEquals("Dark",   darkTheme.getName()  );
-      assertEquals(Color.BLACK,   darkTheme.getBackgroundColor()  );
-      assertEquals(Color.WHITE,   darkTheme.getTextColor()  );
-      assertNotNull(  darkTheme.getTitleFont()  );
-      assertNotNull(  darkTheme.getBodyFont()  );
+    public void setTextColor  (  Color textColor ) {
+        this.textColor = textColor;
     }
+
+    public Font  getTitleFont() { return  titleFont; }
     
-    @Test
-    public  void  testSetterGetters () {
-        Theme theme = new Theme("Custom", Color.BLUE, Color.YELLOW, 
-                         new Font("Times New Roman", Font.BOLD, 28),
-                             new Font("Times New Roman", Font.PLAIN, 20));
-        
-        // Test initial values
-        assertEquals("Custom", theme.getName());
-        assertEquals(Color.BLUE, theme.getBackgroundColor());
-        assertEquals(Color.YELLOW, theme.getTextColor());
-        
-        // Test setters
-        theme.setName ("Modified");
-        theme.setBackgroundColor (Color.GREEN);
-        theme.setTextColor (Color.RED);
-        Font newTitleFont = new Font("Courier", Font.ITALIC, 26);
-        Font newBodyFont = new Font("Courier", Font.PLAIN, 16);
-        theme.setTitleFont (newTitleFont);
-        theme.setBodyFont (newBodyFont);
-        
-        // Verify changes
-        assertEquals ( "Modified",  theme.getName() );
-        assertEquals ( Color.GREEN,  theme.getBackgroundColor() );
-        assertEquals ( Color.RED,  theme.getTextColor() );
-        assertEquals ( newTitleFont,  theme.getTitleFont() );
-        assertEquals ( newBodyFont,  theme.getBodyFont() );
+    public  void  setTitleFont(Font  titleFont) {
+        this.titleFont = titleFont;
+    }
+
+    public Font getBodyFont(){return bodyFont;}
+    
+    public void  setBodyFont(Font bodyFont){
+    this.bodyFont = bodyFont;
+    }
+
+    /** 
+     * A method with intentionally bad formatting to test the Google Java Format workflow
+    */
+    public   static   Theme  createCustomTheme(  Color   backgroundColor,Color  textColor,   
+    String fontName,   int 
+        fontSize)   {
+            Theme customTheme =    new Theme();
+        customTheme.setBackgroundColor(  backgroundColor);
+    customTheme.setTextColor(textColor   );
+                customTheme.setTitleFont(new Font(fontName, Font.BOLD, fontSize + 4));
+        customTheme.setBodyFont(new Font(fontName, Font.PLAIN, fontSize));
+            return     customTheme;
     }
 }
