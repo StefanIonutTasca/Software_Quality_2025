@@ -2,9 +2,9 @@ name: Google Java Format
 
 on:
   push:
-    branches: [ development, testing, acceptance, main ]
+    branches: [ development, testing, acceptance, main, theme-support ]
   pull_request:
-    branches: [ development, testing, acceptance, main ]
+    branches: [ development, testing, acceptance, main, theme-support ]
 
 # Define permissions at the top level
 permissions:
@@ -23,6 +23,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       
+      - name: Debug - Current Branch
+        run: |
+          echo "Current branch: ${{ github.ref_name }}"
+          echo "Event type: ${{ github.event_name }}"
+      
       # First check if formatting is needed without making changes
       - name: Check Google Java Format
         id: check-format
@@ -36,9 +41,11 @@ jobs:
       - name: Report format status
         run: |
           if [ "${{ steps.check-format.outcome }}" == "failure" ]; then
-            echo "Formatting issues detected. Creating a PR to fix them."
+            echo "::warning::📋 Formatting issues detected! We'll create a PR to fix them automatically."
+            echo "💡 Files needing formatting:"
+            git diff --name-only | grep "\.java$" || echo "No Java files modified"
           else
-            echo "Code is already properly formatted!"
+            echo "::notice::✅ Code is already properly formatted! No changes needed."
           fi
   
   # Separate job to make formatting changes and create PR
@@ -51,12 +58,17 @@ jobs:
         with:
           fetch-depth: 0
           # Use a PAT instead of GITHUB_TOKEN
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
       
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
+      
+      - name: Debug - Format Job
+        run: |
+          echo "Running formatting job on branch: ${{ github.ref_name }}"
+          echo "Working with repository: ${{ github.repository }}"
       
       # Apply formatting
       - name: Apply Google Java Format
@@ -71,18 +83,62 @@ jobs:
         run: |
           git diff --exit-code || echo "modified=true" >> $GITHUB_OUTPUT
       
-      # Create PR if changes were made
+      # Show what files were modified
+      - name: Show modified files
+        if: steps.git-check.outputs.modified == 'true'
+        run: |
+          echo "::notice::🔄 Files that needed formatting:"
+          git diff --name-only | grep "\.java$"
+          echo "------------------------------------"
+          echo "Sample diff from one file:"
+          git diff --unified=1 | head -n 20
+      
+      # Try to create PR with GITHUB_TOKEN first, fallback to commit if that fails
       - name: Create Pull Request with formatting changes
         if: steps.git-check.outputs.modified == 'true'
+        id: create-pr
+        continue-on-error: true
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
           title: 'style: Format Java code with Google Java Format'
           commit-message: 'style: Format Java code with Google Java Format'
           body: |
+            ## Automatic Code Formatting
+
             This PR formats the Java code according to Google Java Format standards.
             
+            ### What changed?
+            - Applied consistent indentation, spacing, and line breaks
+            - Fixed import order and formatting
+            - Ensured consistent brace placement
+            
+            ### Important
             If tests are failing, please verify that the formatting has not inadvertently changed test assertions or functionality.
           branch: automated-code-format
           base: ${{ github.ref_name }}
           delete-branch: true
+      
+      # Fallback to direct commit if PR creation fails
+      - name: Fallback - Commit formatting changes directly
+        if: steps.git-check.outputs.modified == 'true' && steps.create-pr.outcome == 'failure'
+        run: |
+          echo "::notice::⚠️ PR creation failed, falling back to direct commit"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git commit -m "style: Format Java code with Google Java Format"
+          git push
+      
+      # Final status message
+      - name: Final status
+        run: |
+          if [ "${{ steps.git-check.outputs.modified }}" == "true" ]; then
+            if [ "${{ steps.create-pr.outcome }}" == "success" ]; then
+              echo "::notice::✅ Pull Request created successfully to fix formatting issues!"
+            elif [ "${{ steps.create-pr.outcome }}" == "failure" ]; then
+              echo "::notice::✅ Formatting changes committed directly to branch."
+            fi
+          else
+            echo "::notice::✅ No formatting changes were needed."
+          fi
