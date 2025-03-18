@@ -1,0 +1,50 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches: [ development, testing, acceptance, main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+          
+      - name: Check if PR has tests
+        id: check-tests
+        run: |
+          # Count the number of files that include test code
+          TEST_FILE_COUNT=$(git diff --name-only origin/${{ github.base_ref }} | grep -c "Test\.java" || true)
+          echo "Found $TEST_FILE_COUNT test files"
+          if [[ "$TEST_FILE_COUNT" -eq 0 ]] && [[ $(git diff --name-only origin/${{ github.base_ref }} | grep -c "\.java$" || true) -gt 0 ]]; then
+            echo "⚠️ Warning: This PR changes Java code but doesn't include tests"
+            echo "::warning::This PR changes Java code but doesn't include tests"
+          else
+            echo "✅ PR includes tests or doesn't change Java code"
+          fi
+          
+      - name: Check PR description
+        if: github.event.pull_request.body == null || github.event.pull_request.body == ''
+        run: |
+          echo "::warning::PR description is empty. Please add a meaningful description."
+          
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+        
+      - name: Validate code coverage
+        run: mvn jacoco:report
+        
+      - name: Upload JaCoCo coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-jacoco-report
+          path: target/site/jacoco/
