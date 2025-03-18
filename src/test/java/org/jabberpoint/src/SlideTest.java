@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 
 public class SlideTest {
 
-    private Slide slide;
+    private org.jabberpoint.src.Slide slide;
     
     @BeforeEach
     public void setUp() {
-        slide = new Slide();
+        slide = new org.jabberpoint.src.Slide();
         slide.setTitle("Test Slide");
     }
     

@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 
 public class PresentationTest {
 
-    private Presentation presentation;
+    private org.jabberpoint.src.Presentation presentation;
     
     @BeforeEach
     public void setUp() {
-        presentation = new Presentation();
+        presentation = new org.jabberpoint.src.Presentation();
         presentation.setTitle("Test Presentation");
     }
     
@@ -23,7 +23,7 @@ public class PresentationTest {
     @Test
     public void testSlideManagement() {
         int initialCount = presentation.getSize();
-        Slide slide = new Slide();
+        org.jabberpoint.src.Slide slide = new org.jabberpoint.src.Slide();
         slide.setTitle("New Slide");
         presentation.append(slide);
         assertEquals(initialCount + 1, presentation.getSize());
