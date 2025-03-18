@@ -4,25 +4,17 @@ import java.io.IOException;
 
 /**
  * Strategy implementation for loading a demo presentation
- * This class provides a way to create a demonstration presentation
- * without reading from an external file
  */
 public class DemoPresentationLoader implements PresentationLoader {
     
     /**
-     * Loads a demo presentation with sample slides
-     * 
-     * @param presentation The presentation object to load content into
-     * @param source Ignored for demo presentations
-     * @throws IOException If there's an error during loading
+     * Loads a demo presentation
      */
     @Override
     public void loadPresentation(Presentation presentation, String source) throws IOException {
-        // Set the title of the presentation
-        presentation.setTitle("Demo Presentation - Software Quality");
-        
-        // Create the first slide
-        Slide slide = new Slide();
+        presentation.setTitle("Demo Presentation");
+        Slide slide;
+        slide = new Slide();
         slide.setTitle("JabberPoint");
         slide.append(1, "The Java Presentation Tool");
         slide.append(2, "Copyright (c) 1996-2000: Ian Darwin");
@@ -36,7 +28,6 @@ public class DemoPresentationLoader implements PresentationLoader {
         slide.append(3, "Quit: q or Q");
         presentation.append(slide);
 
-        // Create the second slide
         slide = new Slide();
         slide.setTitle("Demonstration of levels and styles");
         slide.append(1, "Level 1");
@@ -48,23 +39,8 @@ public class DemoPresentationLoader implements PresentationLoader {
         slide.append(4, "And this is level 4");
         presentation.append(slide);
 
-        // Create the third slide
         slide = new Slide();
-        slide.setTitle("Software Quality Concepts");
-        slide.append(1, "Quality Attributes:");
-        slide.append(2, "Reliability");
-        slide.append(2, "Maintainability");
-        slide.append(2, "Usability");
-        slide.append(2, "Performance");
-        slide.append(1, "Testing Approaches:");
-        slide.append(2, "Unit Testing");
-        slide.append(2, "Integration Testing");
-        slide.append(2, "System Testing");
-        presentation.append(slide);
-
-        // Create the fourth slide with an image
-        slide = new Slide();
-        slide.setTitle("The final slide");
+        slide.setTitle("The third slide");
         slide.append(1, "To open a new presentation,");
         slide.append(2, "use File->Open from the menu.");
         slide.append(1, " ");

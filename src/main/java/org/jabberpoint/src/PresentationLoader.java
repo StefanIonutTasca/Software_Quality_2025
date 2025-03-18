@@ -4,7 +4,6 @@ import java.io.IOException;
 
 /**
  * Strategy pattern interface for loading presentations from different sources
- * This interface defines the strategy for loading presentation content
  */
 public interface PresentationLoader {
     /**

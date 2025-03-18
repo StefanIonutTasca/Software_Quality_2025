@@ -6,62 +6,63 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/**
- * Tests for the PresentationLoaderFactory class
- */
 public class PresentationLoaderFactoryTest {
 
     @Test
-    @DisplayName("Test that XML loader is created correctly")
-    public void testCreateXmlLoader() {
+    @DisplayName("Test creating XMLPresentationLoader")
+    public void testCreateXMLLoader() {
         PresentationLoader loader = PresentationLoaderFactory.createLoader("xml");
-        assertNotNull(loader, "Loader should not be null");
-        assertTrue(loader instanceof XMLPresentationLoader, "Loader should be an XMLPresentationLoader");
+        assertNotNull(loader);
+        assertTrue(loader instanceof XMLPresentationLoader);
     }
-    
+
     @Test
-    @DisplayName("Test that Demo loader is created correctly")
+    @DisplayName("Test creating DemoPresentationLoader")
     public void testCreateDemoLoader() {
         PresentationLoader loader = PresentationLoaderFactory.createLoader("demo");
-        assertNotNull(loader, "Loader should not be null");
-        assertTrue(loader instanceof DemoPresentationLoader, "Loader should be a DemoPresentationLoader");
+        assertNotNull(loader);
+        assertTrue(loader instanceof DemoPresentationLoader);
     }
-    
+
     @Test
-    @DisplayName("Test that factory is case insensitive")
-    public void testCaseInsensitivity() {
-        PresentationLoader loader1 = PresentationLoaderFactory.createLoader("XML");
-        PresentationLoader loader2 = PresentationLoaderFactory.createLoader("Demo");
-        
-        assertTrue(loader1 instanceof XMLPresentationLoader, "Upper case XML should create XMLPresentationLoader");
-        assertTrue(loader2 instanceof DemoPresentationLoader, "Upper case Demo should create DemoPresentationLoader");
+    @DisplayName("Test case insensitivity for XML loader")
+    public void testXMLLoaderCaseInsensitivity() {
+        PresentationLoader loader = PresentationLoaderFactory.createLoader("XML");
+        assertTrue(loader instanceof XMLPresentationLoader);
     }
-    
+
     @Test
-    @DisplayName("Test that unknown type throws IllegalArgumentException")
-    public void testUnknownType() {
+    @DisplayName("Test case insensitivity for Demo loader")
+    public void testDemoLoaderCaseInsensitivity() {
+        PresentationLoader loader = PresentationLoaderFactory.createLoader("DEMO");
+        assertTrue(loader instanceof DemoPresentationLoader);
+    }
+
+    @Test
+    @DisplayName("Test unknown loader type throws exception")
+    public void testUnknownLoaderType() {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             PresentationLoaderFactory.createLoader("unknown");
         });
-        
-        String expectedMessage = "Unknown presentation loader type";
+
+        String expectedMessage = "Unknown loader type";
         String actualMessage = exception.getMessage();
-        assertTrue(actualMessage.contains(expectedMessage), "Exception message should mention unknown type");
+        assertTrue(actualMessage.contains(expectedMessage));
     }
-    
+
     @ParameterizedTest
     @ValueSource(strings = {"xml", "XML", "Xml", "xMl"})
     @DisplayName("Test different case variations for XML loader")
-    public void testXmlCaseVariations(String type) {
+    public void testXMLLoaderVariations(String type) {
         PresentationLoader loader = PresentationLoaderFactory.createLoader(type);
-        assertTrue(loader instanceof XMLPresentationLoader, "Should create XMLPresentationLoader regardless of case");
+        assertTrue(loader instanceof XMLPresentationLoader);
     }
-    
+
     @ParameterizedTest
-    @ValueSource(strings = {"demo", "DEMO", "Demo", "dEMo"})
+    @ValueSource(strings = {"demo", "DEMO", "Demo", "dEmO"})
     @DisplayName("Test different case variations for Demo loader")
-    public void testDemoCaseVariations(String type) {
+    public void testDemoLoaderVariations(String type) {
         PresentationLoader loader = PresentationLoaderFactory.createLoader(type);
-        assertTrue(loader instanceof DemoPresentationLoader, "Should create DemoPresentationLoader regardless of case");
+        assertTrue(loader instanceof DemoPresentationLoader);
     }
 }
