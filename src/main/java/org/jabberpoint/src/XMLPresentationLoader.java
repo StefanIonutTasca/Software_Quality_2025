@@ -115,7 +115,7 @@ public class XMLPresentationLoader implements PresentationLoader {
     public void savePresentation(Presentation presentation, String filename) throws IOException {
         PrintWriter out = new PrintWriter(new FileWriter(filename));
         out.println("<?xml version=\"1.0\"?>");
-        out.println("<!DOCTYPE presentation SYSTEM \"jabberpoint.dtd\">");
+        // Removed DOCTYPE declaration to avoid dependency on jabberpoint.dtd
         out.println("<presentation>");
         out.print("<showtitle>");
         out.print(presentation.getTitle());
