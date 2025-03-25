@@ -74,7 +74,7 @@
         </resources>
         
         <plugins>
-            <!-- Maven Compiler Plugin with specific configuration for package structure -->
+            <!-- Maven Compiler Plugin with standard configuration -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -82,33 +82,8 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
-                    <!-- Disable annotation processing to avoid duplicate class issues -->
-                    <proc>none</proc>
-                    <!-- Use build-helper-maven-plugin to correctly handle the package structure -->
-                    <useIncrementalCompilation>false</useIncrementalCompilation>
+                    <showWarnings>true</showWarnings>
                 </configuration>
-            </plugin>
-            
-            <!-- Maven Build Helper Plugin to specify additional source roots -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.4.0</version>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <!-- This effectively makes Maven ignore the 'src' in the package path -->
-                                <source>src/main/java/org/jabberpoint</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             
             <!-- Maven Jar Plugin for creating the JAR with the correct main class -->
@@ -121,7 +96,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>org.jabberpoint.src.JabberPoint</mainClass>
+                            <mainClass>org.jabberpoint.JabberPoint</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
