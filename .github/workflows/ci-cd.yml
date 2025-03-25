@@ -4,7 +4,9 @@ on:
   push:
     branches: [ main, development, testing, acceptance ]
   pull_request:
-    branches: [ main, development, testing, acceptance ]
+    branches:
+      - '**'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -20,26 +22,8 @@ jobs:
         distribution: 'temurin'
         cache: maven
         
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
-      continue-on-error: true  # Continue even if build fails
-      
-    - name: Test with Maven
-      run: mvn test
-      continue-on-error: true  # Continue even if tests fail
-      
-    - name: Generate JaCoCo Report
-      run: mvn jacoco:report
-      continue-on-error: true  # Continue even if report generation fails
-      
-    - name: Create JaCoCo directory if it doesn't exist
-      run: mkdir -p target/site/jacoco
-      
-    - name: Create dummy report if none exists
-      run: |
-        if [ ! -f target/site/jacoco/index.html ]; then
-          echo "<html><body><h1>JaCoCo Report</h1><p>No coverage data available yet.</p></body></html>" > target/site/jacoco/index.html
-        fi
+    - name: Build and Test with Maven (including JaCoCo reports)
+      run: mvn -B verify --file pom.xml
       
     - name: Upload JaCoCo coverage report
       uses: actions/upload-artifact@v4
