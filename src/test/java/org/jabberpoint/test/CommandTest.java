@@ -17,10 +17,13 @@ import org.jabberpoint.src.OpenFileCommand;
 import org.jabberpoint.src.SaveFileCommand;
 import org.jabberpoint.src.NewPresentationCommand;
 
+// Import Frame for constructor parameters
+import java.awt.Frame;
+
 /**
  * Unit tests for Command pattern implementations
  */
-class CommandTest {
+public class CommandTest {
     
     private Presentation presentation;
     private Slide testSlide1;
@@ -181,7 +184,8 @@ class CommandTest {
         
         @BeforeEach
         void setUp() {
-            openFileCommand = new OpenFileCommand(presentation, "test.xml");
+            // Use a Frame object instead of a String
+            openFileCommand = new OpenFileCommand(presentation, new Frame());
         }
         
         @Test
@@ -208,7 +212,8 @@ class CommandTest {
         
         @BeforeEach
         void setUp() {
-            saveFileCommand = new SaveFileCommand(presentation, "test.xml");
+            // Use a Frame object instead of a String
+            saveFileCommand = new SaveFileCommand(presentation, new Frame());
         }
         
         @Test
