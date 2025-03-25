@@ -5,6 +5,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
 import static org.junit.jupiter.api.Assertions.*;
 
+// Import the required classes
+import org.jabberpoint.src.Presentation;
+import org.jabberpoint.src.Slide;
+import org.jabberpoint.src.Command;
+import org.jabberpoint.src.NextSlideCommand;
+import org.jabberpoint.src.PrevSlideCommand;
+import org.jabberpoint.src.ExitCommand;
+import org.jabberpoint.src.OpenFileCommand;
+import org.jabberpoint.src.SaveFileCommand;
+import org.jabberpoint.src.NewPresentationCommand;
+
 public class CommandTest {
     private Presentation presentation;
     private Slide slide1;

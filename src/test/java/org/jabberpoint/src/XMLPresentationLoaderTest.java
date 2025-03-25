@@ -1,7 +1,13 @@
 package org.jabberpoint.src;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.io.PrintWriter;
 import java.io.FileWriter;
 import javax.xml.parsers.DocumentBuilder;
@@ -12,9 +18,17 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
+
+// Import the required classes
+import org.jabberpoint.src.XMLPresentationLoader;
+import org.jabberpoint.src.Presentation;
+import org.jabberpoint.src.PresentationLoader;
+import org.jabberpoint.src.Slide;
+import org.jabberpoint.src.SlideItem;
+import org.jabberpoint.src.TextItem;
+import org.jabberpoint.src.BitmapItem;
+import org.jabberpoint.src.SlideItemFactory;
 
 /**
  * Strategy implementation for loading presentations from XML files

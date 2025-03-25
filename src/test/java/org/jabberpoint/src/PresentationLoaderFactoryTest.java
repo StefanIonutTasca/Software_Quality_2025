@@ -3,47 +3,47 @@ package org.jabberpoint.src;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.jabberpoint.src.PresentationLoader;
+import org.jabberpoint.src.PresentationLoaderFactory;
+import org.jabberpoint.src.XMLPresentationLoader;
+import org.jabberpoint.src.DemoPresentationLoader;
+
 public class PresentationLoaderFactoryTest {
-
     @Test
-    void testGetLoaderForXMLFile() {
-        PresentationLoader loader = PresentationLoaderFactory.getLoader("test.xml");
-        assertNotNull(loader, "Loader should not be null");
-        assertTrue(loader instanceof XMLPresentationLoader, "Should return XMLPresentationLoader for XML file");
+    void createLoaderForXMLFile() {
+        PresentationLoader loader = PresentationLoaderFactory.createLoader("test.xml");
+        assertTrue(loader instanceof XMLPresentationLoader);
     }
 
     @Test
-    void testGetLoaderForUppercaseXMLFile() {
-        PresentationLoader loader = PresentationLoaderFactory.getLoader("TEST.XML");
-        assertNotNull(loader, "Loader should not be null");
-        assertTrue(loader instanceof XMLPresentationLoader, "Should return XMLPresentationLoader for uppercase XML file");
+    void createLoaderForXMLFileWithUpperCase() {
+        PresentationLoader loader = PresentationLoaderFactory.createLoader("test.XML");
+        assertTrue(loader instanceof XMLPresentationLoader);
     }
 
     @Test
-    void testGetLoaderForDemoPresentation() {
-        PresentationLoader loader = PresentationLoaderFactory.getLoader("demo");
-        assertNotNull(loader, "Loader should not be null");
-        assertTrue(loader instanceof DemoPresentationLoader, "Should return DemoPresentationLoader for demo");
+    void createLoaderForDemoFile() {
+        PresentationLoader loader = PresentationLoaderFactory.createLoader("demo");
+        assertTrue(loader instanceof DemoPresentationLoader);
     }
 
     @Test
-    void testGetLoaderForUppercaseDemo() {
-        PresentationLoader loader = PresentationLoaderFactory.getLoader("DEMO");
-        assertNotNull(loader, "Loader should not be null");
-        assertTrue(loader instanceof DemoPresentationLoader, "Should return DemoPresentationLoader for uppercase demo");
+    void createLoaderForDemoFileWithUpperCase() {
+        PresentationLoader loader = PresentationLoaderFactory.createLoader("DEMO");
+        assertTrue(loader instanceof DemoPresentationLoader);
     }
 
     @Test
-    void testGetLoaderForNullFilename() {
+    void createLoaderForUnknownExtension() {
         assertThrows(IllegalArgumentException.class, () -> {
-            PresentationLoaderFactory.getLoader(null);
-        }, "Should throw IllegalArgumentException for null filename");
+            PresentationLoaderFactory.createLoader("test.unknown");
+        });
     }
 
     @Test
-    void testGetLoaderForEmptyFilename() {
+    void createLoaderForNullFilename() {
         assertThrows(IllegalArgumentException.class, () -> {
-            PresentationLoaderFactory.getLoader("");
-        }, "Should throw IllegalArgumentException for empty filename");
+            PresentationLoaderFactory.createLoader(null);
+        });
     }
 }

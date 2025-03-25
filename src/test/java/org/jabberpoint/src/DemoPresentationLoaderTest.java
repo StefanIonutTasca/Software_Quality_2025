@@ -3,6 +3,10 @@ package org.jabberpoint.src;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import org.jabberpoint.src.DemoPresentationLoader;
+import org.jabberpoint.src.Presentation;
+import org.jabberpoint.src.Slide;
+import org.jabberpoint.src.BitmapItem;
 
 public class DemoPresentationLoaderTest {
     private DemoPresentationLoader loader;

@@ -1,10 +1,17 @@
 package org.jabberpoint.src;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import java.awt.event.KeyEvent;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.awt.event.KeyEvent;
+import javax.swing.JFrame;
+
+// Import the required classes
+import org.jabberpoint.src.KeyController;
+import org.jabberpoint.src.Presentation;
+import org.jabberpoint.src.SlideViewerComponent;
 
 /**
  * Unit tests for KeyController
