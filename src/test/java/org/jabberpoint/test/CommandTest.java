@@ -1,24 +1,20 @@
 package org.jabberpoint.test;
 
+import java.awt.Frame;
+import org.jabberpoint.src.Command;
+import org.jabberpoint.src.ExitCommand;
+import org.jabberpoint.src.NewPresentationCommand;
+import org.jabberpoint.src.NextSlideCommand;
+import org.jabberpoint.src.OpenFileCommand;
+import org.jabberpoint.src.Presentation;
+import org.jabberpoint.src.PrevSlideCommand;
+import org.jabberpoint.src.SaveFileCommand;
+import org.jabberpoint.src.Slide;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-
-// Import implementation classes from org.jabberpoint.src package
-import org.jabberpoint.src.Command;
-import org.jabberpoint.src.Presentation;
-import org.jabberpoint.src.Slide;
-import org.jabberpoint.src.NextSlideCommand;
-import org.jabberpoint.src.PrevSlideCommand;
-import org.jabberpoint.src.ExitCommand;
-import org.jabberpoint.src.OpenFileCommand;
-import org.jabberpoint.src.SaveFileCommand;
-import org.jabberpoint.src.NewPresentationCommand;
-
-// Import Frame for constructor parameters
-import java.awt.Frame;
 
 /**
  * Unit tests for Command pattern implementations

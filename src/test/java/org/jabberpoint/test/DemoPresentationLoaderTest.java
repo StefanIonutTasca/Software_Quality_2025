@@ -1,20 +1,16 @@
 package org.jabberpoint.test;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-// Import implementation classes from org.jabberpoint.src package
+import org.jabberpoint.src.BitmapItem;
 import org.jabberpoint.src.DemoPresentationLoader;
 import org.jabberpoint.src.Presentation;
 import org.jabberpoint.src.Slide;
-import org.jabberpoint.src.BitmapItem;
 import org.jabberpoint.src.SlideItem;
 import org.jabberpoint.src.TextItem;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for DemoPresentationLoader
