@@ -1,3 +1,5 @@
+package org.jabberpoint.src;
+
 /**
  * A built in demo-presentation
  *

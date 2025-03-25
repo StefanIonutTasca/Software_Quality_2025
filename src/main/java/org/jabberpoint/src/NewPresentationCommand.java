@@ -1,3 +1,5 @@
+package org.jabberpoint.src;
+
 /**
  * Command implementation for creating a new presentation
  */

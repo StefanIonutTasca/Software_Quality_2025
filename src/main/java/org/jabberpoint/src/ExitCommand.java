@@ -1,3 +1,5 @@
+package org.jabberpoint.src;
+
 /**
  * Command implementation for exiting the application
  */

@@ -1,3 +1,5 @@
+package org.jabberpoint.src;
+
 /**
  * Command pattern interface for actions that can be performed on a presentation
  */

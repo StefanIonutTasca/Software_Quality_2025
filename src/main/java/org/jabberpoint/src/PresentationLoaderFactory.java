@@ -1,3 +1,5 @@
+package org.jabberpoint.src;
+
 /**
  * Factory for creating PresentationLoader instances
  * Implements the Factory Method pattern

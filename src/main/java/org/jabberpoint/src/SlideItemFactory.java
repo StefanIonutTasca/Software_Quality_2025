@@ -1,3 +1,5 @@
+package org.jabberpoint.src;
+
 /**
  * Factory for creating slide items
  * Implements the Factory Method pattern

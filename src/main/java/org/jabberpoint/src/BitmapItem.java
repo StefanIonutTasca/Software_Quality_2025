@@ -1,3 +1,5 @@
+package org.jabberpoint.src;
+
 import java.awt.Rectangle;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;

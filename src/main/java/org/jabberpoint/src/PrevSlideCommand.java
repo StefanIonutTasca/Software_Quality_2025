@@ -1,3 +1,5 @@
+package org.jabberpoint.src;
+
 /**
  * Command implementation for moving to the previous slide
  */
