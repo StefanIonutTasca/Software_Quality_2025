@@ -74,7 +74,24 @@
         </resources>
         
         <plugins>
-            <!-- Maven Compiler Plugin -->
+            <!-- Maven Clean Plugin to clean up before building -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${project.build.directory}</directory>
+                            <includes>
+                                <include>**/*</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+            
+            <!-- Maven Compiler Plugin with simplified configuration -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -82,38 +99,77 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
-                    <compilerArgs>
-                        <arg>-Xlint:all</arg>
-                    </compilerArgs>
-                    <!-- Configure source and target directories -->
-                    <includes>
-                        <include>**/*.java</include>
-                    </includes>
-                    <!-- Ensure we're using the right package structure -->
-                    <useIncrementalCompilation>false</useIncrementalCompilation>
-                    <!-- Add this to fix package structure issues -->
-                    <compilerArgument>-Xpkginfo:always</compilerArgument>
-                    <!-- Force the compiler to only compile the src directory once -->
-                    <fork>true</fork>
+                    <showWarnings>true</showWarnings>
+                    <showDeprecation>true</showDeprecation>
+                    <verbose>true</verbose>
                 </configuration>
             </plugin>
             
-            <!-- Add the build-helper-maven-plugin to add additional source directories -->
+            <!-- Use Ant plugin to manually handle the compilation process -->
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.3.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <configuration>
+                            <target>
+                                <!-- Create output directory -->
+                                <mkdir dir="${project.build.outputDirectory}"/>
+                                
+                                <!-- Compile Java files -->
+                                <javac srcdir="${project.build.sourceDirectory}"
+                                       destdir="${project.build.outputDirectory}"
+                                       source="${maven.compiler.source}"
+                                       target="${maven.compiler.target}"
+                                       debug="true"
+                                       includeantruntime="false">
+                                    <classpath refid="maven.compile.classpath"/>
+                                </javac>
+                                
+                                <!-- Copy resources -->
+                                <copy todir="${project.build.outputDirectory}">
+                                    <fileset dir="${project.build.sourceDirectory}" excludes="**/*.java"/>
+                                </copy>
+                            </target>
+                        </configuration>
                         <goals>
-                            <goal>add-source</goal>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <!-- Maven Shade Plugin to handle duplicate classes -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.4.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <sources>
-                                <source>src/main/java</source>
-                            </sources>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.jabberpoint.src.JabberPoint</mainClass>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
