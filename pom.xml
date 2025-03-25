@@ -139,13 +139,13 @@
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>test</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
                         <configuration>
-                            <!-- Generate report even if tests fail -->
-                            <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
+                            <!-- Use standard output directory expected by GitHub Actions -->
+                            <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
                         </configuration>
                     </execution>
                     <!-- Temporarily commenting out the check execution
