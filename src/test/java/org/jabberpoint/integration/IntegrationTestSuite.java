@@ -49,3 +49,4 @@ public class IntegrationTestSuite {
     assertTrue(true, "Placeholder integration test");
   }
 }
+
