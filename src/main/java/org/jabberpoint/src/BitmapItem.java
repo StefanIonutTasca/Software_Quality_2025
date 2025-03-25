@@ -50,8 +50,11 @@ public class BitmapItem extends SlideItem {
 	public String getName() {
 		return imageName;
 	}
-
-// alias for getName() to maintain compatibility with XMLPresentationLoader
+	
+	/**
+	 * Get the name of the image file
+	 * @return the name of the image file
+	 */
 	public String getImageName() {
 		return imageName;
 	}

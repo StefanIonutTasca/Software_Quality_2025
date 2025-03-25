@@ -1,5 +1,7 @@
 package org.jabberpoint.src;
 
+import java.util.Objects;
+
 /**
  * Command implementation for exiting the application
  */
@@ -9,9 +11,10 @@ public class ExitCommand implements Command {
     /**
      * Constructor
      * @param presentation The presentation to operate on
+     * @throws NullPointerException if presentation is null
      */
     public ExitCommand(Presentation presentation) {
-        this.presentation = presentation;
+        this.presentation = Objects.requireNonNull(presentation, "Presentation cannot be null");
     }
     
     /**
