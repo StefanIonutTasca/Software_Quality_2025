@@ -1,3 +1,5 @@
+package org.jabberpoint.src;
+
 import java.util.ArrayList;
 
 /**
