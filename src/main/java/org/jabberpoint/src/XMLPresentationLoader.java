@@ -132,7 +132,7 @@ public class XMLPresentationLoader implements PresentationLoader {
                 else {
                     if (slideItem instanceof BitmapItem) {
                         out.print("\"image\" level=\"" + slideItem.getLevel() + "\">");
-                        out.print(((BitmapItem)slideItem).getImageName());
+                        out.print(((BitmapItem)slideItem).getName());
                     }
                     else {
                         System.out.println("Ignoring unknown SlideItem type: " + slideItem.getClass().getName());
