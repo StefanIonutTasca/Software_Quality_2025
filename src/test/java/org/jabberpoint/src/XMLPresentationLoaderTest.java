@@ -1,3 +1,5 @@
+package org.jabberpoint.src;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -10,11 +12,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Strategy implementation for loading presentations from XML files
  */
-public class XMLPresentationLoader implements PresentationLoader {
+public class XMLPresentationLoaderTest implements PresentationLoader {
     /** Default API to use. */
     protected static final String DEFAULT_API_TO_USE = "dom";
     
@@ -28,6 +33,23 @@ public class XMLPresentationLoader implements PresentationLoader {
     protected static final String TEXT = "text";
     protected static final String IMAGE = "image";
     
+    private XMLPresentationLoader loader;
+    private Presentation presentation;
+
+    @BeforeEach
+    void setUp() {
+        loader = new XMLPresentationLoader();
+        presentation = new Presentation();
+    }
+
+    @Test
+    void testLoadBitmapItem() {
+        assertTrue(slide.getSlideItem(1) instanceof BitmapItem, "Second item should be a BitmapItem");
+        BitmapItem bitmapItem = (BitmapItem) slide.getSlideItem(1);
+        assertEquals(2, bitmapItem.getLevel(), "Image item should have level 2");
+        assertEquals("test.jpg", bitmapItem.getName(), "Image item should have correct name");
+    }
+
     /**
      * Loads a presentation from an XML file
      */

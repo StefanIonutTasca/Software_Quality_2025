@@ -1,84 +1,49 @@
 package org.jabberpoint.src;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Unit tests for PresentationLoaderFactory
- */
-class PresentationLoaderFactoryTest {
+public class PresentationLoaderFactoryTest {
 
     @Test
-    @DisplayName("Should create XMLPresentationLoader when type is xml")
-    void createLoaderShouldReturnXMLLoaderWhenTypeIsXml() {
-        // Act
-        PresentationLoader loader = PresentationLoaderFactory.createLoader("xml");
-        
-        // Assert
-        assertTrue(loader instanceof XMLPresentationLoader, "Loader should be an instance of XMLPresentationLoader");
+    void testGetLoaderForXMLFile() {
+        PresentationLoader loader = PresentationLoaderFactory.getLoader("test.xml");
+        assertNotNull(loader, "Loader should not be null");
+        assertTrue(loader instanceof XMLPresentationLoader, "Should return XMLPresentationLoader for XML file");
     }
 
     @Test
-    @DisplayName("Should create XMLPresentationLoader when type is XML (case insensitive)")
-    void createLoaderShouldReturnXMLLoaderWhenTypeIsXmlUppercase() {
-        // Act
-        PresentationLoader loader = PresentationLoaderFactory.createLoader("XML");
-        
-        // Assert
-        assertTrue(loader instanceof XMLPresentationLoader, "Loader should be an instance of XMLPresentationLoader");
+    void testGetLoaderForUppercaseXMLFile() {
+        PresentationLoader loader = PresentationLoaderFactory.getLoader("TEST.XML");
+        assertNotNull(loader, "Loader should not be null");
+        assertTrue(loader instanceof XMLPresentationLoader, "Should return XMLPresentationLoader for uppercase XML file");
     }
 
     @Test
-    @DisplayName("Should create DemoPresentationLoader when type is demo")
-    void createLoaderShouldReturnDemoLoaderWhenTypeIsDemo() {
-        // Act
-        PresentationLoader loader = PresentationLoaderFactory.createLoader("demo");
-        
-        // Assert
-        assertTrue(loader instanceof DemoPresentationLoader, "Loader should be an instance of DemoPresentationLoader");
+    void testGetLoaderForDemoPresentation() {
+        PresentationLoader loader = PresentationLoaderFactory.getLoader("demo");
+        assertNotNull(loader, "Loader should not be null");
+        assertTrue(loader instanceof DemoPresentationLoader, "Should return DemoPresentationLoader for demo");
     }
 
     @Test
-    @DisplayName("Should create DemoPresentationLoader when type is DEMO (case insensitive)")
-    void createLoaderShouldReturnDemoLoaderWhenTypeIsDemoUppercase() {
-        // Act
-        PresentationLoader loader = PresentationLoaderFactory.createLoader("DEMO");
-        
-        // Assert
-        assertTrue(loader instanceof DemoPresentationLoader, "Loader should be an instance of DemoPresentationLoader");
+    void testGetLoaderForUppercaseDemo() {
+        PresentationLoader loader = PresentationLoaderFactory.getLoader("DEMO");
+        assertNotNull(loader, "Loader should not be null");
+        assertTrue(loader instanceof DemoPresentationLoader, "Should return DemoPresentationLoader for uppercase demo");
     }
-    
+
     @Test
-    @DisplayName("Should throw IllegalArgumentException when type is unknown")
-    void createLoaderShouldThrowExceptionWhenTypeIsUnknown() {
-        // Arrange
-        String unknownType = "unknown";
-        
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> PresentationLoaderFactory.createLoader(unknownType),
-            "Should throw IllegalArgumentException for unknown loader type"
-        );
-        
-        // Additional assertion on the exception message
-        assertTrue(exception.getMessage().contains(unknownType), 
-                "Exception message should contain the unknown type");
+    void testGetLoaderForNullFilename() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            PresentationLoaderFactory.getLoader(null);
+        }, "Should throw IllegalArgumentException for null filename");
     }
-    
-    @ParameterizedTest
-    @ValueSource(strings = {"", "   ", "pdf", "powerpoint", "invalid"})
-    @DisplayName("Should throw IllegalArgumentException for various invalid types")
-    void createLoaderShouldThrowExceptionForVariousInvalidTypes(String invalidType) {
-        // Act & Assert
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> PresentationLoaderFactory.createLoader(invalidType),
-            "Should throw IllegalArgumentException for invalid loader type: " + invalidType
-        );
+
+    @Test
+    void testGetLoaderForEmptyFilename() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            PresentationLoaderFactory.getLoader("");
+        }, "Should throw IllegalArgumentException for empty filename");
     }
 }
