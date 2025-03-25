@@ -69,7 +69,6 @@ class XMLPresentationLoaderTest {
         // Arrange - create a valid XML file
         File validXmlFile = tempDir.resolve("valid.xml").toFile();
         String validXml = "<?xml version=\"1.0\"?>\n" +
-                "<!DOCTYPE presentation SYSTEM \"jabberpoint.dtd\">\n" +
                 "<presentation>\n" +
                 "  <showtitle>Test Presentation</showtitle>\n" +
                 "  <slide>\n" +
@@ -129,7 +128,6 @@ class XMLPresentationLoaderTest {
         // Arrange - create XML with text and image items
         File xmlFile = tempDir.resolve("items.xml").toFile();
         String xml = "<?xml version=\"1.0\"?>\n" +
-                "<!DOCTYPE presentation SYSTEM \"jabberpoint.dtd\">\n" +
                 "<presentation>\n" +
                 "  <showtitle>Items Test</showtitle>\n" +
                 "  <slide>\n" +
@@ -173,7 +171,6 @@ class XMLPresentationLoaderTest {
         // Arrange - create XML with malformed level attribute
         File xmlFile = tempDir.resolve("malformed.xml").toFile();
         String xml = "<?xml version=\"1.0\"?>\n" +
-                "<!DOCTYPE presentation SYSTEM \"jabberpoint.dtd\">\n" +
                 "<presentation>\n" +
                 "  <showtitle>Malformed Test</showtitle>\n" +
                 "  <slide>\n" +

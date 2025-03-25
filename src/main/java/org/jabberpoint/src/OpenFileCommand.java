@@ -4,6 +4,7 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import java.awt.Frame;
+import java.awt.GraphicsEnvironment;
 
 /**
  * Command implementation for opening a file
@@ -24,9 +25,16 @@ public class OpenFileCommand implements Command {
     
     /**
      * Executes the command to open a file
+     * In headless environments (without GUI) or when parent is null,
+     * this is a no-op as file chooser dialog cannot be shown
      */
     @Override
     public void execute() {
+        // Skip file opening in headless environment or if parent is null
+        if (parent == null || GraphicsEnvironment.isHeadless()) {
+            return; // Cannot show file chooser in headless environment
+        }
+        
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new java.io.File("."));
         int returnVal = fileChooser.showOpenDialog(parent);
