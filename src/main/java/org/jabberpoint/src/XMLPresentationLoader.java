@@ -115,7 +115,7 @@ public class XMLPresentationLoader implements PresentationLoader {
     public void savePresentation(Presentation presentation, String filename) throws IOException {
         PrintWriter out = new PrintWriter(new FileWriter(filename));
         out.println("<?xml version=\"1.0\"?>");
-        // Removed DOCTYPE declaration to avoid dependency on jabberpoint.dtd
+        out.println("<!DOCTYPE presentation SYSTEM \"jabberpoint.dtd\">");
         out.println("<presentation>");
         out.print("<showtitle>");
         out.print(presentation.getTitle());
@@ -134,7 +134,7 @@ public class XMLPresentationLoader implements PresentationLoader {
                 else {
                     if (slideItem instanceof BitmapItem) {
                         out.print("\"image\" level=\"" + slideItem.getLevel() + "\">");
-                        out.print(((BitmapItem)slideItem).getImageName());
+                        out.print(((BitmapItem)slideItem).getName());
                     }
                     else {
                         System.out.println("Ignoring unknown SlideItem type: " + slideItem.getClass().getName());
