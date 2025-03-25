@@ -1,4 +1,4 @@
-package org.jabberpoint.src;
+package org.jabberpoint.test;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,9 +9,17 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import static org.junit.jupiter.api.Assertions.*;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
+
+// Import implementation classes from org.jabberpoint.src package
+import org.jabberpoint.src.XMLPresentationLoader;
+import org.jabberpoint.src.Presentation;
+import org.jabberpoint.src.Slide;
+import org.jabberpoint.src.TextItem;
+import org.jabberpoint.src.BitmapItem;
+import org.jabberpoint.src.SlideItem;
 
 /**
  * Unit tests for XMLPresentationLoader

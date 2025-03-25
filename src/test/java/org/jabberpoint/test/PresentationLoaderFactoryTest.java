@@ -1,4 +1,4 @@
-package org.jabberpoint.src;
+package org.jabberpoint.test;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -6,6 +6,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.jabberpoint.src.PresentationLoader;
+import org.jabberpoint.src.PresentationLoaderFactory;
+import org.jabberpoint.src.XMLPresentationLoader;
+import org.jabberpoint.src.DemoPresentationLoader;
 
 /**
  * Unit tests for PresentationLoaderFactory
