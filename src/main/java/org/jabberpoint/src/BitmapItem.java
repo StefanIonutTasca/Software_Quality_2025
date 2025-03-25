@@ -5,6 +5,8 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
 
 import javax.imageio.ImageIO;
 
@@ -33,12 +35,62 @@ public class BitmapItem extends SlideItem {
 	public BitmapItem(int level, String name) {
 		super(level);
 		imageName = name;
+		
+		// Try loading the image from different locations
+		tryLoadImage();
+	}
+	
+	private void tryLoadImage() {
+		if (imageName == null) {
+			return;
+		}
+		
+		// First try: Direct file path (as before)
 		try {
-			bufferedImage = ImageIO.read(new File(imageName));
+			File file = new File(imageName);
+			if (file.exists()) {
+				bufferedImage = ImageIO.read(file);
+				return; // Success!
+			}
+		} catch (IOException e) {
+			System.err.println(FILE + imageName + " could not be loaded: " + e.getMessage());
 		}
-		catch (IOException e) {
-			System.err.println(FILE + imageName + NOTFOUND) ;
+		
+		// Second try: Check in the package directory
+		try {
+			File packageFile = new File("src/main/java/org/jabberpoint/" + imageName);
+			if (packageFile.exists()) {
+				bufferedImage = ImageIO.read(packageFile);
+				return; // Success!
+			}
+		} catch (IOException e) {
+			System.err.println("Package path: " + imageName + " could not be loaded: " + e.getMessage());
 		}
+		
+		// Third try: As a resource from classpath
+		try {
+			URL url = getClass().getResource("/" + imageName);
+			if (url != null) {
+				bufferedImage = ImageIO.read(url);
+				return; // Success!
+			}
+		} catch (IOException e) {
+			System.err.println("Resource: " + imageName + " could not be loaded: " + e.getMessage());
+		}
+		
+		// Final attempt: Check in the parent directory structures
+		try {
+			File parentFile = new File("../" + imageName);
+			if (parentFile.exists()) {
+				bufferedImage = ImageIO.read(parentFile);
+				return; // Success!
+			}
+		} catch (IOException e) {
+			System.err.println("Parent path: " + imageName + " could not be loaded: " + e.getMessage());
+		}
+		
+		// If we get here, all attempts failed
+		System.err.println(FILE + imageName + NOTFOUND + " in any location");
 	}
 
 // An empty bitmap-item
@@ -69,6 +121,15 @@ public class BitmapItem extends SlideItem {
 
 // draw the image
 	public void draw(int x, int y, float scale, Graphics g, Style myStyle, ImageObserver observer) {
+		// Skip drawing if the bufferedImage is null (image not found)
+		if (bufferedImage == null) {
+			// Draw a placeholder or error message instead
+			int width = x + (int) (myStyle.indent * scale);
+			int height = y + (int) (myStyle.leading * scale);
+			g.drawString("Image not found: " + imageName, width, height);
+			return;
+		}
+		
 		int width = x + (int) (myStyle.indent * scale);
 		int height = y + (int) (myStyle.leading * scale);
 		g.drawImage(bufferedImage, width, height,(int) (bufferedImage.getWidth(observer)*scale),
