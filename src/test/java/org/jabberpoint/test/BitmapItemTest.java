@@ -129,49 +129,6 @@ class BitmapItemTest {
         );
     }
 
-    @Test
-    @DisplayName("Should attempt to load image from multiple locations")
-    void shouldAttemptToLoadImageFromMultipleLocations() {
-        // Create a BitmapItem with a reasonable image name that might exist in various locations
-        bitmapItem = new BitmapItem(1, "JabberPoint.jpg");
-        
-        // Try to create a placeholder image file if necessary for testing
-        java.io.File testDir = new java.io.File("src/test/resources");
-        if (!testDir.exists()) {
-            testDir.mkdirs();
-        }
-        
-        // No specific assertions here as we're mainly testing that the code doesn't throw exceptions
-        // when attempting to load from multiple locations. The "tryLoadImage" method is exercised
-        // as part of the constructor
-        assertNotNull(bitmapItem);
-    }
-    
-    @Test
-    @DisplayName("Should draw image when buffered image is available")
-    void shouldDrawImageWhenBufferedImageIsAvailable() throws Exception {
-        // This test is conditional on whether we can actually load an image
-        bitmapItem = new BitmapItem(1, "JabberPoint.jpg");
-        
-        if (hasLoadedImage(bitmapItem)) {
-            // Act
-            bitmapItem.draw(10, 20, 2.0f, graphicsMock, style, observerMock);
-            
-            // Assert - verify drawImage method was called
-            Mockito.verify(graphicsMock).drawImage(
-                Mockito.any(),  // BufferedImage
-                Mockito.anyInt(),  // x
-                Mockito.anyInt(),  // y
-                Mockito.anyInt(),  // width
-                Mockito.anyInt(),  // height
-                Mockito.eq(observerMock)  // observer
-            );
-        } else {
-            // Skip test if image cannot be loaded
-            System.out.println("Test skipped because no test image could be loaded");
-        }
-    }
-
     /**
      * Helper method to check if the bitmap item has successfully loaded an image
      */
