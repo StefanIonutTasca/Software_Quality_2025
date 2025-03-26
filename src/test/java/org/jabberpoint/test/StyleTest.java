@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 class StyleTest {
 
     private Style style;
-    private static final String FONTNAME = "Helvetica";
+    private static final String FONTNAME = "SansSerif";
 
     @BeforeEach
     void setUp() {

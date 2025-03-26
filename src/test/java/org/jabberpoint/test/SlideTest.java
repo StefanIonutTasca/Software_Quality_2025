@@ -2,7 +2,7 @@ package org.jabberpoint.test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.ImageObserver;
 import java.util.Vector;
@@ -21,14 +21,14 @@ import org.mockito.Mockito;
 class SlideTest {
 
     private Slide slide;
-    private Graphics graphicsMock;
+    private Graphics2D graphicsMock;
     private ImageObserver observerMock;
     private Rectangle areaMock;
 
     @BeforeEach
     void setUp() {
         slide = new Slide();
-        graphicsMock = Mockito.mock(Graphics.class);
+        graphicsMock = Mockito.mock(Graphics2D.class);
         observerMock = Mockito.mock(ImageObserver.class);
         areaMock = new Rectangle(0, 0, 800, 600);
     }
