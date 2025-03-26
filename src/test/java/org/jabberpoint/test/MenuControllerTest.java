@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import org.jabberpoint.src.AboutBox;
 import org.jabberpoint.src.MenuController;
 import org.jabberpoint.src.Presentation;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,12 @@ class MenuControllerTest {
     
     @Mock
     private Presentation mockPresentation;
+    
+    @BeforeAll
+    public static void setUpHeadlessMode() {
+        // Set up headless mode for tests
+        System.setProperty("java.awt.headless", "true");
+    }
     
     @BeforeEach
     void setUp() {

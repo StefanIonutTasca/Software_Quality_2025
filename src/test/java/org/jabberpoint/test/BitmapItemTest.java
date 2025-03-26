@@ -118,33 +118,42 @@ class BitmapItemTest {
     }
 
     @Test
-    @DisplayName("Should create a bounding box with correct dimensions")
+    @DisplayName("Should create bounding box with correct dimensions")
     void shouldCreateBoundingBoxWithCorrectDimensions() {
         // Arrange
-        bitmapItem = new BitmapItem(1, testImagePath.toString());
-        float scale = 1.5f;
+        int level = 1;
+        String imagePath = "test.jpg";
+        int width = 300;
+        int height = 200;
         
-        // This test may be skipped if the image can't be loaded in the test environment
-        if (hasLoadedImage(bitmapItem)) {
-            // Set up the mock to return expected values for image dimensions
-            Mockito.when(observerMock.imageUpdate(Mockito.any(), Mockito.anyInt(), Mockito.anyInt(), 
-                                                 Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt()))
-                   .thenReturn(true);
-            Mockito.when(testImage.getWidth(observerMock)).thenReturn(100);
-            Mockito.when(testImage.getHeight(observerMock)).thenReturn(100);
-            
-            // Act
-            Rectangle boundingBox = bitmapItem.getBoundingBox(graphicsMock, observerMock, scale, style);
-            
-            // Assert
-            assertNotNull(boundingBox);
-            // Instead of accessing style.indent directly, we'll just verify the x position is >= 0
-            assertTrue(boundingBox.x >= 0);
-            assertEquals(0, boundingBox.y);
-            // Since we're mocking the image dimensions, we can verify the expected width and height
-            assertTrue(boundingBox.width > 0);
-            assertTrue(boundingBox.height > 0);
+        // Create a mock image with known dimensions
+        BufferedImage mockImage = Mockito.mock(BufferedImage.class);
+        Mockito.when(mockImage.getWidth(Mockito.any())).thenReturn(width);
+        Mockito.when(mockImage.getHeight(Mockito.any())).thenReturn(height);
+        
+        // Create a BitmapItem with the mock image
+        BitmapItem bitmapItem = new BitmapItem(level, imagePath);
+        
+        // Use reflection to set the mock image
+        try {
+            Field imageField = BitmapItem.class.getDeclaredField("bufferedImage");
+            imageField.setAccessible(true);
+            imageField.set(bitmapItem, mockImage);
+        } catch (Exception e) {
+            fail("Failed to set mock image: " + e.getMessage());
         }
+        
+        // Use a real Style object instead of mocking
+        float scaleValue = 1.5f;
+        
+        // Act
+        Rectangle box = bitmapItem.getBoundingBox(graphicsMock, observerMock, scaleValue, style);
+        
+        // Assert
+        assertNotNull(box, "Bounding box should not be null");
+        // Expected width and height should be proportional to the image dimensions
+        assertTrue(box.width > 0, "Width should be positive");
+        assertTrue(box.height > 0, "Height should be positive");
     }
 
     @Test
@@ -166,29 +175,49 @@ class BitmapItemTest {
     
     @Test
     @DisplayName("Should draw the image when image is found")
-    void shouldDrawTheImageWhenImageIsFound() throws IOException {
-        // Arrange - create a bitmap item with a valid image
-        bitmapItem = new BitmapItem(1, testImagePath.toString());
+    void shouldDrawTheImageWhenImageIsFound() {
+        // Arrange
+        int level = 2;
+        String imagePath = "test.jpg";
+        int imageWidth = 400;
+        int imageHeight = 300;
         
-        // Act - only if image was loaded successfully
-        if (hasLoadedImage(bitmapItem)) {
-            // Set expectations for the image dimensions
-            Mockito.when(testImage.getWidth(observerMock)).thenReturn(100);
-            Mockito.when(testImage.getHeight(observerMock)).thenReturn(100);
-            
-            // Draw the image
-            bitmapItem.draw(10, 10, 1.5f, graphicsMock, style, observerMock);
-            
-            // Assert - verify drawImage was called with the correct parameters
-            Mockito.verify(graphicsMock).drawImage(
-                Mockito.any(BufferedImage.class),
-                Mockito.anyInt(), // x
-                Mockito.anyInt(), // y
-                Mockito.anyInt(), // width
-                Mockito.anyInt(), // height
-                Mockito.eq(observerMock)
-            );
+        // Create a mock image with known dimensions
+        BufferedImage mockImage = Mockito.mock(BufferedImage.class);
+        Mockito.when(mockImage.getWidth(Mockito.any())).thenReturn(imageWidth);
+        Mockito.when(mockImage.getHeight(Mockito.any())).thenReturn(imageHeight);
+        
+        // Create BitmapItem with mocked image
+        BitmapItem bitmapItem = new BitmapItem(level, imagePath);
+        
+        // Set the mock image using reflection
+        try {
+            Field imageField = BitmapItem.class.getDeclaredField("bufferedImage");
+            imageField.setAccessible(true);
+            imageField.set(bitmapItem, mockImage);
+        } catch (Exception e) {
+            fail("Failed to set mock image: " + e.getMessage());
         }
+        
+        // Use the real Style object from setup
+        float scaleValue = 1.5f;
+        
+        // Create a mock graphics context
+        Graphics mockGraphics = Mockito.mock(Graphics.class);
+        
+        // Act
+        bitmapItem.draw(0, 0, scaleValue, mockGraphics, style, observerMock);
+        
+        // Assert
+        // Verify that drawImage was called on the graphics object
+        Mockito.verify(mockGraphics).drawImage(
+            Mockito.eq(mockImage),
+            Mockito.anyInt(),
+            Mockito.anyInt(),
+            Mockito.anyInt(),
+            Mockito.anyInt(),
+            Mockito.eq(observerMock)
+        );
     }
     
     @Test

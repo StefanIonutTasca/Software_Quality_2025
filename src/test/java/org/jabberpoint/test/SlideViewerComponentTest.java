@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.font.FontRenderContext;
@@ -15,6 +14,7 @@ import org.jabberpoint.src.Presentation;
 import org.jabberpoint.src.Slide;
 import org.jabberpoint.src.SlideViewerComponent;
 import org.jabberpoint.src.TextItem;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,9 +28,14 @@ class SlideViewerComponentTest {
     private SlideViewerComponent slideViewerComponent;
     private Presentation presentation;
     private JFrame mockFrame;
-    private Graphics mockGraphics;
     private Graphics2D mockGraphics2D;
     private FontRenderContext frc;
+
+    @BeforeAll
+    public static void setUpHeadlessMode() {
+        // Set up headless mode for tests
+        System.setProperty("java.awt.headless", "true");
+    }
 
     @BeforeEach
     void setUp() {
@@ -45,7 +50,6 @@ class SlideViewerComponentTest {
         slideViewerComponent = new SlideViewerComponent(presentation, mockFrame);
         
         // Set up graphics mocks for painting tests
-        mockGraphics = Mockito.mock(Graphics.class);
         mockGraphics2D = Mockito.mock(Graphics2D.class);
         
         // Create a real FontRenderContext for text rendering
@@ -100,20 +104,20 @@ class SlideViewerComponentTest {
         presentation.append(slide);
         presentation.setSlideNumber(0);
         
-        // Act
-        slideViewerComponent.paintComponent(mockGraphics);
+        // Act 
+        slideViewerComponent.paintComponent(mockGraphics2D);
         
         // Assert
         // Verify background is filled
-        verify(mockGraphics).setColor(any());
-        verify(mockGraphics).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
+        verify(mockGraphics2D).setColor(any());
+        verify(mockGraphics2D).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
         
         // Verify slide number is drawn
-        verify(mockGraphics).setFont(any());
-        verify(mockGraphics).drawString(contains("Slide 1 of 1"), anyInt(), anyInt());
+        verify(mockGraphics2D).setFont(any());
+        verify(mockGraphics2D).drawString(contains("Slide 1 of 1"), anyInt(), anyInt());
         
         // Verify a drawString was called
-        verify(mockGraphics).drawString(anyString(), anyInt(), anyInt());
+        verify(mockGraphics2D).drawString(anyString(), anyInt(), anyInt());
     }
     
     @Test
@@ -122,14 +126,14 @@ class SlideViewerComponentTest {
         // Arrange - empty presentation with no slides
         presentation.setSlideNumber(-1);
         
-        // Act
-        slideViewerComponent.paintComponent(mockGraphics);
+        // Act 
+        slideViewerComponent.paintComponent(mockGraphics2D);
         
         // Assert - should still fill background but not draw slide
-        verify(mockGraphics).setColor(any());
-        verify(mockGraphics).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
+        verify(mockGraphics2D).setColor(any());
+        verify(mockGraphics2D).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
         
         // Should not attempt to draw slide number or slide
-        verify(mockGraphics, never()).drawString(contains("Slide"), anyInt(), anyInt());
+        verify(mockGraphics2D, never()).drawString(contains("Slide"), anyInt(), anyInt());
     }
 }
