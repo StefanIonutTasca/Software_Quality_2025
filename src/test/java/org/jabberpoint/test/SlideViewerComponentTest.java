@@ -1,124 +1,141 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.Presentation;
-import org.jabberpoint.src.Slide;
-import org.jabberpoint.src.SlideViewerComponent;
-import org.jabberpoint.src.TextItem;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import javax.swing.JFrame;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Tests for SlideViewerComponent class
- */
-public class SlideViewerComponentTest {
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import javax.swing.JFrame;
 
-    private SlideViewerComponent slideViewerComponent;
-    private Presentation mockPresentation;
-    private JFrame mockFrame;
-    private Graphics mockGraphics;
+import org.jabberpoint.src.Presentation;
+import org.jabberpoint.src.Slide;
+import org.jabberpoint.src.SlideViewerComponent;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+
+/**
+ * Unit tests for SlideViewerComponent class
+ */
+class SlideViewerComponentTest {
+
+    private JFrame frameMock;
+    private Presentation presentationMock;
+    private SlideViewerComponent component;
+    private Graphics graphicsMock;
+    private Slide slideMock;
 
     @BeforeEach
     void setUp() {
-        mockPresentation = mock(Presentation.class);
-        mockFrame = mock(JFrame.class);
-        mockGraphics = mock(Graphics.class);
+        frameMock = mock(JFrame.class);
+        presentationMock = mock(Presentation.class);
+        component = new SlideViewerComponent(presentationMock, frameMock);
+        graphicsMock = mock(Graphics.class);
+        slideMock = mock(Slide.class);
         
-        slideViewerComponent = new SlideViewerComponent(mockPresentation, mockFrame);
+        // Initialize common mock behaviors
+        when(presentationMock.getSlideNumber()).thenReturn(0);
+        when(presentationMock.getSize()).thenReturn(3);
+        when(presentationMock.getTitle()).thenReturn("Test Presentation");
     }
 
     @Test
-    @DisplayName("Should register as an observer to the presentation")
-    void shouldRegisterAsObserver() {
-        // Verify that the component registered itself as an observer during initialization
-        verify(mockPresentation).addObserver(slideViewerComponent);
-    }
-    
-    @Test
-    @DisplayName("Should return correct preferred size")
-    void shouldReturnCorrectPreferredSize() {
+    @DisplayName("Should have correct preferred size")
+    void shouldHaveCorrectPreferredSize() {
         // Act
-        Dimension preferredSize = slideViewerComponent.getPreferredSize();
+        Dimension preferredSize = component.getPreferredSize();
         
         // Assert
-        assertEquals(800, preferredSize.width);  // Assuming Slide.WIDTH is 800
-        assertEquals(600, preferredSize.height); // Assuming Slide.HEIGHT is 600
+        assertEquals(Slide.WIDTH, preferredSize.width);
+        assertEquals(Slide.HEIGHT, preferredSize.height);
     }
-    
+
     @Test
-    @DisplayName("Should update component when slide changes")
-    void shouldUpdateComponentWhenSlideChanges() {
+    @DisplayName("Should update and repaint when slide changes")
+    void shouldUpdateAndRepaintWhenSlideChanges() {
         // Arrange
-        Slide testSlide = new Slide();
-        testSlide.setTitle("Test Slide");
-        testSlide.append(new TextItem(1, "Test Item"));
-        when(mockPresentation.getTitle()).thenReturn("Test Presentation");
+        SlideViewerComponent spyComponent = spy(component);
         
         // Act
-        slideViewerComponent.update(mockPresentation, testSlide);
+        spyComponent.update(presentationMock, slideMock);
         
         // Assert
-        verify(mockFrame).setTitle("Test Presentation");
+        verify(spyComponent).repaint();
+        verify(frameMock).setTitle("Test Presentation");
     }
     
     @Test
-    @DisplayName("Should handle null slide in update")
-    void shouldHandleNullSlideInUpdate() {
-        // Act - should not throw exception
-        assertDoesNotThrow(() -> slideViewerComponent.update(mockPresentation, null));
-    }
-    
-    @Test
-    @DisplayName("Should paint component correctly with valid slide")
-    void shouldPaintComponentCorrectlyWithValidSlide() {
+    @DisplayName("Should repaint when slide is null")
+    void shouldRepaintWhenSlideIsNull() {
         // Arrange
-        Slide testSlide = mock(Slide.class);
-        when(mockPresentation.getSlideNumber()).thenReturn(2); // Third slide (0-indexed)
-        when(mockPresentation.getSize()).thenReturn(5); // Total 5 slides
-        slideViewerComponent.update(mockPresentation, testSlide);
+        SlideViewerComponent spyComponent = spy(component);
         
         // Act
-        slideViewerComponent.paintComponent(mockGraphics);
+        spyComponent.update(presentationMock, null);
         
         // Assert
-        verify(mockGraphics).setColor(any()); // Color is set
-        verify(mockGraphics).fillRect(anyInt(), anyInt(), anyInt(), anyInt()); // Background is filled
-        verify(mockGraphics).drawString(contains("Slide 3 of 5"), anyInt(), anyInt()); // Slide number is displayed
-        verify(testSlide).draw(eq(mockGraphics), any(Rectangle.class), eq(slideViewerComponent)); // Slide is drawn
+        verify(spyComponent).repaint();
+        verify(frameMock, never()).setTitle(anyString());
     }
     
     @Test
-    @DisplayName("Should not draw slide when slide number is negative")
-    void shouldNotDrawSlideWhenSlideNumberIsNegative() {
+    @DisplayName("Should paint component when slide number is valid")
+    void shouldPaintComponentWhenSlideNumberIsValid() {
         // Arrange
-        when(mockPresentation.getSlideNumber()).thenReturn(-1);
+        component.update(presentationMock, slideMock);
+        
+        // Mock component dimensions
+        when(presentationMock.getSlideNumber()).thenReturn(1);
+        doReturn(new Dimension(800, 600)).when(graphicsMock).getClipBounds();
         
         // Act
-        slideViewerComponent.paintComponent(mockGraphics);
+        component.paintComponent(graphicsMock);
         
-        // Assert - verify slide isn't drawn
-        verify(mockGraphics, never()).drawString(contains("Slide"), anyInt(), anyInt());
+        // Assert - verify drawing operations
+        verify(graphicsMock).setColor(any()); // Background color
+        verify(graphicsMock).fillRect(anyInt(), anyInt(), anyInt(), anyInt()); // Fill background
+        verify(graphicsMock, times(2)).setColor(any()); // Text color
+        verify(graphicsMock).setFont(any());
+        verify(graphicsMock).drawString(contains("Slide 2 of 3"), anyInt(), anyInt()); // Check slide number text
+        
+        // Verify slide is drawn
+        ArgumentCaptor<Rectangle> rectangleCaptor = ArgumentCaptor.forClass(Rectangle.class);
+        verify(slideMock).draw(eq(graphicsMock), rectangleCaptor.capture(), eq(component));
+        Rectangle capturedRect = rectangleCaptor.getValue();
+        assertEquals(0, capturedRect.x);
+        assertTrue(capturedRect.height > 0);
+        assertTrue(capturedRect.width > 0);
     }
     
     @Test
-    @DisplayName("Should not draw slide when slide is null")
-    void shouldNotDrawSlideWhenSlideIsNull() {
-        // Arrange
-        when(mockPresentation.getSlideNumber()).thenReturn(0);
-        slideViewerComponent.update(mockPresentation, null);
+    @DisplayName("Should not draw slide when slide number is invalid")
+    void shouldNotDrawSlideWhenSlideNumberIsInvalid() {
+        // Arrange - set invalid slide number
+        when(presentationMock.getSlideNumber()).thenReturn(-1);
         
         // Act
-        slideViewerComponent.paintComponent(mockGraphics);
+        component.paintComponent(graphicsMock);
         
-        // Assert - verify slide isn't drawn
-        verify(mockGraphics, never()).drawString(contains("Slide"), anyInt(), anyInt());
+        // Assert - verify only background operations happened
+        verify(graphicsMock).setColor(any()); // Background color
+        verify(graphicsMock).fillRect(anyInt(), anyInt(), anyInt(), anyInt()); // Fill background
+        
+        // Verify slide is NOT drawn
+        verify(graphicsMock, never()).drawString(anyString(), anyInt(), anyInt());
+        verifyNoInteractions(slideMock);
+    }
+    
+    @Test
+    @DisplayName("Should register as observer to presentation")
+    void shouldRegisterAsObserverToPresentation() {
+        // This test verifies that the component registers itself as an observer
+        // during construction
+        
+        // Arrange & Act - already done in setUp()
+        
+        // Assert - verify component was registered
+        verify(presentationMock).addObserver(component);
     }
 }

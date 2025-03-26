@@ -1,235 +1,188 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.MenuController;
-import org.jabberpoint.src.Presentation;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.awt.Frame;
 import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import org.jabberpoint.src.MenuController;
+import org.jabberpoint.src.Presentation;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 /**
- * Tests for MenuController class
+ * Unit tests for MenuController class
  */
-public class MenuControllerTest {
+class MenuControllerTest {
 
+    private Frame frameMock;
+    private Presentation presentationMock;
     private MenuController menuController;
-    private Frame mockFrame;
-    private Presentation mockPresentation;
 
     @BeforeEach
     void setUp() {
-        mockFrame = mock(Frame.class);
-        mockPresentation = mock(Presentation.class);
-        menuController = new MenuController(mockFrame, mockPresentation);
+        frameMock = mock(Frame.class);
+        presentationMock = mock(Presentation.class);
+        menuController = new MenuController(frameMock, presentationMock);
     }
 
     @Test
-    @DisplayName("Should create menu items with correct shortcuts")
-    void shouldCreateMenuItemsWithCorrectShortcuts() {
+    @DisplayName("Should create menu items correctly")
+    void shouldCreateMenuItemsCorrectly() {
         // Act
-        MenuItem fileItem = menuController.mkMenuItem("File");
-        MenuItem exitItem = menuController.mkMenuItem("Exit");
+        MenuItem item = menuController.mkMenuItem("Test");
         
         // Assert
-        assertEquals("File", fileItem.getLabel());
-        assertEquals('F', fileItem.getShortcut().getKey());
-        
-        assertEquals("Exit", exitItem.getLabel());
-        assertEquals('E', exitItem.getShortcut().getKey());
+        assertEquals("Test", item.getLabel());
+        assertNotNull(item.getShortcut());
+        assertEquals('T', item.getShortcut().getKey());
     }
     
     @Test
-    @DisplayName("Should create menu with File, View and Help menus")
-    void shouldCreateMenuWithCorrectStructure() {
-        // Get all menus from the menu bar
-        Menu[] menus = getMenus(menuController);
+    @DisplayName("Should have correct menu structure")
+    void shouldHaveCorrectMenuStructure() {
+        // Menu order is File, View, Help (Help is set as help menu)
         
-        // Verify we have at least 2 menus (File and View, Help might be handled differently)
-        assertTrue(menus.length >= 2);
+        // Check number of menus
+        assertEquals(2, menuController.getMenuCount()); // File, View (Help is special)
         
-        // Check menu labels
-        List<String> menuLabels = new ArrayList<>();
-        for (Menu menu : menus) {
-            menuLabels.add(menu.getLabel());
-        }
+        // Check file menu
+        Menu fileMenu = menuController.getMenu(0);
+        assertEquals("File", fileMenu.getLabel());
+        assertEquals(5, fileMenu.getItemCount()); // Open, New, Save, separator, Exit
         
-        assertTrue(menuLabels.contains("File"));
-        assertTrue(menuLabels.contains("View"));
+        assertEquals("Open", fileMenu.getItem(0).getLabel());
+        assertEquals("New", fileMenu.getItem(1).getLabel());
+        assertEquals("Save", fileMenu.getItem(2).getLabel());
+        // Item 3 is a separator
+        assertEquals("Exit", fileMenu.getItem(4).getLabel());
         
-        // Check for menu items in File menu
-        Menu fileMenu = findMenuByLabel(menus, "File");
-        assertNotNull(fileMenu);
+        // Check view menu
+        Menu viewMenu = menuController.getMenu(1);
+        assertEquals("View", viewMenu.getLabel());
+        assertEquals(3, viewMenu.getItemCount()); // Next, Prev, Go to
         
-        List<String> fileMenuItems = getMenuItemLabels(fileMenu);
-        assertTrue(fileMenuItems.contains("Open"));
-        assertTrue(fileMenuItems.contains("New"));
-        assertTrue(fileMenuItems.contains("Save"));
-        assertTrue(fileMenuItems.contains("Exit"));
+        assertEquals("Next", viewMenu.getItem(0).getLabel());
+        assertEquals("Prev", viewMenu.getItem(1).getLabel());
+        assertEquals("Go to", viewMenu.getItem(2).getLabel());
         
-        // Check for menu items in View menu
-        Menu viewMenu = findMenuByLabel(menus, "View");
-        assertNotNull(viewMenu);
-        
-        List<String> viewMenuItems = getMenuItemLabels(viewMenu);
-        assertTrue(viewMenuItems.contains("Next"));
-        assertTrue(viewMenuItems.contains("Prev"));
-        assertTrue(viewMenuItems.contains("Go to"));
+        // Check help menu
+        Menu helpMenu = menuController.getHelpMenu();
+        assertNotNull(helpMenu);
+        assertEquals("Help", helpMenu.getLabel());
+        assertEquals(1, helpMenu.getItemCount()); // About
+        assertEquals("About", helpMenu.getItem(0).getLabel());
     }
     
     @Test
-    @DisplayName("Test Next menu item action")
-    void testNextMenuItemAction() throws Exception {
-        // Find the Next menu item
-        MenuItem nextItem = findMenuItemByLabel("Next");
-        assertNotNull(nextItem);
+    @DisplayName("Should call nextSlide when Next menu item is clicked")
+    void shouldCallNextSlideWhenNextMenuItemIsClicked() throws Exception {
+        // Arrange - get the Next menu item's ActionListener
+        Menu viewMenu = menuController.getMenu(1); // View menu
+        MenuItem nextMenuItem = viewMenu.getItem(0); // Next menu item
         
-        // Simulate click
-        simulateMenuItemClick(nextItem);
+        // Create an action event
+        ActionEvent event = new ActionEvent(nextMenuItem, ActionEvent.ACTION_PERFORMED, "Next");
         
-        // Verify presentation.nextSlide was called
-        verify(mockPresentation, times(1)).nextSlide();
-    }
-    
-    @Test
-    @DisplayName("Test Prev menu item action")
-    void testPrevMenuItemAction() throws Exception {
-        // Find the Prev menu item
-        MenuItem prevItem = findMenuItemByLabel("Prev");
-        assertNotNull(prevItem);
+        // Get the ActionListener from the menu item
+        // We need to extract it via reflection since it's not directly accessible
+        Field[] fields = MenuItem.class.getDeclaredFields();
         
-        // Simulate click
-        simulateMenuItemClick(prevItem);
-        
-        // Verify presentation.prevSlide was called
-        verify(mockPresentation, times(1)).prevSlide();
-    }
-    
-    @Test
-    @DisplayName("Test New menu item action")
-    void testNewMenuItemAction() throws Exception {
-        // Find the New menu item
-        MenuItem newItem = findMenuItemByLabel("New");
-        assertNotNull(newItem);
-        
-        // Simulate click
-        simulateMenuItemClick(newItem);
-        
-        // Since presentation.clear() is package-private, we can't directly verify it
-        // Instead, verify the side effect of repaint on the frame
-        verify(mockFrame, times(1)).repaint();
-    }
-    
-    @Test
-    @DisplayName("Test Exit menu item action")
-    void testExitMenuItemAction() throws Exception {
-        // Find the Exit menu item
-        MenuItem exitItem = findMenuItemByLabel("Exit");
-        assertNotNull(exitItem);
-        
-        // Simulate click
-        simulateMenuItemClick(exitItem);
-        
-        // Verify presentation.exit was called with 0
-        verify(mockPresentation, times(1)).exit(0);
-    }
-    
-    // Helper methods for testing the menu structure and actions
-    
-    private Menu[] getMenus(MenuController menuBar) {
-        int menuCount = menuBar.getMenuCount();
-        Menu[] menus = new Menu[menuCount];
-        for (int i = 0; i < menuCount; i++) {
-            menus[i] = menuBar.getMenu(i);
-        }
-        return menus;
-    }
-    
-    private Menu findMenuByLabel(Menu[] menus, String label) {
-        for (Menu menu : menus) {
-            if (label.equals(menu.getLabel())) {
-                return menu;
-            }
-        }
-        return null;
-    }
-    
-    private List<String> getMenuItemLabels(Menu menu) {
-        List<String> labels = new ArrayList<>();
-        int itemCount = menu.getItemCount();
-        for (int i = 0; i < itemCount; i++) {
-            MenuItem item = menu.getItem(i);
-            // Skip separators
-            if (item != null && item.getLabel() != null) {
-                labels.add(item.getLabel());
-            }
-        }
-        return labels;
-    }
-    
-    private MenuItem findMenuItemByLabel(String label) {
-        Menu[] menus = getMenus(menuController);
-        for (Menu menu : menus) {
-            int itemCount = menu.getItemCount();
-            for (int i = 0; i < itemCount; i++) {
-                MenuItem item = menu.getItem(i);
-                if (item != null && label.equals(item.getLabel())) {
-                    return item;
-                }
-            }
-        }
-        return null;
-    }
-    
-    private void simulateMenuItemClick(MenuItem menuItem) throws Exception {
-        // Instead of using reflection which can be brittle, we'll trigger
-        // the action directly using public methods
-        try {
-            // Create a mock action event
-            ActionEvent mockEvent = new ActionEvent(
-                menuItem, 
-                ActionEvent.ACTION_PERFORMED, 
-                menuItem.getActionCommand() != null ? menuItem.getActionCommand() : ""
-            );
-            
-            // Get the action listener via reflection - this is safer than assuming field name
-            Field[] fields = MenuItem.class.getDeclaredFields();
-            for (Field field : fields) {
+        for (Field field : fields) {
+            if (field.getType().getName().contains("ActionListener")) {
                 field.setAccessible(true);
-                Object value = field.get(menuItem);
-                
-                // Check if field contains action listeners
-                if (value instanceof java.awt.event.ActionListener[]) {
-                    for (java.awt.event.ActionListener listener : (java.awt.event.ActionListener[])value) {
-                        listener.actionPerformed(mockEvent);
-                    }
-                    return;
-                } else if (value instanceof java.awt.event.ActionListener) {
-                    ((java.awt.event.ActionListener)value).actionPerformed(mockEvent);
-                    return;
-                }
+                java.awt.event.ActionListener listener = (java.awt.event.ActionListener) field.get(nextMenuItem);
+                listener.actionPerformed(event);
+                break;
             }
-            
-            // If we couldn't find listeners through fields, try another approach
-            // Call the processActionEvent method using reflection as a fallback
-            Method processMethod = MenuItem.class.getDeclaredMethod("processActionEvent", ActionEvent.class);
-            processMethod.setAccessible(true);
-            processMethod.invoke(menuItem, mockEvent);
-            
-        } catch (Exception e) {
-            System.err.println("Warning: Could not simulate menu item click: " + e.getMessage());
-            // Just rethrow the exception to fail the test
-            throw e;
         }
+        
+        // Verify
+        verify(presentationMock, times(1)).nextSlide();
+    }
+    
+    @Test
+    @DisplayName("Should call prevSlide when Prev menu item is clicked")
+    void shouldCallPrevSlideWhenPrevMenuItemIsClicked() throws Exception {
+        // Arrange - get the Prev menu item's ActionListener
+        Menu viewMenu = menuController.getMenu(1); // View menu
+        MenuItem prevMenuItem = viewMenu.getItem(1); // Prev menu item
+        
+        // Create an action event
+        ActionEvent event = new ActionEvent(prevMenuItem, ActionEvent.ACTION_PERFORMED, "Prev");
+        
+        // Get the ActionListener from the menu item
+        // We need to extract it via reflection since it's not directly accessible
+        Field[] fields = MenuItem.class.getDeclaredFields();
+        
+        for (Field field : fields) {
+            if (field.getType().getName().contains("ActionListener")) {
+                field.setAccessible(true);
+                java.awt.event.ActionListener listener = (java.awt.event.ActionListener) field.get(prevMenuItem);
+                listener.actionPerformed(event);
+                break;
+            }
+        }
+        
+        // Verify
+        verify(presentationMock, times(1)).prevSlide();
+    }
+    
+    @Test
+    @DisplayName("Should call exit when Exit menu item is clicked")
+    void shouldCallExitWhenExitMenuItemIsClicked() throws Exception {
+        // Arrange - get the Exit menu item's ActionListener
+        Menu fileMenu = menuController.getMenu(0); // File menu
+        MenuItem exitMenuItem = fileMenu.getItem(4); // Exit menu item
+        
+        // Create an action event
+        ActionEvent event = new ActionEvent(exitMenuItem, ActionEvent.ACTION_PERFORMED, "Exit");
+        
+        // Get the ActionListener from the menu item using reflection
+        Field[] fields = MenuItem.class.getDeclaredFields();
+        
+        for (Field field : fields) {
+            if (field.getType().getName().contains("ActionListener")) {
+                field.setAccessible(true);
+                java.awt.event.ActionListener listener = (java.awt.event.ActionListener) field.get(exitMenuItem);
+                listener.actionPerformed(event);
+                break;
+            }
+        }
+        
+        // Verify
+        verify(presentationMock, times(1)).exit(0);
+    }
+    
+    @Test
+    @DisplayName("Should trigger actions when New menu item is clicked")
+    void shouldTriggerActionsWhenNewMenuItemIsClicked() throws Exception {
+        // Arrange - get the New menu item's ActionListener
+        Menu fileMenu = menuController.getMenu(0); // File menu
+        MenuItem newMenuItem = fileMenu.getItem(1); // New menu item
+        
+        // Create an action event
+        ActionEvent event = new ActionEvent(newMenuItem, ActionEvent.ACTION_PERFORMED, "New");
+        
+        // Get the ActionListener from the menu item using reflection
+        Field[] fields = MenuItem.class.getDeclaredFields();
+        
+        for (Field field : fields) {
+            if (field.getType().getName().contains("ActionListener")) {
+                field.setAccessible(true);
+                java.awt.event.ActionListener listener = (java.awt.event.ActionListener) field.get(newMenuItem);
+                listener.actionPerformed(event);
+                break;
+            }
+        }
+        
+        // We cannot directly verify if clear() was called since it's not visible,
+        // but we can verify that the frame was repainted which happens after clear
+        verify(frameMock, times(1)).repaint();
     }
 }
