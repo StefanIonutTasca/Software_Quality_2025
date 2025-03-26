@@ -24,7 +24,6 @@ class SlideTest {
     private Graphics graphicsMock;
     private ImageObserver observerMock;
     private Rectangle areaMock;
-    private SlideItem mockItem;
 
     @BeforeEach
     void setUp() {
@@ -32,7 +31,6 @@ class SlideTest {
         graphicsMock = Mockito.mock(Graphics.class);
         observerMock = Mockito.mock(ImageObserver.class);
         areaMock = new Rectangle(0, 0, 800, 600);
-        mockItem = Mockito.mock(SlideItem.class);
     }
 
     @Test

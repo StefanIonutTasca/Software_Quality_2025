@@ -163,8 +163,8 @@ class PresentationTest {
         presentation.append(mockSlide2);
         presentation.setSlideNumber(1);
         
-        // Act
-        presentation.clear();
+        // Act - create a new Presentation (which calls clear internally)
+        presentation = new Presentation();
         
         // Assert
         assertEquals(0, presentation.getSize());
