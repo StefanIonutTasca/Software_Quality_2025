@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.font.FontRenderContext;
 import java.awt.image.ImageObserver;
 import java.util.Vector;
 
@@ -24,6 +25,7 @@ class SlideTest {
     private Graphics2D graphicsMock;
     private ImageObserver observerMock;
     private Rectangle areaMock;
+    private FontRenderContext frcMock;
 
     @BeforeEach
     void setUp() {
@@ -31,6 +33,10 @@ class SlideTest {
         graphicsMock = Mockito.mock(Graphics2D.class);
         observerMock = Mockito.mock(ImageObserver.class);
         areaMock = new Rectangle(0, 0, 800, 600);
+        frcMock = Mockito.mock(FontRenderContext.class);
+        
+        // Configure Graphics2D mock to return a valid FontRenderContext
+        Mockito.when(graphicsMock.getFontRenderContext()).thenReturn(frcMock);
     }
 
     @Test
