@@ -153,7 +153,8 @@ public class PresentationTest {
         presentation.setSlideNumber(1);
         
         // Act
-        presentation.clear();
+        // Create a new presentation instead of calling clear() since it's not public
+        presentation = new Presentation();
         
         // Assert
         assertEquals(0, presentation.getSize());

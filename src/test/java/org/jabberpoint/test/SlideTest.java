@@ -22,14 +22,14 @@ public class SlideTest {
     private Slide testSlide;
     private Graphics mockGraphics;
     private ImageObserver mockObserver;
-    private SlideItem mockSlideItem;
+    private Rectangle testArea;
 
     @BeforeEach
     void setUp() {
         testSlide = new Slide();
         mockGraphics = mock(Graphics.class);
         mockObserver = mock(ImageObserver.class);
-        mockSlideItem = mock(SlideItem.class);
+        testArea = new Rectangle(0, 0, 800, 600);
     }
 
     @Test
@@ -71,79 +71,71 @@ public class SlideTest {
     }
     
     @Test
-    @DisplayName("Should return correct bounding box size")
-    void shouldReturnCorrectBoundingBoxSize() {
+    @DisplayName("Should calculate correct slide size")
+    void shouldCalculateCorrectSlideSize() {
         // Arrange
-        Rectangle mockRect1 = new Rectangle(0, 0, 100, 50);
-        Rectangle mockRect2 = new Rectangle(0, 0, 150, 75);
+        testSlide.append(new TextItem(1, "Item 1"));
+        testSlide.append(new TextItem(2, "Item 2"));
+        testSlide.append(new TextItem(1, "Item 3"));
         
-        // Create mock slide items with specific bounding boxes
-        SlideItem item1 = mock(SlideItem.class);
-        SlideItem item2 = mock(SlideItem.class);
-        
-        when(item1.getBoundingBox(eq(mockGraphics), eq(mockObserver), anyFloat(), any(Style.class)))
-            .thenReturn(mockRect1);
-        when(item2.getBoundingBox(eq(mockGraphics), eq(mockObserver), anyFloat(), any(Style.class)))
-            .thenReturn(mockRect2);
-        
+        // Act & Assert
+        assertEquals(3, testSlide.getSize());
+    }
+    
+    @Test
+    @DisplayName("Should retrieve specific slide item")
+    void shouldRetrieveSpecificSlideItem() {
+        // Arrange
+        TextItem item1 = new TextItem(1, "Item 1");
+        TextItem item2 = new TextItem(2, "Item 2");
         testSlide.append(item1);
         testSlide.append(item2);
         
-        // Act
-        Rectangle boundingBox = testSlide.getBoundingBox(mockGraphics, mockObserver);
+        // Act & Assert
+        assertSame(item1, testSlide.getSlideItem(0));
+        assertSame(item2, testSlide.getSlideItem(1));
+    }
+    
+    @Test
+    @DisplayName("Should append text with level")
+    void shouldAppendTextWithLevel() {
+        // Arrange & Act
+        testSlide.append(1, "Test Message");
         
         // Assert
-        assertNotNull(boundingBox);
-        assertTrue(boundingBox.width >= 150); // Should be at least as wide as the widest item
-        assertTrue(boundingBox.height > 0);   // Should have some height
+        assertEquals(1, testSlide.getSize());
+        SlideItem item = testSlide.getSlideItem(0);
+        assertTrue(item instanceof TextItem);
+        assertEquals(1, item.getLevel());
+        assertEquals("Test Message", ((TextItem)item).getText());
     }
     
     @Test
     @DisplayName("Should draw all slide items")
     void shouldDrawAllSlideItems() {
         // Arrange
-        SlideItem item1 = mock(SlideItem.class);
-        SlideItem item2 = mock(SlideItem.class);
+        testSlide.setTitle("Test Title");
+        SlideItem item1 = spy(new TextItem(1, "Item 1"));
+        SlideItem item2 = spy(new TextItem(2, "Item 2"));
         testSlide.append(item1);
         testSlide.append(item2);
         
         // Act
-        testSlide.draw(mockGraphics, mockObserver);
+        testSlide.draw(mockGraphics, testArea, mockObserver);
         
-        // Assert - Verify that draw was called on each item
+        // Assert
+        // Verify the title and both items were drawn
         verify(item1).draw(anyInt(), anyInt(), anyFloat(), eq(mockGraphics), any(Style.class), eq(mockObserver));
         verify(item2).draw(anyInt(), anyInt(), anyFloat(), eq(mockGraphics), any(Style.class), eq(mockObserver));
     }
     
     @Test
-    @DisplayName("Should calculate correct scale based on component size")
-    void shouldCalculateCorrectScale() {
-        // Arrange
-        int componentWidth = 800;
-        int componentHeight = 600;
-        
-        // Create a slide with a known bounding box
-        final Rectangle mockBoundingBox = new Rectangle(0, 0, 400, 300);
-        
-        Slide spySlide = spy(new Slide());
-        doReturn(mockBoundingBox).when(spySlide).getBoundingBox(any(), any());
-        
-        // Act
-        float scale = spySlide.getScale(componentWidth, componentHeight);
-        
-        // Assert
-        assertTrue(scale > 0, "Scale should be greater than 0");
-        assertEquals(Math.min((float)componentWidth/mockBoundingBox.width, 
-                              (float)componentHeight/mockBoundingBox.height), 
-                    scale, 
-                    0.001f, 
-                    "Scale calculation should match expected formula");
-    }
-    
-    @Test
     @DisplayName("Draw method should handle empty slides")
     void drawShouldHandleEmptySlides() {
+        // Arrange
+        testSlide.setTitle("Empty Slide");
+        
         // Act & Assert - no exceptions should be thrown
-        assertDoesNotThrow(() -> testSlide.draw(mockGraphics, mockObserver));
+        assertDoesNotThrow(() -> testSlide.draw(mockGraphics, testArea, mockObserver));
     }
 }
