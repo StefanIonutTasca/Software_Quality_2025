@@ -8,7 +8,6 @@ import org.junit.jupiter.api.DisplayName;
 import java.awt.Color;
 import java.awt.Font;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,31 +18,8 @@ public class StyleTest {
     
     @BeforeEach
     void setUp() {
-        // Reset the singleton instance before each test using reflection
-        try {
-            Field instanceField = Style.class.getDeclaredField("instance");
-            instanceField.setAccessible(true);
-            
-            // Remove final modifier
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
-            modifiersField.setInt(instanceField, instanceField.getModifiers() & ~Modifier.FINAL);
-            
-            // Set the instance to null
-            instanceField.set(null, null);
-            
-            // Reset styles array if it exists
-            try {
-                Field stylesField = Style.class.getDeclaredField("styles");
-                stylesField.setAccessible(true);
-                stylesField.set(null, null);
-            } catch (Exception e) {
-                // Ignore if styles field not found or cannot be reset
-            }
-        } catch (Exception e) {
-            // If reflection fails, just proceed with the test
-            System.out.println("Could not reset singleton: " + e.getMessage());
-        }
+        // Ensure styles are created properly
+        Style.createStyles();
     }
     
     @Test

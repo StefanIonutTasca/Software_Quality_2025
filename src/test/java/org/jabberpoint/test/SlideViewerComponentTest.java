@@ -6,9 +6,12 @@ import org.jabberpoint.src.SlideViewerComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.mockito.ArgumentMatcher;
 
 import javax.swing.JFrame;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,6 +30,9 @@ public class SlideViewerComponentTest {
     
     @BeforeEach
     void setUp() {
+        // Ensure styles are created for other tests
+        org.jabberpoint.src.Style.createStyles();
+        
         mockPresentation = mock(Presentation.class);
         mockFrame = mock(JFrame.class);
         mockGraphics = mock(Graphics.class);
@@ -98,18 +104,28 @@ public class SlideViewerComponentTest {
         when(mockPresentation.getSlideNumber()).thenReturn(2);
         when(mockPresentation.getSize()).thenReturn(5);
         
+        // Mock the component size and methods
+        SlideViewerComponent spyComponent = spy(slideViewerComponent);
+        doReturn(new Dimension(800, 600)).when(spyComponent).getSize();
+        doReturn(800).when(spyComponent).getWidth();
+        doReturn(600).when(spyComponent).getHeight();
+        
         // Act
-        slideViewerComponent.paintComponent(mockGraphics);
+        spyComponent.paintComponent(mockGraphics);
         
         // Assert
         // Verify background is filled
+        verify(mockGraphics).setColor(Color.white);
         verify(mockGraphics).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
         
-        // Verify slide number text is drawn
-        verify(mockGraphics).drawString(contains("Slide 3 of 5"), anyInt(), anyInt());
+        // Verify color is set for text
+        verify(mockGraphics).setColor(Color.black);
         
-        // Verify slide is drawn
-        // We could use a spy for the slide to verify it's drawn, but that would require more complex setup
+        // Verify font is set
+        verify(mockGraphics).setFont(any(Font.class));
+        
+        // Verify slide number text is drawn
+        verify(mockGraphics).drawString(matches("Slide 3 of 5"), anyInt(), anyInt());
     }
     
     @Test
@@ -148,5 +164,20 @@ public class SlideViewerComponentTest {
         
         // Verify no text is drawn if slide is null
         verify(mockGraphics, never()).drawString(anyString(), anyInt(), anyInt());
+    }
+    
+    // Helper method to match strings that contain a substring
+    private String matches(final String substring) {
+        return argThat(new ArgumentMatcher<String>() {
+            @Override
+            public boolean matches(String argument) {
+                return argument != null && argument.contains(substring);
+            }
+            
+            @Override
+            public String toString() {
+                return "String containing [" + substring + "]";
+            }
+        });
     }
 }
