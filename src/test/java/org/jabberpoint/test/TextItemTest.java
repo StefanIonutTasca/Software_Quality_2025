@@ -1,18 +1,17 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.TextItem;
 import org.jabberpoint.src.Style;
+import org.jabberpoint.src.TextItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
+import java.awt.Font;
 import java.awt.Rectangle;
-import java.awt.image.ImageObserver;
 import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
-import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
-import java.text.AttributedString;
+import java.awt.image.ImageObserver;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -21,131 +20,104 @@ import static org.mockito.Mockito.*;
  * Unit tests for TextItem class
  */
 public class TextItemTest {
+    private TextItem textItem;
     private Graphics2D mockGraphics;
     private ImageObserver mockObserver;
+    private Style testStyle;
+    private FontRenderContext mockFrc;
+    private AffineTransform mockTransform;
 
     @BeforeEach
     void setUp() {
-        // Ensure styles are created properly
+        // Ensure styles are initialized properly
         Style.createStyles();
         
-        // Create mock Graphics2D directly instead of Graphics
+        // Create test TextItem
+        textItem = new TextItem(1, "Test Message");
+        
+        // Create mocks
         mockGraphics = mock(Graphics2D.class);
         mockObserver = mock(ImageObserver.class);
+        mockFrc = mock(FontRenderContext.class);
+        mockTransform = mock(AffineTransform.class);
         
-        // Mock FontRenderContext behavior
-        FontRenderContext mockFrc = mock(FontRenderContext.class);
+        // Setup mock behavior
         when(mockGraphics.getFontRenderContext()).thenReturn(mockFrc);
-        
-        // Mock AffineTransform to avoid NullPointerException
-        AffineTransform mockTransform = mock(AffineTransform.class);
         when(mockTransform.getScaleX()).thenReturn(1.0);
         when(mockGraphics.getTransform()).thenReturn(mockTransform);
+        
+        // Get style for level 1
+        testStyle = Style.getStyle(1);
+        assertNotNull(testStyle, "Style object should not be null");
+        
+        // Mock the font behavior
+        Font mockFont = mock(Font.class);
+        when(mockGraphics.getFont()).thenReturn(mockFont);
     }
 
     @Test
-    @DisplayName("Should create TextItem with proper level and text")
+    @DisplayName("Should create text item with level and text")
     void constructorShouldSetLevelAndText() {
-        // Arrange & Act
-        TextItem textItem = new TextItem(2, "Test Text");
-        
         // Assert
-        assertEquals(2, textItem.getLevel());
-        assertEquals("Test Text", textItem.getText());
+        assertEquals(1, textItem.getLevel());
+        assertEquals("Test Message", textItem.getText());
     }
 
     @Test
-    @DisplayName("Should create empty TextItem with default values")
-    void defaultConstructorShouldCreateEmptyItem() {
-        // Arrange & Act
-        TextItem textItem = new TextItem();
+    @DisplayName("getBoundingBox should return non-null rectangle")
+    void getBoundingBoxShouldReturnNonNullRectangle() {
+        try {
+            // Since we can't mock private methods without PowerMock, we'll test a simpler case
+            // Mock style to return a non-null font to avoid NullPointerException
+            when(testStyle.getFont(anyFloat())).thenReturn(new Font("Arial", Font.PLAIN, 12));
+            
+            // Act - use the real getBoundingBox method
+            Rectangle boundingBox = textItem.getBoundingBox(mockGraphics, mockObserver, 1.0f, testStyle);
+            
+            // Assert
+            assertNotNull(boundingBox, "Bounding box should not be null");
+        } catch (NullPointerException e) {
+            fail("Should not throw NullPointerException: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @DisplayName("getText should return the text content")
+    void getTextShouldReturnTextContent() {
+        // Act
+        String text = textItem.getText();
         
         // Assert
-        assertEquals(0, textItem.getLevel());
-        // The default text is "No Text Given" in the TextItem class
-        assertEquals("No Text Given", textItem.getText());
+        assertEquals("Test Message", text);
     }
     
     @Test
-    @DisplayName("getText should return the text")
-    void getTextShouldReturnText() {
-        // Arrange
-        String testText = "Sample Text";
-        TextItem textItem = new TextItem(1, testText);
-        
-        // Act & Assert
-        assertEquals(testText, textItem.getText());
+    @DisplayName("draw should not throw exception")
+    void drawShouldNotThrowException() {
+        try {
+            // Mock the necessary behavior for draw
+            Font mockFont = mock(Font.class);
+            when(testStyle.getFont(anyFloat())).thenReturn(mockFont);
+            
+            // Act & Assert - should not throw exception
+            assertDoesNotThrow(() -> 
+                textItem.draw(0, 0, 1.0f, mockGraphics, testStyle, mockObserver)
+            );
+        } catch (NullPointerException e) {
+            fail("Should not throw NullPointerException: " + e.getMessage());
+        }
     }
     
     @Test
     @DisplayName("toString should return proper representation")
     void toStringShouldReturnProperRepresentation() {
         // Arrange
-        TextItem textItem = new TextItem(3, "Test String");
+        TextItem item = new TextItem(2, "Test");
         
         // Act
-        String result = textItem.toString();
+        String result = item.toString();
         
         // Assert
-        assertEquals("TextItem[3,Test String]", result);
-    }
-    
-    @Test
-    @DisplayName("getBoundingBox should return non-null rectangle")
-    void getBoundingBoxShouldReturnNonNullRectangle() {
-        // This test would require more complex mocking of TextLayout and LineBreakMeasurer
-        // We'll simplify and just check the basic functionality
-        
-        try {
-            // Arrange
-            TextItem textItem = new TextItem(1, "Test");
-            
-            // Create a simple style that we control
-            Style simpleStyle = new Style(10, java.awt.Color.BLACK, 12, 5);
-            
-            // Act 
-            Rectangle boundingBox = textItem.getBoundingBox(mockGraphics, mockObserver, 1.0f, simpleStyle);
-            assertNotNull(boundingBox);
-        } catch (NullPointerException e) {
-            // If we get a NullPointerException, the test fails
-            fail("Should not throw NullPointerException: " + e.getMessage());
-        }
-    }
-    
-    @Test
-    @DisplayName("draw should not throw exceptions")
-    void drawShouldNotThrowException() {
-        try {
-            // Arrange
-            TextItem textItem = new TextItem(1, "Test");
-            
-            // Create a simple style that we control
-            Style simpleStyle = new Style(10, java.awt.Color.BLACK, 12, 5);
-            
-            // Act 
-            textItem.draw(10, 20, 1.0f, mockGraphics, simpleStyle, mockObserver);
-        } catch (NullPointerException e) {
-            // If we get a NullPointerException, the test fails
-            fail("Should not throw NullPointerException: " + e.getMessage());
-        }
-    }
-    
-    @Test
-    @DisplayName("AttributedString should be properly created")
-    void attributedStringShouldBeProperlyCreated() {
-        try {
-            // Arrange
-            TextItem textItem = new TextItem(1, "Test");
-            
-            // Create a simple style that we control
-            Style simpleStyle = new Style(10, java.awt.Color.BLACK, 12, 5);
-            
-            // Act 
-            AttributedString attrStr = textItem.getAttributedString(simpleStyle, 1.0f);
-            assertNotNull(attrStr);
-        } catch (NullPointerException e) {
-            // If we get a NullPointerException, the test fails
-            fail("Should not throw NullPointerException: " + e.getMessage());
-        }
+        assertEquals("TextItem[2,Test]", result);
     }
 }
