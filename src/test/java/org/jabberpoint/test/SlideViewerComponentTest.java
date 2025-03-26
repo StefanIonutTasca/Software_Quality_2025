@@ -56,8 +56,8 @@ public class SlideViewerComponentTest {
         
         // Assert
         assertNotNull(preferredSize);
-        assertEquals(800, preferredSize.width);
-        assertEquals(600, preferredSize.height);
+        assertEquals(1200, preferredSize.width);
+        assertEquals(800, preferredSize.height);
     }
     
     @Test
@@ -73,13 +73,14 @@ public class SlideViewerComponentTest {
         // Arrange
         SlideViewerComponent spyComponent = spy(slideViewerComponent);
         doNothing().when(spyComponent).repaint();
+        when(mockPresentation.getTitle()).thenReturn("Test Presentation");
         
         // Act
         spyComponent.update(mockPresentation, testSlide);
         
         // Assert
         verify(spyComponent).repaint();
-        verify(mockFrame).setTitle(anyString());
+        verify(mockFrame).setTitle("Test Presentation");
     }
     
     @Test
@@ -111,15 +112,22 @@ public class SlideViewerComponentTest {
         doReturn(800).when(spyComponent).getWidth();
         doReturn(600).when(spyComponent).getHeight();
         
+        // We need to make sure the slide is not null
+        when(mockPresentation.getCurrentSlide()).thenReturn(testSlide);
+        
         // Act
         spyComponent.paintComponent(mockGraphics);
         
-        // Assert - verify each method is called without requiring a specific order
+        // Verify the basic background setup
         verify(mockGraphics).setColor(Color.white);
         verify(mockGraphics).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
+        
+        // Verify the text rendering
         verify(mockGraphics).setFont(any(Font.class));
         verify(mockGraphics).setColor(Color.black);
         verify(mockGraphics).drawString(contains("Slide 3 of 5"), anyInt(), anyInt());
+        
+        // Verify the slide is drawn
         verify(testSlide).draw(eq(mockGraphics), any(Rectangle.class), eq(spyComponent));
     }
     

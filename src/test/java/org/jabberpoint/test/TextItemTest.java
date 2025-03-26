@@ -70,7 +70,12 @@ public class TextItemTest {
             // Since we can't mock private methods without PowerMock, we'll test a simpler case
             // Mock style to return a non-null font to avoid NullPointerException
             Font mockFont = new Font("Arial", Font.PLAIN, 12);
-            when(testStyle.getFont(1.0f)).thenReturn(mockFont);
+            doReturn(mockFont).when(testStyle).getFont(anyFloat());
+            
+            // Mock the AffineTransform to avoid NullPointerException
+            AffineTransform mockTransform = mock(AffineTransform.class);
+            when(mockTransform.getScaleX()).thenReturn(1.0);
+            when(mockGraphics.getTransform()).thenReturn(mockTransform);
             
             // Act - use the real getBoundingBox method
             Rectangle boundingBox = textItem.getBoundingBox(mockGraphics, mockObserver, 1.0f, testStyle);
@@ -98,7 +103,12 @@ public class TextItemTest {
         try {
             // Mock the necessary behavior for draw
             Font mockFont = new Font("Arial", Font.PLAIN, 12);
-            when(testStyle.getFont(1.0f)).thenReturn(mockFont);
+            doReturn(mockFont).when(testStyle).getFont(anyFloat());
+            
+            // Mock the AffineTransform to avoid NullPointerException
+            AffineTransform mockTransform = mock(AffineTransform.class);
+            when(mockTransform.getScaleX()).thenReturn(1.0);
+            when(mockGraphics.getTransform()).thenReturn(mockTransform);
             
             // Act & Assert - should not throw exception
             assertDoesNotThrow(() -> 

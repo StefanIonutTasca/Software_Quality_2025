@@ -151,6 +151,9 @@ public class SlideTest {
             // Create and configure a mock AffineTransform
             AffineTransform mockAffineTransform = mock(AffineTransform.class);
             when(mockAffineTransform.getScaleX()).thenReturn(1.0);
+            when(mockAffineTransform.getScaleY()).thenReturn(1.0);
+            when(mockAffineTransform.getTranslateX()).thenReturn(0.0);
+            when(mockAffineTransform.getTranslateY()).thenReturn(0.0);
             when(mockGraphics.getTransform()).thenReturn(mockAffineTransform);
             
             // Mock the draw method to do nothing
