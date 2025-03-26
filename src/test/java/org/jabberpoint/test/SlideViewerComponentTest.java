@@ -112,8 +112,11 @@ public class SlideViewerComponentTest {
         doReturn(800).when(spyComponent).getWidth();
         doReturn(600).when(spyComponent).getHeight();
         
-        // We need to make sure the slide is not null
-        when(mockPresentation.getCurrentSlide()).thenReturn(testSlide);
+        // We need to make sure the slide is not null and set in the component
+        spyComponent.update(mockPresentation, testSlide);
+        
+        // Clear invocations from the update call
+        clearInvocations(mockGraphics);
         
         // Act
         spyComponent.paintComponent(mockGraphics);

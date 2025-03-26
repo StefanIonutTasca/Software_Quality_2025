@@ -14,6 +14,7 @@ import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.awt.Font;
+import java.awt.FontMetrics;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -150,11 +151,18 @@ public class SlideTest {
             
             // Create and configure a mock AffineTransform
             AffineTransform mockAffineTransform = mock(AffineTransform.class);
-            when(mockAffineTransform.getScaleX()).thenReturn(1.0);
-            when(mockAffineTransform.getScaleY()).thenReturn(1.0);
-            when(mockAffineTransform.getTranslateX()).thenReturn(0.0);
-            when(mockAffineTransform.getTranslateY()).thenReturn(0.0);
-            when(mockGraphics.getTransform()).thenReturn(mockAffineTransform);
+            doReturn(1.0).when(mockAffineTransform).getScaleX();
+            doReturn(1.0).when(mockAffineTransform).getScaleY();
+            doReturn(0.0).when(mockAffineTransform).getTranslateX();
+            doReturn(0.0).when(mockAffineTransform).getTranslateY();
+            doReturn(mockAffineTransform).when(mockGraphics).getTransform();
+            
+            // Mock FontMetrics for TextItem
+            FontMetrics mockFontMetrics = mock(FontMetrics.class);
+            doReturn(10).when(mockFontMetrics).stringWidth(anyString());
+            doReturn(10).when(mockFontMetrics).getHeight();
+            doReturn(10).when(mockFontMetrics).getAscent();
+            doReturn(mockFontMetrics).when(mockGraphics).getFontMetrics(any(Font.class));
             
             // Mock the draw method to do nothing
             doNothing().when(item1).draw(anyInt(), anyInt(), anyFloat(), any(Graphics2D.class), any(Style.class), any(ImageObserver.class));

@@ -43,8 +43,8 @@ public class TextItemTest {
         
         // Setup mock behavior
         when(mockGraphics.getFontRenderContext()).thenReturn(mockFrc);
-        when(mockTransform.getScaleX()).thenReturn(1.0);
-        when(mockGraphics.getTransform()).thenReturn(mockTransform);
+        doReturn(1.0).when(mockTransform).getScaleX();
+        doReturn(mockTransform).when(mockGraphics).getTransform();
         
         // Get style for level 1
         testStyle = Style.getStyle(1);
@@ -71,11 +71,6 @@ public class TextItemTest {
             // Mock style to return a non-null font to avoid NullPointerException
             Font mockFont = new Font("Arial", Font.PLAIN, 12);
             doReturn(mockFont).when(testStyle).getFont(anyFloat());
-            
-            // Mock the AffineTransform to avoid NullPointerException
-            AffineTransform mockTransform = mock(AffineTransform.class);
-            when(mockTransform.getScaleX()).thenReturn(1.0);
-            when(mockGraphics.getTransform()).thenReturn(mockTransform);
             
             // Act - use the real getBoundingBox method
             Rectangle boundingBox = textItem.getBoundingBox(mockGraphics, mockObserver, 1.0f, testStyle);
@@ -104,11 +99,6 @@ public class TextItemTest {
             // Mock the necessary behavior for draw
             Font mockFont = new Font("Arial", Font.PLAIN, 12);
             doReturn(mockFont).when(testStyle).getFont(anyFloat());
-            
-            // Mock the AffineTransform to avoid NullPointerException
-            AffineTransform mockTransform = mock(AffineTransform.class);
-            when(mockTransform.getScaleX()).thenReturn(1.0);
-            when(mockGraphics.getTransform()).thenReturn(mockTransform);
             
             // Act & Assert - should not throw exception
             assertDoesNotThrow(() -> 
