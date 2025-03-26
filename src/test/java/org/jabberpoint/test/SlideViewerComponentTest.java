@@ -102,9 +102,14 @@ class SlideViewerComponentTest {
         Slide slide = new Slide();
         slide.setTitle("Test Slide");
         presentation.append(slide);
+        
+        // Explicitly set the slide number to 0 (first slide)
         presentation.setSlideNumber(0);
         
-        // Act 
+        // Make sure the component has the reference to the slide
+        slideViewerComponent.update(presentation, slide);
+        
+        // Act - explicitly call paintComponent with our mocked Graphics2D
         slideViewerComponent.paintComponent(mockGraphics2D);
         
         // Assert

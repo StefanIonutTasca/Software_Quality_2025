@@ -38,16 +38,40 @@ class XMLAccessorTest {
     }
 
     @AfterEach
-    void tearDown() {
-        try {
-            Files.deleteIfExists(testXmlFile);
-        } catch (IOException e) {
-            // Ignore exceptions during cleanup
-        }
+    void tearDown() throws IOException {
+        // Clean up any files created during tests
+        Files.deleteIfExists(testXmlFile);
     }
-    
+
     @Test
-    @DisplayName("Should save and load a presentation with slides and items")
+    @DisplayName("Should load presentation from XML file")
+    void shouldLoadPresentationFromXmlFile() throws IOException {
+        // Arrange - Create XML with presentation data
+        String xml = 
+            "<?xml version=\"1.0\"?>\n" +
+            "<!DOCTYPE presentation SYSTEM \"jabberpoint.dtd\">\n" +
+            "<presentation>\n" +
+            "<showtitle>Test Presentation</showtitle>\n" +
+            "<slide>\n" +
+            "<title>Slide 1</title>\n" +
+            "<item kind=\"text\" level=\"1\">Text Item 1</item>\n" +
+            "</slide>\n" +
+            "</presentation>";
+        
+        Files.writeString(testXmlFile, xml);
+        
+        // Act
+        xmlAccessor.loadFile(presentation, testXmlFile.toString());
+        
+        // Assert
+        assertEquals("Test Presentation", presentation.getTitle(), "Title should be loaded from XML");
+        assertEquals(1, presentation.getSize(), "Should have 1 slide");
+        assertEquals("Slide 1", presentation.getSlide(0).getTitle(), "Slide title should match");
+        assertEquals(1, presentation.getSlide(0).getSize(), "Slide should have 1 item");
+    }
+
+    @Test
+    @DisplayName("Should save and load presentation with slides and items")
     void shouldSaveAndLoadPresentationWithSlidesAndItems() throws IOException {
         // Arrange
         Presentation originalPresentation = new Presentation();
@@ -71,7 +95,6 @@ class XMLAccessorTest {
         // Act
         // Create a new presentation and load the file
         Presentation loadedPresentation = new Presentation();
-        loadedPresentation.setTitle("Test Presentation"); // Set the title explicitly
         xmlAccessor.loadFile(loadedPresentation, testXmlFile.toString());
         
         // Assert
@@ -88,26 +111,14 @@ class XMLAccessorTest {
     }
     
     @Test
-    @DisplayName("Should handle loading file with invalid XML")
-    void shouldHandleLoadingFileWithInvalidXML() throws IOException {
-        // Arrange - Create a file with invalid XML
-        Files.writeString(testXmlFile, "This is not valid XML");
-        
-        // Act & Assert - Should not throw exception, but log error
-        assertDoesNotThrow(() -> {
-            Presentation p = new Presentation();
-            xmlAccessor.loadFile(p, testXmlFile.toString());
-        }, "Should handle invalid XML gracefully");
-    }
-    
-    @Test
-    @DisplayName("Should handle loading non-existent file")
-    void shouldHandleLoadingNonExistentFile() {
+    @DisplayName("Should handle non-existent file")
+    void shouldHandleNonExistentFile() {
         // Act & Assert - Should not throw exception for non-existent file
-        assertDoesNotThrow(() -> {
-            Presentation p = new Presentation();
-            xmlAccessor.loadFile(p, "non_existent_file.xml");
-        }, "Should handle non-existent file gracefully");
+        Exception exception = assertThrows(IOException.class, () -> {
+            xmlAccessor.loadFile(presentation, tempDir.resolve("non_existent.xml").toString());
+        });
+        
+        assertTrue(exception.getMessage().contains("non_existent.xml"), "Exception message should mention the file name");
     }
     
     @Test
@@ -118,7 +129,9 @@ class XMLAccessorTest {
             "<?xml version=\"1.0\"?>\n" +
             "<!DOCTYPE presentation SYSTEM \"jabberpoint.dtd\">\n" +
             "<presentation>\n" +
+            "<showtitle>Test Presentation</showtitle>\n" +
             "<slide>\n" +
+            "<title>Test Slide</title>\n" +
             "<item kind=\"text\" level=\"notanumber\">This is a test</item>\n" +
             "</slide>\n" +
             "</presentation>";
@@ -142,7 +155,9 @@ class XMLAccessorTest {
             "<?xml version=\"1.0\"?>\n" +
             "<!DOCTYPE presentation SYSTEM \"jabberpoint.dtd\">\n" +
             "<presentation>\n" +
+            "<showtitle>Test Presentation</showtitle>\n" +
             "<slide>\n" +
+            "<title>Test Slide</title>\n" +
             "<item kind=\"unknown\" level=\"1\">This is a test</item>\n" +
             "</slide>\n" +
             "</presentation>";
