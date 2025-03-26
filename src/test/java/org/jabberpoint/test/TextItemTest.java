@@ -11,6 +11,7 @@ import java.awt.image.ImageObserver;
 import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextAttribute;
+import java.awt.geom.AffineTransform;
 import java.text.AttributedString;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,6 +36,11 @@ public class TextItemTest {
         // Mock FontRenderContext behavior
         FontRenderContext mockFrc = mock(FontRenderContext.class);
         when(mockGraphics.getFontRenderContext()).thenReturn(mockFrc);
+        
+        // Mock AffineTransform to avoid NullPointerException
+        AffineTransform mockTransform = mock(AffineTransform.class);
+        when(mockTransform.getScaleX()).thenReturn(1.0);
+        when(mockGraphics.getTransform()).thenReturn(mockTransform);
     }
 
     @Test
@@ -97,18 +103,12 @@ public class TextItemTest {
             // Create a simple style that we control
             Style simpleStyle = new Style(10, java.awt.Color.BLACK, 12, 5);
             
-            // Act
+            // Act 
             Rectangle boundingBox = textItem.getBoundingBox(mockGraphics, mockObserver, 1.0f, simpleStyle);
-            
-            // Assert - should at least not be null
             assertNotNull(boundingBox);
         } catch (NullPointerException e) {
-            // If we get a NullPointerException related to font, we'll skip the test
-            if (e.getMessage() != null && e.getMessage().contains("font")) {
-                System.out.println("Skipping test due to font issue: " + e.getMessage());
-            } else {
-                throw e; // Re-throw if it's not a font issue
-            }
+            // If we get a NullPointerException, the test fails
+            fail("Should not throw NullPointerException: " + e.getMessage());
         }
     }
     
@@ -122,17 +122,11 @@ public class TextItemTest {
             // Create a simple style that we control
             Style simpleStyle = new Style(10, java.awt.Color.BLACK, 12, 5);
             
-            // Act & Assert - with try/catch to handle font exceptions
+            // Act 
             textItem.draw(10, 20, 1.0f, mockGraphics, simpleStyle, mockObserver);
-            // If we get here without exception, the test passes
-            assertTrue(true);
         } catch (NullPointerException e) {
-            // If we get a NullPointerException related to font, we'll skip the test
-            if (e.getMessage() != null && e.getMessage().contains("font")) {
-                System.out.println("Skipping test due to font issue: " + e.getMessage());
-            } else {
-                throw e; // Re-throw if it's not a font issue
-            }
+            // If we get a NullPointerException, the test fails
+            fail("Should not throw NullPointerException: " + e.getMessage());
         }
     }
     
@@ -146,18 +140,12 @@ public class TextItemTest {
             // Create a simple style that we control
             Style simpleStyle = new Style(10, java.awt.Color.BLACK, 12, 5);
             
-            // Act - this will call the getAttributedString method
+            // Act 
             AttributedString attrStr = textItem.getAttributedString(simpleStyle, 1.0f);
-            
-            // Assert
             assertNotNull(attrStr);
         } catch (NullPointerException e) {
-            // If we get a NullPointerException related to font, we'll skip the test
-            if (e.getMessage() != null && e.getMessage().contains("font")) {
-                System.out.println("Skipping test due to font issue: " + e.getMessage());
-            } else {
-                throw e; // Re-throw if it's not a font issue
-            }
+            // If we get a NullPointerException, the test fails
+            fail("Should not throw NullPointerException: " + e.getMessage());
         }
     }
 }

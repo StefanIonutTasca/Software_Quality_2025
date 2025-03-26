@@ -5,45 +5,65 @@ import org.jabberpoint.src.Style;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.io.TempDir;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.contains;
 
 /**
  * Unit tests for BitmapItem class
  */
 public class BitmapItemTest {
-    private Graphics mockGraphics;
+    private Graphics2D mockGraphics;
     private ImageObserver mockObserver;
     private Style testStyle;
     private String testImagePath;
     private File tempImageFile;
+    
+    @TempDir
+    Path tempDir;
 
     @BeforeEach
     void setUp() throws IOException {
-        // Create mocks
-        mockGraphics = mock(Graphics.class);
+        // Ensure styles are created properly
+        Style.createStyles();
+        
+        // Create mocks with proper Graphics2D setup
+        mockGraphics = mock(Graphics2D.class);
         mockObserver = mock(ImageObserver.class);
         
-        // Get the Style singleton
-        testStyle = Style.getInstance();
+        // Mock FontRenderContext which may be needed
+        FontRenderContext mockFrc = mock(FontRenderContext.class);
+        when(mockGraphics.getFontRenderContext()).thenReturn(mockFrc);
+        
+        // Mock AffineTransform to avoid NullPointerException
+        AffineTransform mockTransform = mock(AffineTransform.class);
+        when(mockTransform.getScaleX()).thenReturn(1.0);
+        when(mockGraphics.getTransform()).thenReturn(mockTransform);
+        
+        // Get the Style instance
+        testStyle = Style.getStyle(1);
+        
+        // Create a simple 1x1 black image for testing
+        BufferedImage testImage = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
         
         // Create a temporary test image
-        tempImageFile = File.createTempFile("test_image", ".jpg");
-        tempImageFile.deleteOnExit();
+        tempImageFile = new File(tempDir.toFile(), "test_image.jpg");
         testImagePath = tempImageFile.getAbsolutePath();
         
-        // Copy a test image to the temp file if needed
-        // For this test we'll just use an empty file
-        Files.write(Paths.get(testImagePath), new byte[100]);
+        // Write a simple valid image
+        javax.imageio.ImageIO.write(testImage, "jpg", tempImageFile);
     }
 
     @Test
@@ -81,12 +101,12 @@ public class BitmapItemTest {
     }
     
     @Test
-    @DisplayName("getBoundingBox should return correct rectangle")
-    void getBoundingBoxShouldReturnCorrectRectangle() {
-        // Skip if image can't be loaded in test environment
+    @DisplayName("getBoundingBox should return correct rectangle when image exists")
+    void getBoundingBoxShouldReturnCorrectRectangleWhenImageExists() throws Exception {
+        // Create a BitmapItem with our test image
         BitmapItem bitmapItem = new BitmapItem(1, testImagePath);
         
-        // Mock for ImageObserver
+        // Mock the ImageObserver behavior
         when(mockObserver.imageUpdate(any(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt())).thenReturn(true);
         
         // Act
@@ -96,6 +116,19 @@ public class BitmapItemTest {
         assertNotNull(boundingBox);
         assertTrue(boundingBox.width >= 0);
         assertTrue(boundingBox.height >= 0);
+    }
+    
+    @Test
+    @DisplayName("getBoundingBox should handle null image")
+    void getBoundingBoxShouldHandleNullImage() {
+        // Create a BitmapItem with a non-existent image
+        BitmapItem bitmapItem = new BitmapItem(1, "non_existent_image.jpg");
+        
+        // Act
+        Rectangle boundingBox = bitmapItem.getBoundingBox(mockGraphics, mockObserver, 1.0f, testStyle);
+        
+        // Assert - should return some default rectangle rather than null
+        assertNotNull(boundingBox);
     }
     
     @Test
@@ -124,6 +157,20 @@ public class BitmapItemTest {
         
         // Verify that text was drawn for missing image
         verify(mockGraphics).drawString(contains("Image not found"), anyInt(), anyInt());
+    }
+    
+    @Test
+    @DisplayName("draw should handle existing image properly")
+    void drawShouldHandleExistingImage() {
+        // Arrange
+        BitmapItem bitmapItem = new BitmapItem(1, testImagePath);
+        
+        // Act & Assert - should not throw exception
+        assertDoesNotThrow(() -> 
+            bitmapItem.draw(0, 0, 1.0f, mockGraphics, testStyle, mockObserver)
+        );
+        
+        // No need to verify drawing operations as they may vary based on image loaded
     }
     
     @Test

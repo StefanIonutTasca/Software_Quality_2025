@@ -117,12 +117,14 @@ public class SlideViewerComponentTest {
         // Assert - using InOrder to verify the sequence of method calls
         InOrder inOrder = inOrder(mockGraphics);
         
-        // First, background color is set
+        // First, background color is set and rectangle filled
         inOrder.verify(mockGraphics).setColor(Color.white);
         inOrder.verify(mockGraphics).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
         
-        // Then the font is set and text color
+        // Then the font is set 
         inOrder.verify(mockGraphics).setFont(any(Font.class));
+        
+        // Then text color is set
         inOrder.verify(mockGraphics).setColor(Color.black);
         
         // Then the slide number text is drawn
