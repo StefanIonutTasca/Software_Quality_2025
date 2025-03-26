@@ -69,7 +69,8 @@ public class TextItemTest {
         try {
             // Since we can't mock private methods without PowerMock, we'll test a simpler case
             // Mock style to return a non-null font to avoid NullPointerException
-            when(testStyle.getFont(anyFloat())).thenReturn(new Font("Arial", Font.PLAIN, 12));
+            Font mockFont = new Font("Arial", Font.PLAIN, 12);
+            when(testStyle.getFont(1.0f)).thenReturn(mockFont);
             
             // Act - use the real getBoundingBox method
             Rectangle boundingBox = textItem.getBoundingBox(mockGraphics, mockObserver, 1.0f, testStyle);
@@ -96,8 +97,8 @@ public class TextItemTest {
     void drawShouldNotThrowException() {
         try {
             // Mock the necessary behavior for draw
-            Font mockFont = mock(Font.class);
-            when(testStyle.getFont(anyFloat())).thenReturn(mockFont);
+            Font mockFont = new Font("Arial", Font.PLAIN, 12);
+            when(testStyle.getFont(1.0f)).thenReturn(mockFont);
             
             // Act & Assert - should not throw exception
             assertDoesNotThrow(() -> 

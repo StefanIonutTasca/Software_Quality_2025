@@ -136,17 +136,22 @@ public class SlideTest {
     }
     
     @Test
-    @DisplayName("Should draw all slide items")
+    @DisplayName("Draw method should draw all slide items")
     void shouldDrawAllSlideItems() {
         try {
-            // Create spy TextItems that won't actually perform the drawing
-            TextItem item1 = spy(new TextItem(1, "Item 1"));
-            TextItem item2 = spy(new TextItem(2, "Item 2"));
+            // Create mock items
+            SlideItem item1 = mock(SlideItem.class);
+            SlideItem item2 = mock(SlideItem.class);
             
             // Mock the getBoundingBox() method to return a valid Rectangle
             Rectangle mockRect = new Rectangle(0, 0, 10, 10);
             doReturn(mockRect).when(item1).getBoundingBox(any(Graphics2D.class), any(ImageObserver.class), anyFloat(), any(Style.class));
             doReturn(mockRect).when(item2).getBoundingBox(any(Graphics2D.class), any(ImageObserver.class), anyFloat(), any(Style.class));
+            
+            // Create and configure a mock AffineTransform
+            AffineTransform mockAffineTransform = mock(AffineTransform.class);
+            when(mockAffineTransform.getScaleX()).thenReturn(1.0);
+            when(mockGraphics.getTransform()).thenReturn(mockAffineTransform);
             
             // Mock the draw method to do nothing
             doNothing().when(item1).draw(anyInt(), anyInt(), anyFloat(), any(Graphics2D.class), any(Style.class), any(ImageObserver.class));
