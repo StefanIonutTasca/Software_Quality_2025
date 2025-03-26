@@ -11,6 +11,7 @@ import java.util.Vector;
 
 import org.jabberpoint.src.Slide;
 import org.jabberpoint.src.SlideItem;
+import org.jabberpoint.src.Style;
 import org.jabberpoint.src.TextItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -163,40 +164,31 @@ class SlideTest {
         // Arrange
         slide.setTitle("Test Slide");
         
-        // Create a test TextItem instead of mocking SlideItem
-        // This ensures we have a real implementation working with our real FontRenderContext
-        TextItem item = new TextItem(1, "Test text");
-        slide.append(item);
-        
-        // Act
-        try {
-            slide.draw(graphicsMock, areaMock, observerMock);
-            // If we reach here without exception, the test passes
-            assertTrue(true);
-        } catch (NullPointerException e) {
-            // Since we're using a mock Graphics2D, exceptions might still occur in lower-level drawing
-            // The important part is that the SlideItem's draw method gets called
-            // We'll verify this through a different approach
-        }
-        
-        // Alternative approach: Create a slide with a mock item
-        Slide slideWithMockItem = new Slide();
+        // Use a fully mocked SlideItem to avoid null text issues in real implementations
         SlideItem mockItem = Mockito.mock(SlideItem.class);
         Rectangle boundingBox = new Rectangle(0, 0, 100, 50);
-        Mockito.when(mockItem.getBoundingBox(Mockito.any(), Mockito.any(), Mockito.anyFloat(), Mockito.any()))
-               .thenReturn(boundingBox);
-        slideWithMockItem.append(mockItem);
         
-        // Act on the slide with mock item
-        slideWithMockItem.draw(graphicsMock, areaMock, observerMock);
+        // Configure the mock to return the bounding box when getBoundingBox is called
+        Mockito.when(mockItem.getBoundingBox(
+            Mockito.any(Graphics2D.class),
+            Mockito.any(ImageObserver.class),
+            Mockito.anyFloat(),
+            Mockito.any(Style.class)
+        )).thenReturn(boundingBox);
         
-        // Verify the mock was called properly
+        // Add the mock item to the slide
+        slide.append(mockItem);
+        
+        // Act - draw the slide
+        slide.draw(graphicsMock, areaMock, observerMock);
+        
+        // Assert - verify that draw was called on the mock item with the expected parameters
         Mockito.verify(mockItem).draw(
             Mockito.anyInt(),
             Mockito.anyInt(),
             Mockito.anyFloat(),
             Mockito.eq(graphicsMock),
-            Mockito.any(),
+            Mockito.any(Style.class),
             Mockito.eq(observerMock)
         );
     }
