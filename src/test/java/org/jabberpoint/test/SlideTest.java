@@ -4,6 +4,7 @@ import org.jabberpoint.src.Slide;
 import org.jabberpoint.src.SlideItem;
 import org.jabberpoint.src.TextItem;
 import org.jabberpoint.src.Style;
+import org.jabberpoint.src.BitmapItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +28,8 @@ public class SlideTest {
     private Graphics2D mockGraphics;
     private ImageObserver mockObserver;
     private Rectangle testArea;
+    private FontMetrics mockFontMetrics;
+    private Font testFont;
 
     @BeforeEach
     void setUp() {
@@ -37,6 +40,8 @@ public class SlideTest {
         mockGraphics = mock(Graphics2D.class);
         mockObserver = mock(ImageObserver.class);
         testArea = new Rectangle(0, 0, 800, 600);
+        mockFontMetrics = mock(FontMetrics.class);
+        testFont = new Font("SansSerif", Font.PLAIN, 12);
         
         // Mock FontRenderContext which is needed for TextItem
         FontRenderContext mockFrc = mock(FontRenderContext.class);
@@ -45,14 +50,19 @@ public class SlideTest {
         // Mock AffineTransform to avoid NullPointerException
         AffineTransform mockTransform = mock(AffineTransform.class);
         when(mockTransform.getScaleX()).thenReturn(1.0);
+        when(mockTransform.getScaleY()).thenReturn(1.0);
+        when(mockTransform.getTranslateX()).thenReturn(0.0);
+        when(mockTransform.getTranslateY()).thenReturn(0.0);
         when(mockGraphics.getTransform()).thenReturn(mockTransform);
         
-        // Mock Style behavior
-        Style mockStyle = mock(Style.class);
-        when(mockStyle.getFont(anyFloat())).thenReturn(new Font("SansSerif", Font.PLAIN, 12));
+        // Mock the font metrics behavior
+        when(mockFontMetrics.stringWidth(anyString())).thenReturn(100);
+        when(mockFontMetrics.getHeight()).thenReturn(20);
+        when(mockFontMetrics.getAscent()).thenReturn(15);
+        when(mockGraphics.getFontMetrics(any(Font.class))).thenReturn(mockFontMetrics);
         
-        // Use PowerMockito or similar to mock static methods if needed
-        // For now, we'll try to work around it
+        // Mock creating new Graphics2D
+        when(mockGraphics.create()).thenReturn(mockGraphics);
     }
 
     @Test
@@ -139,82 +149,60 @@ public class SlideTest {
     @Test
     @DisplayName("Draw method should draw all slide items")
     void shouldDrawAllSlideItems() {
+        // We're going to use a spy on a real slide item instead of a mock
+        // This allows us to verify interactions while using the real implementation
+        
+        // Create a spy for TextItem to verify drawing
+        TextItem spyTextItem = spy(new TextItem(1, "Test Text"));
+        
+        // Create a mock BitmapItem to avoid loading real images
+        BitmapItem mockBitmapItem = mock(BitmapItem.class);
+        
+        // Set up the real TextItem with a real font
         try {
-            // Create mock items
-            SlideItem item1 = mock(SlideItem.class);
-            SlideItem item2 = mock(SlideItem.class);
-            
-            // Mock the getBoundingBox() method to return a valid Rectangle
-            Rectangle mockRect = new Rectangle(0, 0, 10, 10);
-            doReturn(mockRect).when(item1).getBoundingBox(any(Graphics2D.class), any(ImageObserver.class), anyFloat(), any(Style.class));
-            doReturn(mockRect).when(item2).getBoundingBox(any(Graphics2D.class), any(ImageObserver.class), anyFloat(), any(Style.class));
-            
-            // Create and configure a mock AffineTransform
-            AffineTransform mockAffineTransform = mock(AffineTransform.class);
-            doReturn(1.0).when(mockAffineTransform).getScaleX();
-            doReturn(1.0).when(mockAffineTransform).getScaleY();
-            doReturn(0.0).when(mockAffineTransform).getTranslateX();
-            doReturn(0.0).when(mockAffineTransform).getTranslateY();
-            doReturn(mockAffineTransform).when(mockGraphics).getTransform();
-            
-            // Mock FontMetrics for TextItem
-            FontMetrics mockFontMetrics = mock(FontMetrics.class);
-            doReturn(10).when(mockFontMetrics).stringWidth(anyString());
-            doReturn(10).when(mockFontMetrics).getHeight();
-            doReturn(10).when(mockFontMetrics).getAscent();
-            doReturn(mockFontMetrics).when(mockGraphics).getFontMetrics(any(Font.class));
-            
-            // Mock the draw method to do nothing
-            doNothing().when(item1).draw(anyInt(), anyInt(), anyFloat(), any(Graphics2D.class), any(Style.class), any(ImageObserver.class));
-            doNothing().when(item2).draw(anyInt(), anyInt(), anyFloat(), any(Graphics2D.class), any(Style.class), any(ImageObserver.class));
-            
-            // Add the items to the slide
-            testSlide.setTitle("Test Title");
-            testSlide.append(item1);
-            testSlide.append(item2);
-            
-            // Act
-            testSlide.draw(mockGraphics, testArea, mockObserver);
-            
-            // Assert - verify that draw was called for each item
-            verify(item1).draw(anyInt(), anyInt(), anyFloat(), eq(mockGraphics), any(Style.class), eq(mockObserver));
-            verify(item2).draw(anyInt(), anyInt(), anyFloat(), eq(mockGraphics), any(Style.class), eq(mockObserver));
+            // Use reflection to ensure all Style objects have a real font
+            for (int i = 0; i <= 5; i++) {
+                Style style = Style.getStyle(i);
+                java.lang.reflect.Field fontField = Style.class.getDeclaredField("font");
+                fontField.setAccessible(true);
+                fontField.set(style, testFont);
+            }
         } catch (Exception e) {
-            fail("Test should not throw exception: " + e.getMessage());
+            fail("Failed to set font field: " + e.getMessage());
         }
+        
+        // Add the items to the slide
+        testSlide.setTitle("Test Title");
+        testSlide.append(spyTextItem);
+        testSlide.append(mockBitmapItem);
+        
+        // Act
+        assertDoesNotThrow(() -> {
+            testSlide.draw(mockGraphics, testArea, mockObserver);
+        });
+        
+        // Verify that draw was called for the spy TextItem
+        // Note: we can't verify exact parameters due to the complexity of the draw method,
+        // but we can verify it was called at least once
+        verify(spyTextItem, atLeastOnce()).draw(
+            anyInt(), anyInt(), anyFloat(), any(Graphics2D.class), any(Style.class), any(ImageObserver.class)
+        );
+        
+        // Verify draw was called for the mock BitmapItem
+        verify(mockBitmapItem, atLeastOnce()).draw(
+            anyInt(), anyInt(), anyFloat(), any(Graphics2D.class), any(Style.class), any(ImageObserver.class)
+        );
     }
     
     @Test
     @DisplayName("Draw method should handle empty slides")
     void drawShouldHandleEmptySlides() {
-        try {
-            // Create a TextItem spy for the title that won't do actual drawing
-            TextItem titleItem = spy(new TextItem(0, "Empty Slide"));
-            
-            // Mock the getBoundingBox() method to return a valid Rectangle
-            Rectangle mockRect = new Rectangle(0, 0, 10, 10);
-            doReturn(mockRect).when(titleItem).getBoundingBox(any(Graphics2D.class), any(ImageObserver.class), anyFloat(), any(Style.class));
-            
-            // Mock the draw method to do nothing
-            doNothing().when(titleItem).draw(anyInt(), anyInt(), anyFloat(), any(Graphics2D.class), any(Style.class), any(ImageObserver.class));
-            
-            // Set the title
-            testSlide.setTitle("Empty Slide");
-            
-            // Create a subclass of Slide that overrides the creation of the title TextItem
-            Slide testableSlide = new Slide() {
-                @Override
-                public void draw(java.awt.Graphics g, Rectangle area, ImageObserver view) {
-                    // Override to avoid the actual drawing which may cause NPE
-                    // Just ensure it doesn't throw an exception
-                }
-            };
-            testableSlide.setTitle("Empty Slide");
-            
-            // Act & Assert - no exceptions should be thrown
-            assertDoesNotThrow(() -> testableSlide.draw(mockGraphics, testArea, mockObserver));
-        } catch (Exception e) {
-            fail("Test should not throw exception: " + e.getMessage());
-        }
+        // Create an empty slide with just a title
+        testSlide.setTitle("Empty Slide");
+        
+        // Act & Assert - should not throw exceptions
+        assertDoesNotThrow(() -> {
+            testSlide.draw(mockGraphics, testArea, mockObserver);
+        });
     }
 }
