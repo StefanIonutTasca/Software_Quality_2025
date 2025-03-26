@@ -5,7 +5,6 @@ import org.jabberpoint.src.SlideViewerFrame;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedConstruction;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -70,13 +69,16 @@ public class SlideViewerFrameTest {
             }
             
             @Override
-            public int getKeyListeners().length {
-                return keyListenerCount;
+            public KeyListener[] getKeyListeners() {
+                // Return an empty array with length equal to our count
+                return new KeyListener[keyListenerCount];
             }
         });
         
         // Verify a key listener was added (indirectly through our spy)
         verify(frame).addKeyListener(any());
+        // Also check that our counter was incremented (frame is used)
+        assertTrue(frame.getKeyListeners().length > 0, "Key listener count should be greater than 0");
     }
     
     @Test
@@ -92,6 +94,9 @@ public class SlideViewerFrameTest {
         
         // Verify menu bar was set
         verify(frame).setMenuBar(any(MenuBar.class));
+        
+        // Also verify the menu bar is not null
+        assertNotNull(frame.getMenuBar(), "Menu bar should not be null");
     }
     
     @Test
@@ -114,6 +119,9 @@ public class SlideViewerFrameTest {
         
         // Verify component was added to content pane
         verify(mockContainer).add(any(Component.class));
+        
+        // Also verify the frame was properly configured
+        verify(frame).setSize(SlideViewerFrame.WIDTH, SlideViewerFrame.HEIGHT);
     }
     
     @Test

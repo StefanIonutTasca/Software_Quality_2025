@@ -7,7 +7,6 @@ import org.jabberpoint.src.TextItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import javax.swing.JFrame;
 import java.awt.Dimension;
