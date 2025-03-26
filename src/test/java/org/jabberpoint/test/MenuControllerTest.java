@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 
 import org.jabberpoint.src.MenuController;
 import org.jabberpoint.src.Presentation;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,12 @@ class MenuControllerTest {
     private Frame frameMock;
     private Presentation presentationMock;
     private MenuController menuController;
+    
+    @BeforeAll
+    static void setUpHeadlessMode() {
+        // Set headless mode for UI testing
+        System.setProperty("java.awt.headless", "true");
+    }
 
     @BeforeEach
     void setUp() {

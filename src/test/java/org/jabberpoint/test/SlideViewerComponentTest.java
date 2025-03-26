@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 import org.jabberpoint.src.Presentation;
 import org.jabberpoint.src.Slide;
 import org.jabberpoint.src.SlideViewerComponent;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,12 @@ class SlideViewerComponentTest {
     private SlideViewerComponent component;
     private Graphics graphicsMock;
     private Slide slideMock;
+    
+    @BeforeAll
+    static void setUpHeadlessMode() {
+        // Set headless mode for UI testing
+        System.setProperty("java.awt.headless", "true");
+    }
 
     @BeforeEach
     void setUp() {
@@ -88,7 +95,9 @@ class SlideViewerComponentTest {
         
         // Mock component dimensions
         when(presentationMock.getSlideNumber()).thenReturn(1);
-        doReturn(new Dimension(800, 600)).when(graphicsMock).getClipBounds();
+        
+        // Use Rectangle instead of Dimension for getClipBounds
+        when(graphicsMock.getClipBounds()).thenReturn(new Rectangle(0, 0, 800, 600));
         
         // Act
         component.paintComponent(graphicsMock);

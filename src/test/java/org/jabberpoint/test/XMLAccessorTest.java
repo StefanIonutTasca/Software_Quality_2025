@@ -101,6 +101,9 @@ class XMLAccessorTest {
         
         Files.writeString(testFile, xmlContent);
         
+        // Initialize presentation title to make sure it gets set by the accessor
+        presentation.setTitle("Initial Title");
+        
         // Act
         accessor.loadFile(presentation, testFile.toString());
         

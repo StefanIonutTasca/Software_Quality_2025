@@ -201,4 +201,28 @@ class PresentationTest {
         // Assert - observer should not be notified after removal
         Mockito.verify(mockObserver, Mockito.never()).update(Mockito.any(), Mockito.any());
     }
+    
+    @Test
+    @DisplayName("Should notify multiple observers")
+    void shouldNotifyMultipleObservers() {
+        // Arrange
+        PresentationObserver mockObserver2 = Mockito.mock(PresentationObserver.class);
+        presentation.append(mockSlide1);
+        presentation.addObserver(mockObserver);
+        presentation.addObserver(mockObserver2);
+        
+        // Act
+        presentation.setSlideNumber(0);
+        
+        // Assert
+        Mockito.verify(mockObserver).update(presentation, mockSlide1);
+        Mockito.verify(mockObserver2).update(presentation, mockSlide1);
+    }
+    
+    @Test
+    @DisplayName("Should handle getCurrentSlide when no slides exist")
+    void shouldHandleGetCurrentSlideWhenNoSlidesExist() {
+        // Act & Assert
+        assertNull(presentation.getCurrentSlide());
+    }
 }
