@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.mockito.ArgumentMatcher;
+import org.mockito.InOrder;
 
 import javax.swing.JFrame;
 import java.awt.Color;
@@ -113,19 +114,19 @@ public class SlideViewerComponentTest {
         // Act
         spyComponent.paintComponent(mockGraphics);
         
-        // Assert
-        // Verify background is filled
-        verify(mockGraphics).setColor(Color.white);
-        verify(mockGraphics).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
+        // Assert - using InOrder to verify the sequence of method calls
+        InOrder inOrder = inOrder(mockGraphics);
         
-        // Verify color is set for text
-        verify(mockGraphics).setColor(Color.black);
+        // First, background color is set
+        inOrder.verify(mockGraphics).setColor(Color.white);
+        inOrder.verify(mockGraphics).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
         
-        // Verify font is set
-        verify(mockGraphics).setFont(any(Font.class));
+        // Then the font is set and text color
+        inOrder.verify(mockGraphics).setFont(any(Font.class));
+        inOrder.verify(mockGraphics).setColor(Color.black);
         
-        // Verify slide number text is drawn
-        verify(mockGraphics).drawString(matches("Slide 3 of 5"), anyInt(), anyInt());
+        // Then the slide number text is drawn
+        inOrder.verify(mockGraphics).drawString(matches("Slide 3 of 5"), anyInt(), anyInt());
     }
     
     @Test
@@ -139,9 +140,12 @@ public class SlideViewerComponentTest {
         
         // Assert
         // Verify background is filled
+        verify(mockGraphics).setColor(Color.white);
         verify(mockGraphics).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
         
-        // Verify no text or slide is drawn
+        // Verify no text or slide is drawn (setFont and setColor for text shouldn't be called)
+        verify(mockGraphics, never()).setFont(any(Font.class));
+        verify(mockGraphics, never()).setColor(Color.black);
         verify(mockGraphics, never()).drawString(anyString(), anyInt(), anyInt());
     }
     
@@ -160,9 +164,11 @@ public class SlideViewerComponentTest {
         
         // Assert
         // Verify background is filled
+        verify(mockGraphics).setColor(Color.white);
         verify(mockGraphics).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
         
-        // Verify no text is drawn if slide is null
+        // Verify no text or slide is drawn
+        verify(mockGraphics, never()).setFont(any(Font.class));
         verify(mockGraphics, never()).drawString(anyString(), anyInt(), anyInt());
     }
     
