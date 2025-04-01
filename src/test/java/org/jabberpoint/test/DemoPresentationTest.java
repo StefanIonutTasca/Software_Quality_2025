@@ -46,8 +46,8 @@ class DemoPresentationTest {
 
         // Check slide 2
         Slide slide2 = presentation.getSlide(1);
-        assertEquals("Demonstration of levels and stijlen", slide2.getTitle(), 
-                "Second slide title should be 'Demonstration of levels and stijlen'");
+        assertEquals("Demonstration of levels and styles", slide2.getTitle(), 
+                "Second slide title should be 'Demonstration of levels and styles'");
         assertTrue(slide2.getSlideItems().size() > 0, "Second slide should have items");
 
         // Check slide 3
