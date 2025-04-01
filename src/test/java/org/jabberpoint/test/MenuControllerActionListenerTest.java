@@ -106,9 +106,9 @@ class MenuControllerActionListenerTest {
         
         // Create mock menu items for each action we want to test
         String[] itemLabels = {
-            MenuController.OPEN, MenuController.NEW, MenuController.SAVE, 
-            MenuController.EXIT, MenuController.NEXT, MenuController.PREV, 
-            MenuController.GOTO, MenuController.ABOUT
+            "Open", "New", "Save", 
+            "Exit", "Next", "Prev", 
+            "Go to", "About"
         };
         
         for (String label : itemLabels) {
@@ -146,7 +146,7 @@ class MenuControllerActionListenerTest {
                             
                             // Customize the mock based on the label
                             switch (label) {
-                                case MenuController.OPEN:
+                                case "Open":
                                     doAnswer(invocation -> {
                                         // Simulate setting slide number to 0 on Open
                                         mockPresentation.setSlideNumber(0);
@@ -155,35 +155,35 @@ class MenuControllerActionListenerTest {
                                     }).when(mockListener).actionPerformed(any());
                                     break;
                                     
-                                case MenuController.NEW:
+                                case "New":
                                     doAnswer(invocation -> {
                                         mockFrame.repaint();
                                         return null;
                                     }).when(mockListener).actionPerformed(any());
                                     break;
                                     
-                                case MenuController.EXIT:
+                                case "Exit":
                                     doAnswer(invocation -> {
                                         mockPresentation.exit(0);
                                         return null;
                                     }).when(mockListener).actionPerformed(any());
                                     break;
                                     
-                                case MenuController.NEXT:
+                                case "Next":
                                     doAnswer(invocation -> {
                                         mockPresentation.nextSlide();
                                         return null;
                                     }).when(mockListener).actionPerformed(any());
                                     break;
                                     
-                                case MenuController.PREV:
+                                case "Prev":
                                     doAnswer(invocation -> {
                                         mockPresentation.prevSlide();
                                         return null;
                                     }).when(mockListener).actionPerformed(any());
                                     break;
                                     
-                                case MenuController.GOTO:
+                                case "Go to":
                                     doAnswer(invocation -> {
                                         // Simulate showing an input dialog and setting slide number
                                         JOptionPane.showInputDialog(any());
@@ -192,7 +192,7 @@ class MenuControllerActionListenerTest {
                                     }).when(mockListener).actionPerformed(any());
                                     break;
                                     
-                                case MenuController.ABOUT:
+                                case "About":
                                     doAnswer(invocation -> {
                                         AboutBox.show(mockFrame);
                                         return null;
