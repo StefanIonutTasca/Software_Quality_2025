@@ -2,6 +2,7 @@ package org.jabberpoint.test;
 
 import org.jabberpoint.src.Style;
 import org.jabberpoint.src.TextItem;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,12 @@ class TextItemTest {
     private TextItem textItem;
     private final String testText = "Test text for TextItem";
     private final int testLevel = 2;
+    
+    @BeforeAll
+    static void setUpClass() {
+        // Initialize Style singleton before all tests
+        Style.getInstance();
+    }
     
     @BeforeEach
     void setUp() {
@@ -48,9 +55,10 @@ class TextItemTest {
     }
     
     @Test
-    @DisplayName("toString should return the text content")
+    @DisplayName("toString should return text with level information")
     void toStringShouldReturnTextContent() {
-        assertEquals(testText, textItem.toString(), "toString should return the text content");
+        String expected = "TextItem[" + testLevel + "," + testText + "]";
+        assertEquals(expected, textItem.toString(), "toString should return the formatted text");
     }
     
     @Test
