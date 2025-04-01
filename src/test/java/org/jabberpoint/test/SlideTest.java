@@ -7,6 +7,7 @@ import org.jabberpoint.src.TextItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -150,20 +151,49 @@ class SlideTest {
     void getScaleShouldCalculateCorrectScaleBasedOnAreaDimensions() {
         // Set up a mock rectangle for the slide bounding box that's larger than the area
         Rectangle boundingBox = new Rectangle(0, 0, 1000, 800);
-        Rectangle area = new Rectangle(0, 0, 500, 400);
+        Rectangle smallArea = new Rectangle(0, 0, 500, 400);
         
-        // Add a second item to the slide
-        slide.append(new TextItem(2, "Second Item"));
+        // Add a second item to the slide with a spy to capture draw calls
+        TextItem spyItem = spy(new TextItem(2, "Second Item"));
+        slide.append(spyItem);
         
         // Set up mocks to return a large bounding box
         when(mockSlideItem.getBoundingBox(any(Graphics.class), any(ImageObserver.class), eq(1.0f), any(Style.class)))
             .thenReturn(boundingBox);
+        when(spyItem.getBoundingBox(any(Graphics.class), any(ImageObserver.class), eq(1.0f), any(Style.class)))
+            .thenReturn(boundingBox);
         
-        // Calculate scale - should be reduced to fit area
-        float scale = slide.getScale(area);
+        // Draw with the smaller area - this should use a reduced scale
+        slide.draw(mockGraphics2D, smallArea, mockObserver);
         
-        // Expect scale to be reduced
-        assertTrue(scale < 1.0f, "Scale should be reduced for large slides");
+        // Verify that the draw method was called with a scale less than 1.0
+        // We need to use argument capture to get the actual scale value
+        ArgumentCaptor<Float> scaleCaptor = ArgumentCaptor.forClass(Float.class);
+        verify(spyItem).draw(anyInt(), anyInt(), scaleCaptor.capture(), 
+                             eq(mockGraphics2D), any(Style.class), eq(mockObserver));
+        
+        float scale = scaleCaptor.getValue();
+        
+        // Expect scale to be reduced since drawing area is smaller than content
+        assertTrue(scale < 1.0f, "Scale should be reduced for large slides in small areas");
         assertTrue(scale > 0.0f, "Scale should be positive");
+        
+        // Now try with an area the same size as the slide content
+        Rectangle largeArea = new Rectangle(0, 0, 1000, 800);
+        
+        // Reset interactions on the spy
+        reset(spyItem);
+        
+        // Draw with the larger area - this should use full scale (1.0)
+        slide.draw(mockGraphics2D, largeArea, mockObserver);
+        
+        // Verify that the draw method was called with a scale of 1.0
+        verify(spyItem).draw(anyInt(), anyInt(), scaleCaptor.capture(), 
+                             eq(mockGraphics2D), any(Style.class), eq(mockObserver));
+        
+        float largeScale = scaleCaptor.getValue();
+        
+        // Scale should be 1.0 (or very close) when area matches content size
+        assertEquals(1.0f, largeScale, 0.05f, "Scale should be ~1.0 when area matches content size");
     }
 }
