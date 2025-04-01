@@ -51,7 +51,7 @@ public class XMLAccessor extends Accessor {
     	    return ""; // Return empty string if no title found
     	}
     	String titleText = titles.item(0).getTextContent();
-    	return titleText == null ? "" : titleText;
+    	return titleText == null ? "" : titleText.trim();
     }
 
 	public void loadFile(Presentation presentation, String filename) throws IOException {
