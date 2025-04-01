@@ -18,9 +18,11 @@ import org.w3c.dom.Text;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.GraphicsEnvironment;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +36,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class XMLAccessorTest {
 
     private XMLAccessor xmlAccessor;
+    private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+    private final PrintStream originalErr = System.err;
     
     @TempDir
     static Path tempDir;
@@ -41,6 +45,14 @@ class XMLAccessorTest {
     @BeforeEach
     void setUp() {
         xmlAccessor = new XMLAccessor();
+        // Redirect System.err to capture error messages
+        System.setErr(new PrintStream(errContent));
+    }
+    
+    @org.junit.jupiter.api.AfterEach
+    void tearDown() {
+        // Restore original System.err
+        System.setErr(originalErr);
     }
 
     @Test
@@ -72,6 +84,7 @@ class XMLAccessorTest {
         
         // Assert
         assertEquals(2, presentation.getSize(), "Presentation should have 2 slides");
+        assertEquals("Test Presentation", presentation.getTitle(), "Presentation title should be correct");
         
         // Test first slide
         Slide firstSlide = presentation.getSlide(0);
@@ -85,8 +98,8 @@ class XMLAccessorTest {
     }
     
     @Test
-    @DisplayName("Should throw IOException for malformed XML")
-    void shouldThrowIOExceptionForMalformedXML() throws Exception {
+    @DisplayName("Should log error for malformed XML")
+    void shouldLogErrorForMalformedXML() throws Exception {
         // Create a malformed XML file
         File xmlFile = tempDir.resolve("malformed.xml").toFile();
         Files.writeString(xmlFile.toPath(),
@@ -101,24 +114,28 @@ class XMLAccessorTest {
         // Create a presentation
         Presentation presentation = new Presentation();
         
-        // Act & Assert
-        assertThrows(IOException.class, () -> 
-            xmlAccessor.loadFile(presentation, xmlFile.getAbsolutePath()),
-            "Should throw IOException for malformed XML"
-        );
+        // Act - Load the malformed XML file (should not throw exception but log error)
+        xmlAccessor.loadFile(presentation, xmlFile.getAbsolutePath());
+        
+        // Assert - error should be logged to System.err
+        assertTrue(errContent.toString().length() > 0, "Error message should be logged");
+        assertTrue(errContent.toString().contains("XML"), 
+                "Error message should contain information about XML parsing error");
     }
     
     @Test
-    @DisplayName("Should handle non-existent file")
-    void shouldHandleNonExistentFile() {
+    @DisplayName("Should log error for non-existent file")
+    void shouldLogErrorForNonExistentFile() throws Exception {
         // Create a presentation
         Presentation presentation = new Presentation();
         
-        // Act & Assert
-        assertThrows(FileNotFoundException.class, () -> 
-            xmlAccessor.loadFile(presentation, "non_existent_file.xml"),
-            "Should throw FileNotFoundException for non-existent file"
-        );
+        // Act - Try to load non-existent file
+        xmlAccessor.loadFile(presentation, "non_existent_file.xml");
+        
+        // Assert - error should be logged to System.err
+        assertTrue(errContent.toString().length() > 0, "Error message should be logged");
+        assertTrue(errContent.toString().contains("non_existent_file.xml"), 
+                "Error message should contain the file name");
     }
     
     @Test
@@ -183,6 +200,8 @@ class XMLAccessorTest {
         String content = Files.readString(savedFile.toPath());
         assertTrue(content.contains("<presentation>"), "XML should have presentation tag");
         assertTrue(content.contains("<showtitle>Original Presentation</showtitle>"), "XML should have presentation title");
+        assertTrue(content.contains("<slide>"), "XML should have slide tag");
+        assertTrue(content.contains("<title>Original Slide</title>"), "XML should have slide title");
         
         // Load the presentation into a new object
         Presentation loadedPresentation = new Presentation();
@@ -191,6 +210,8 @@ class XMLAccessorTest {
         // Assert - loaded presentation should match original
         assertEquals(originalPresentation.getSize(), loadedPresentation.getSize(),
                 "Loaded presentation should have same number of slides");
+        assertEquals(originalPresentation.getTitle(), loadedPresentation.getTitle(),
+                "Loaded presentation should have same title");
         
         Slide originalSlide = originalPresentation.getSlide(0);
         Slide loadedSlide = loadedPresentation.getSlide(0);
@@ -247,6 +268,35 @@ class XMLAccessorTest {
         BitmapItem bitmapItem = (BitmapItem) items.get(1);
         assertEquals(3, bitmapItem.getLevel(), "Image item should have level 3");
         assertEquals("test.jpg", bitmapItem.getName(), "Image item should have correct name");
+    }
+    
+    @Test
+    @DisplayName("Should log error for invalid level value")
+    void shouldLogErrorForInvalidLevelValue() throws Exception {
+        // Arrange
+        Document document = createEmptyDocument();
+        Slide slide = new Slide();
+        
+        // Create a text item element with invalid level
+        Element textItemElement = document.createElement("item");
+        textItemElement.setAttribute("kind", "text");
+        textItemElement.setAttribute("level", "not-a-number");
+        Text textNode = document.createTextNode("Test Text");
+        textItemElement.appendChild(textNode);
+        
+        // Act - Need to access protected method via reflection
+        Method loadSlideItemMethod = XMLAccessor.class.getDeclaredMethod("loadSlideItem", Slide.class, Element.class);
+        loadSlideItemMethod.setAccessible(true);
+        loadSlideItemMethod.invoke(xmlAccessor, slide, textItemElement);
+        
+        // Assert - should log error about number format exception
+        assertTrue(errContent.toString().contains("Number Format Exception"), 
+                "Error message should mention 'Number Format Exception'");
+        
+        // Item should still be added with default level (1)
+        Vector<org.jabberpoint.src.SlideItem> items = slide.getSlideItems();
+        assertEquals(1, items.size(), "Slide should have 1 item despite error");
+        assertEquals(1, items.get(0).getLevel(), "Item should have default level 1");
     }
 
     private Document createEmptyDocument() throws Exception {
