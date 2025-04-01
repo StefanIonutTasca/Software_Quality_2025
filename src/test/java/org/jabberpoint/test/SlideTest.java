@@ -4,6 +4,7 @@ import org.jabberpoint.src.Slide;
 import org.jabberpoint.src.SlideItem;
 import org.jabberpoint.src.Style;
 import org.jabberpoint.src.TextItem;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,12 +39,15 @@ class SlideTest {
     @Mock
     private Rectangle mockRectangle;
     
+    @BeforeAll
+    static void setUpClass() {
+        // Initialize Style singleton
+        Style.getInstance();
+    }
+    
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        
-        // Initialize Style singleton
-        Style.createStyles();
         
         // Create a new slide
         slide = new Slide();
@@ -60,6 +64,11 @@ class SlideTest {
         BufferedImage image = new BufferedImage(
             500, 500, BufferedImage.TYPE_INT_ARGB);
         mockGraphics2D = image.createGraphics();
+        
+        // Initialize the slide title to empty string if null
+        if (slide.getTitle() == null) {
+            slide.setTitle("");
+        }
     }
     
     @Test

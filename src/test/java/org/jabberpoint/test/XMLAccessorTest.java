@@ -1,153 +1,189 @@
 package org.jabberpoint.test;
 
 import org.jabberpoint.src.*;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Vector;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class XMLAccessorTest {
 
     private XMLAccessor xmlAccessor;
     private Presentation presentation;
-    
     @TempDir
     Path tempDir;
+    
+    @BeforeAll
+    static void setUpClass() {
+        // Initialize Style singleton before any tests run
+        Style.getInstance();
+    }
     
     @BeforeEach
     void setUp() {
         xmlAccessor = new XMLAccessor();
         presentation = new Presentation();
-        Style.createStyles(); // Initialize styles for tests
     }
-
+    
     @Test
     @DisplayName("loadFile should parse XML and populate presentation")
     void loadFileShouldParseXmlAndPopulatePresentation() throws IOException {
         // Create a test XML file
-        String xmlContent = "<?xml version=\"1.0\"?>\n" +
-                "<presentation>\n" +
-                "<showtitle>Test Presentation</showtitle>\n" +
-                "<slide>\n" +
-                "<title>Slide 1</title>\n" +
-                "<item kind=\"text\" level=\"1\">Text Item 1</item>\n" +
-                "<item kind=\"image\" level=\"2\">test_image.png</item>\n" +
-                "</slide>\n" +
-                "<slide>\n" +
-                "<title>Slide 2</title>\n" +
-                "<item kind=\"text\" level=\"3\">Text Item 2</item>\n" +
-                "</slide>\n" +
-                "</presentation>";
+        String xmlContent = 
+            "<?xml version=\"1.0\"?>\n" +
+            "<presentation>\n" +
+            "  <showtitle>Test Presentation</showtitle>\n" +
+            "  <slide>\n" +
+            "    <title>Slide 1</title>\n" +
+            "    <item kind=\"text\" level=\"1\">Text Item 1</item>\n" +
+            "    <item kind=\"image\" level=\"2\">test_image.png</item>\n" +
+            "  </slide>\n" +
+            "  <slide>\n" +
+            "    <title>Slide 2</title>\n" +
+            "    <item kind=\"text\" level=\"3\">Text Item 2</item>\n" +
+            "  </slide>\n" +
+            "</presentation>";
         
-        Path xmlFile = tempDir.resolve("test_presentation.xml");
-        Files.writeString(xmlFile, xmlContent);
+        String filePath = tempDir.resolve("test.xml").toString();
+        Files.writeString(Path.of(filePath), xmlContent);
         
         // Load the XML file
-        xmlAccessor.loadFile(presentation, xmlFile.toString());
+        xmlAccessor.loadFile(presentation, filePath);
         
-        // Verify presentation was populated correctly
+        // Check presentation title
         assertEquals("Test Presentation", presentation.getTitle(), "Presentation title should be set");
-        assertEquals(2, presentation.getSize(), "Presentation should have 2 slides");
         
-        // Verify slide 1
+        // Check slide content
+        assertEquals(2, presentation.getSize(), "Presentation should have 2 slides");
         Slide slide1 = presentation.getSlide(0);
         assertEquals("Slide 1", slide1.getTitle(), "Slide 1 title should be set");
         assertEquals(2, slide1.getSize(), "Slide 1 should have 2 items");
         
-        // Verify slide 1 items
+        // Check slide 1 items
         SlideItem item1 = slide1.getSlideItem(0);
         assertTrue(item1 instanceof TextItem, "First item should be a TextItem");
-        assertEquals(1, item1.getLevel(), "First item should have level 1");
-        assertEquals("Text Item 1", ((TextItem) item1).getText(), "First item text should be correct");
+        assertEquals(1, item1.getLevel(), "First item level should be set to 1");
+        assertEquals("Text Item 1", ((TextItem) item1).getText(), "First item text should be set");
         
         SlideItem item2 = slide1.getSlideItem(1);
         assertTrue(item2 instanceof BitmapItem, "Second item should be a BitmapItem");
-        assertEquals(2, item2.getLevel(), "Second item should have level 2");
-        assertEquals("test_image.png", ((BitmapItem) item2).getName(), "Second item image name should be correct");
+        assertEquals(2, item2.getLevel(), "Second item level should be set to 2");
+        assertEquals("test_image.png", ((BitmapItem) item2).getName(), "Second item image name should be set");
         
-        // Verify slide 2
+        // Check slide 2
         Slide slide2 = presentation.getSlide(1);
         assertEquals("Slide 2", slide2.getTitle(), "Slide 2 title should be set");
         assertEquals(1, slide2.getSize(), "Slide 2 should have 1 item");
         
-        // Verify slide 2 item
+        // Check slide 2 item
         SlideItem item3 = slide2.getSlideItem(0);
         assertTrue(item3 instanceof TextItem, "Third item should be a TextItem");
-        assertEquals(3, item3.getLevel(), "Third item should have level 3");
-        assertEquals("Text Item 2", ((TextItem) item3).getText(), "Third item text should be correct");
+        assertEquals(3, item3.getLevel(), "Third item level should be set to 3");
+        assertEquals("Text Item 2", ((TextItem) item3).getText(), "Third item text should be set");
     }
     
     @Test
     @DisplayName("loadFile should handle invalid level attribute gracefully")
     void loadFileShouldHandleInvalidLevelAttributeGracefully() throws IOException {
-        // Create a test XML file with an invalid level attribute
-        String xmlContent = "<?xml version=\"1.0\"?>\n" +
-                "<presentation>\n" +
-                "<showtitle>Test Presentation</showtitle>\n" +
-                "<slide>\n" +
-                "<title>Slide 1</title>\n" +
-                "<item kind=\"text\" level=\"invalid\">Text Item with invalid level</item>\n" +
-                "</slide>\n" +
-                "</presentation>";
+        // Create a test XML file with invalid level
+        String xmlContent = 
+            "<?xml version=\"1.0\"?>\n" +
+            "<presentation>\n" +
+            "  <showtitle>Invalid Level Test</showtitle>\n" +
+            "  <slide>\n" +
+            "    <title>Test Slide</title>\n" +
+            "    <item kind=\"text\" level=\"invalid\">Test Item</item>\n" +
+            "  </slide>\n" +
+            "</presentation>";
         
-        Path xmlFile = tempDir.resolve("test_invalid_level.xml");
-        Files.writeString(xmlFile, xmlContent);
+        String filePath = tempDir.resolve("invalid_level.xml").toString();
+        Files.writeString(Path.of(filePath), xmlContent);
         
-        // Load the XML file
-        xmlAccessor.loadFile(presentation, xmlFile.toString());
+        // Capture standard error output
+        PrintStream originalErr = System.err;
+        ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(errContent));
         
-        // Verify presentation was populated and used default level (1)
-        assertEquals("Test Presentation", presentation.getTitle(), "Presentation title should be set");
-        assertEquals(1, presentation.getSize(), "Presentation should have 1 slide");
-        
-        Slide slide = presentation.getSlide(0);
-        SlideItem item = slide.getSlideItem(0);
-        assertEquals(1, item.getLevel(), "Item should have default level 1 when level is invalid");
+        try {
+            // Load the XML file
+            xmlAccessor.loadFile(presentation, filePath);
+            
+            // Check that some error message was printed
+            assertTrue(errContent.toString().contains("Number Format Exception"), 
+                       "Should show NumberFormatException message");
+            
+            // Check presentation content (should still work with default level)
+            assertEquals("Invalid Level Test", presentation.getTitle(), "Presentation title should be set");
+            assertEquals(1, presentation.getSize(), "Presentation should have 1 slide");
+            
+            // The item should be added with default level (1)
+            Slide slide = presentation.getSlide(0);
+            assertEquals(1, slide.getSize(), "Slide should have 1 item");
+            assertEquals(1, slide.getSlideItem(0).getLevel(), "Item should use default level 1");
+        } finally {
+            System.setErr(originalErr);
+        }
     }
     
     @Test
     @DisplayName("loadFile should handle unknown item kind gracefully")
     void loadFileShouldHandleUnknownItemKindGracefully() throws IOException {
-        // Create a test XML file with an unknown item kind
-        String xmlContent = "<?xml version=\"1.0\"?>\n" +
-                "<presentation>\n" +
-                "<showtitle>Test Presentation</showtitle>\n" +
-                "<slide>\n" +
-                "<title>Slide 1</title>\n" +
-                "<item kind=\"unknown\" level=\"1\">Unknown item type</item>\n" +
-                "</slide>\n" +
-                "</presentation>";
+        // Create a test XML file with unknown item kind
+        String xmlContent = 
+            "<?xml version=\"1.0\"?>\n" +
+            "<presentation>\n" +
+            "  <showtitle>Unknown Kind Test</showtitle>\n" +
+            "  <slide>\n" +
+            "    <title>Test Slide</title>\n" +
+            "    <item kind=\"unknown\" level=\"1\">Test Item</item>\n" +
+            "  </slide>\n" +
+            "</presentation>";
         
-        Path xmlFile = tempDir.resolve("test_unknown_kind.xml");
-        Files.writeString(xmlFile, xmlContent);
+        String filePath = tempDir.resolve("unknown_kind.xml").toString();
+        Files.writeString(Path.of(filePath), xmlContent);
         
-        // Load the XML file - should not throw exception
-        xmlAccessor.loadFile(presentation, xmlFile.toString());
+        // Capture standard error output
+        PrintStream originalErr = System.err;
+        ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(errContent));
         
-        // Verify presentation was populated but the unknown item was not added
-        assertEquals("Test Presentation", presentation.getTitle(), "Presentation title should be set");
-        assertEquals(1, presentation.getSize(), "Presentation should have 1 slide");
-        
-        Slide slide = presentation.getSlide(0);
-        assertEquals(0, slide.getSize(), "Slide should have 0 items as the unknown kind was not added");
+        try {
+            // Load the XML file
+            xmlAccessor.loadFile(presentation, filePath);
+            
+            // Check that an error about unknown type was printed
+            assertTrue(errContent.toString().contains("Unknown Element type"), 
+                       "Should show unknown element type message");
+            
+            // Check presentation content (slide should be created but item ignored)
+            assertEquals("Unknown Kind Test", presentation.getTitle(), "Presentation title should be set");
+            assertEquals(1, presentation.getSize(), "Presentation should have 1 slide");
+            
+            // The unknown item should be ignored
+            Slide slide = presentation.getSlide(0);
+            assertEquals(0, slide.getSize(), "Slide should have 0 items");
+        } finally {
+            System.setErr(originalErr);
+        }
     }
     
     @Test
     @DisplayName("loadFile should handle file not found gracefully")
-    void loadFileShouldHandleFileNotFoundGracefully() throws IOException {
-        // Try to load a non-existent file
-        String nonExistentFile = tempDir.resolve("non_existent_file.xml").toString();
+    void loadFileShouldHandleFileNotFoundGracefully() {
+        // Use a non-existent file path
+        String nonExistentFile = tempDir.resolve("non_existent.xml").toString();
         
-        // Should not throw exception
+        // Load should not throw an exception
         assertDoesNotThrow(() -> xmlAccessor.loadFile(presentation, nonExistentFile));
         
         // Presentation should remain unchanged
@@ -205,70 +241,79 @@ class XMLAccessorTest {
         // Verify text item content
         SlideItem loadedItem = loadedSlide.getSlideItem(0);
         assertTrue(loadedItem instanceof TextItem, "Loaded item should be a TextItem");
-        assertEquals("Test Text Item", loadedItem.toString(), "Loaded text item content should match");
+        assertEquals("Test Text Item", ((TextItem)loadedItem).getText(), "Loaded text item content should match");
         assertEquals(1, loadedItem.getLevel(), "Loaded text item level should match");
     }
     
     @Test
-    @DisplayName("saveFile should handle unsupported SlideItem types")
+    @DisplayName("saveFile should handle unsupported slide item types")
     void saveFileShouldHandleUnsupportedSlideItemTypes() throws IOException {
-        // Create a mock unsupported SlideItem type
-        SlideItem mockItem = mock(SlideItem.class);
-        when(mockItem.getLevel()).thenReturn(1);
+        // Create a presentation with a mock slide item that isn't supported
+        Presentation presentation = new Presentation();
+        presentation.setTitle("Unsupported Items Test");
         
-        // Create a slide with the mock item
+        // Create a slide and add a text item (supported) and a mock item (unsupported)
         Slide slide = new Slide();
-        slide.setTitle("Mock Slide");
+        slide.setTitle("Test Slide");
+        slide.append(1, "Normal Text Item"); // This should be saved
         
-        // Add the mock item to the slide's vector using reflection
-        Vector<SlideItem> items = slide.getSlideItems();
-        items.add(mockItem);
+        // Create an unsupported slide item by extending SlideItem
+        SlideItem unsupportedItem = new SlideItem(2) {
+            @Override
+            public Rectangle getBoundingBox(Graphics g, ImageObserver o, float scale, Style s) {
+                return new Rectangle();
+            }
+            
+            @Override
+            public void draw(int x, int y, float scale, Graphics g, Style s, ImageObserver o) {
+                // Do nothing
+            }
+            
+            @Override
+            public String toString() {
+                return "UnsupportedItem";
+            }
+        };
         
-        // Add the slide to the presentation
-        presentation.setTitle("Mock Presentation");
+        slide.append(unsupportedItem);
         presentation.append(slide);
         
-        // Save the presentation to a file
-        String outputFile = tempDir.resolve("mock_presentation.xml").toString();
+        // Save to a temporary file
+        String outputFile = tempDir.resolve("unsupported_items.xml").toString();
         
-        // Should not throw exception
-        assertDoesNotThrow(() -> xmlAccessor.saveFile(presentation, outputFile));
+        // Capture standard error output
+        PrintStream originalErr = System.err;
+        ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(errContent));
         
-        // Verify the file was created
-        File savedFile = new File(outputFile);
-        assertTrue(savedFile.exists(), "Output file should exist");
-        
-        // Read the file content
-        String savedContent = Files.readString(savedFile.toPath());
-        
-        // Verify the XML structure - the mock item should be ignored
-        assertTrue(savedContent.contains("<presentation>"), "Root element should be present");
-        assertTrue(savedContent.contains("<showtitle>Mock Presentation</showtitle>"), "Show title should be present");
-        assertTrue(savedContent.contains("<slide>"), "Slide element should be present");
-        assertTrue(savedContent.contains("<title>Mock Slide</title>"), "Slide title should be present");
-        
-        // The mock item should not appear as a regular item since it's neither TextItem nor BitmapItem
-        assertFalse(savedContent.contains("<item kind=\"text\" level=\"1\">"), "Mock item should not be saved as text");
-        assertFalse(savedContent.contains("<item kind=\"image\" level=\"1\">"), "Mock item should not be saved as image");
-    }
-    
-    @Test
-    @DisplayName("getTitle should extract title from XML element")
-    void getTitleShouldExtractTitleFromXmlElement() throws Exception {
-        // Create XML file with a title
-        String xmlContent = "<?xml version=\"1.0\"?>\n" +
-                "<presentation>\n" +
-                "<showtitle>Test Title Extraction</showtitle>\n" +
-                "</presentation>";
-        
-        Path xmlFile = tempDir.resolve("test_title.xml");
-        Files.writeString(xmlFile, xmlContent);
-        
-        // Create a helper method to invoke the private getTitle method
-        // We'll do this by loading the file and checking the presentation title
-        xmlAccessor.loadFile(presentation, xmlFile.toString());
-        
-        assertEquals("Test Title Extraction", presentation.getTitle(), 
-                "getTitle method should extract title correctly from XML element");
+        try {
+            // Save the presentation
+            xmlAccessor.saveFile(presentation, outputFile);
+            
+            // Verify error about unknown type was logged
+            String errorOutput = errContent.toString().toLowerCase();
+            assertTrue(errorOutput.contains("unknown") || errorOutput.contains("unsupported") || 
+                       errorOutput.contains("error"), "Should show error about unknown item");
+            
+            // Now try to load the file back
+            Presentation loadedPresentation = new Presentation();
+            xmlAccessor.loadFile(loadedPresentation, outputFile);
+            
+            // Verify the loaded presentation has the same title
+            assertEquals("Unsupported Items Test", loadedPresentation.getTitle(), 
+                         "Loaded presentation title should match");
+            
+            // Verify the text item was saved but the unsupported item wasn't
+            Slide loadedSlide = loadedPresentation.getSlide(0);
+            assertEquals(1, loadedSlide.getSize(), 
+                         "Loaded slide should have 1 item (unsupported item should be skipped)");
+            
+            SlideItem loadedItem = loadedSlide.getSlideItem(0);
+            assertTrue(loadedItem instanceof TextItem, "Loaded item should be a TextItem");
+            assertEquals("Normal Text Item", ((TextItem)loadedItem).getText(), 
+                         "Loaded text item content should match");
+        } finally {
+            System.setErr(originalErr);
+        }
     }
 }
