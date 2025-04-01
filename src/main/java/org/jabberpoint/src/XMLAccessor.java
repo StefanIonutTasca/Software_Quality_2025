@@ -80,6 +80,7 @@ public class XMLAccessor extends Accessor {
 		} 
 		catch (IOException iox) {
 			System.err.println(iox.toString());
+			// Don't rethrow to maintain backward compatibility
 		}
 		catch (SAXException sax) {
 			System.err.println(sax.getMessage());

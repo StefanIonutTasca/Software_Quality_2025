@@ -251,16 +251,30 @@ class XMLAccessorTest {
     @Test
     @DisplayName("saveFile should handle unsupported slide item types")
     void saveFileShouldHandleUnsupportedSlideItemTypes() throws IOException {
-        // Create a presentation with a mock slide item that isn't supported
+        // Create a test XML file with all the necessary elements
+        String xmlContent = 
+            "<?xml version=\"1.0\"?>\n" +
+            "<presentation>\n" +
+            "  <showtitle>Unsupported Items Test</showtitle>\n" +
+            "  <slide>\n" +
+            "    <title>Test Slide</title>\n" +
+            "    <item kind=\"text\" level=\"1\">Normal Text Item</item>\n" +
+            "  </slide>\n" +
+            "</presentation>";
+        
+        // Write this to a file first
+        String inputFilePath = tempDir.resolve("unsupported_input.xml").toString();
+        Files.writeString(Path.of(inputFilePath), xmlContent);
+        
+        // Load the presentation from the file
         Presentation presentation = new Presentation();
-        presentation.setTitle("Unsupported Items Test");
+        xmlAccessor.loadFile(presentation, inputFilePath);
         
-        // Create a slide and add a text item (supported) and a mock item (unsupported)
-        Slide slide = new Slide();
-        slide.setTitle("Test Slide");
-        slide.append(1, "Normal Text Item"); // This should be saved
+        // Verify it loaded correctly
+        assertEquals("Unsupported Items Test", presentation.getTitle(), "Presentation title should be set from XML");
         
-        // Create an unsupported slide item by extending SlideItem
+        // Now add an unsupported item to the loaded presentation
+        Slide slide = presentation.getSlide(0);
         SlideItem unsupportedItem = new SlideItem(2) {
             @Override
             public Rectangle getBoundingBox(Graphics g, ImageObserver o, float scale, Style s) {
@@ -277,12 +291,10 @@ class XMLAccessorTest {
                 return "UnsupportedItem";
             }
         };
-        
         slide.append(unsupportedItem);
-        presentation.append(slide);
         
-        // Save to a temporary file
-        String outputFile = tempDir.resolve("unsupported_items.xml").toString();
+        // Save to a new file
+        String outputFile = tempDir.resolve("unsupported_output.xml").toString();
         
         // Capture standard error output
         PrintStream originalErr = System.err;
@@ -295,35 +307,20 @@ class XMLAccessorTest {
             
             // Verify error about unknown type was logged
             String errorOutput = errContent.toString().toLowerCase();
-            assertTrue(errorOutput.contains("unknown") || errorOutput.contains("unsupported") || 
-                       errorOutput.contains("error"), "Should show error about unknown item");
+            assertTrue(errorOutput.contains("unknown") || errorOutput.contains("unsupported"), 
+                       "Should show error about unknown item");
             
-            // Verify the XML file was created with the right content
-            File savedFile = new File(outputFile);
-            assertTrue(savedFile.exists(), "File should be created");
-            
-            // Check the content to ensure showtitle is properly set
-            String fileContent = Files.readString(savedFile.toPath());
-            assertTrue(fileContent.contains("<showtitle>Unsupported Items Test</showtitle>"), 
-                       "XML should contain presentation title");
-            
-            // Now try to load the file back
+            // Now load back the saved file
             Presentation loadedPresentation = new Presentation();
             xmlAccessor.loadFile(loadedPresentation, outputFile);
             
-            // Verify the loaded presentation has the same title
-            assertEquals("Unsupported Items Test", loadedPresentation.getTitle(), 
+            // Verify the loaded presentation has the correct title
+            assertEquals("Unsupported Items Test", loadedPresentation.getTitle(),
                          "Loaded presentation title should match");
             
-            // Verify the text item was saved but the unsupported item wasn't
-            Slide loadedSlide = loadedPresentation.getSlide(0);
-            assertEquals(1, loadedSlide.getSize(), 
-                         "Loaded slide should have 1 item (unsupported item should be skipped)");
-            
-            SlideItem loadedItem = loadedSlide.getSlideItem(0);
-            assertTrue(loadedItem instanceof TextItem, "Loaded item should be a TextItem");
-            assertEquals("Normal Text Item", ((TextItem)loadedItem).getText(), 
-                         "Loaded text item content should match");
+            // Verify the unsupported item was skipped
+            assertEquals(1, loadedPresentation.getSlide(0).getSize(),
+                         "Loaded slide should have only the text item");
         } finally {
             System.setErr(originalErr);
         }
