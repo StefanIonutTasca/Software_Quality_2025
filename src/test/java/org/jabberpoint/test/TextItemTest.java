@@ -61,7 +61,7 @@ class TextItemTest {
         Style.createStyles();
         realStyle = Style.getStyle(testLevel);
         
-        // Mock Graphics and Graphics2D behavior
+        // Mock Graphics and Graphics2D behavior - properly setup mock to return Graphics2D
         when(mockGraphics.create()).thenReturn(mockGraphics2D);
         when(mockGraphics2D.getFontRenderContext()).thenReturn(mockFontRenderContext);
     }

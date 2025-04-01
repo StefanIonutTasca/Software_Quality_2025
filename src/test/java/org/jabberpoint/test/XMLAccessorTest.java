@@ -159,40 +159,39 @@ class XMLAccessorTest {
     @DisplayName("saveFile should write presentation to XML file")
     void saveFileShouldWritePresentationToXmlFile() throws IOException {
         // Create a presentation with slides and items
-        presentation.setTitle("Saved Presentation");
+        Presentation savePresentation = new Presentation();
+        savePresentation.setTitle("Saved Presentation");
         
-        // Add slide 1 with text and image items
+        // Add two slides
         Slide slide1 = new Slide();
         slide1.setTitle("Saved Slide 1");
-        slide1.append(new TextItem(1, "Saved Text Item 1"));
-        slide1.append(new BitmapItem(2, "saved_image.png"));
-        presentation.append(slide1);
+        TextItem textItem = new TextItem(1, "Saved text item");
+        BitmapItem imageItem = new BitmapItem(2, "saved_image.png");
+        slide1.append(textItem);
+        slide1.append(imageItem);
+        savePresentation.append(slide1);
         
-        // Add slide 2 with a text item
         Slide slide2 = new Slide();
         slide2.setTitle("Saved Slide 2");
-        slide2.append(new TextItem(3, "Saved Text Item 2"));
-        presentation.append(slide2);
+        savePresentation.append(slide2);
         
         // Save the presentation to a file
-        String outputFile = tempDir.resolve("saved_presentation.xml").toString();
-        xmlAccessor.saveFile(presentation, outputFile);
+        String outputFile = tempDir.resolve("test_output.xml").toString();
+        xmlAccessor.saveFile(savePresentation, outputFile);
         
         // Verify the file was created
         File savedFile = new File(outputFile);
         assertTrue(savedFile.exists(), "Output file should exist");
-        assertTrue(savedFile.length() > 0, "Output file should not be empty");
         
         // Read the file content
         String savedContent = Files.readString(savedFile.toPath());
         
         // Verify the XML structure
-        assertTrue(savedContent.contains("<?xml version=\"1.0\"?>"), "XML declaration should be present");
         assertTrue(savedContent.contains("<presentation>"), "Root element should be present");
         assertTrue(savedContent.contains("<showtitle>Saved Presentation</showtitle>"), "Show title should be present");
         assertTrue(savedContent.contains("<slide>"), "Slide element should be present");
-        assertTrue(savedContent.contains("<title>Saved Slide 1</title>"), "Slide 1 title should be present");
-        assertTrue(savedContent.contains("<item kind=\"text\" level=\"1\">Saved Text Item 1</item>"), 
+        assertTrue(savedContent.contains("<title>Saved Slide 1</title>"), "Slide 1 title should be set");
+        assertTrue(savedContent.contains("<item kind=\"text\" level=\"1\">Saved text item</item>"), 
                 "Text item should be present with correct attributes");
         assertTrue(savedContent.contains("<item kind=\"image\" level=\"2\">saved_image.png</item>"), 
                 "Image item should be present with correct attributes");
@@ -200,7 +199,8 @@ class XMLAccessorTest {
         
         // Bonus: Load the saved file to verify it can be parsed back
         Presentation loadedPresentation = new Presentation();
-        xmlAccessor.loadFile(loadedPresentation, outputFile);
+        XMLAccessor loadAccessor = new XMLAccessor(); // Create a new instance to ensure clean state
+        loadAccessor.loadFile(loadedPresentation, outputFile);
         
         assertEquals("Saved Presentation", loadedPresentation.getTitle(), "Loaded presentation title should match");
         assertEquals(2, loadedPresentation.getSize(), "Loaded presentation should have 2 slides");

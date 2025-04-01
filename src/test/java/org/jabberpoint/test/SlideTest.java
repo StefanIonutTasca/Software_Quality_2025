@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.ImageObserver;
 import java.util.Vector;
@@ -25,6 +26,9 @@ class SlideTest {
     
     @Mock
     private Graphics mockGraphics;
+    
+    @Mock
+    private Graphics2D mockGraphics2D;
     
     @Mock
     private ImageObserver mockObserver;
@@ -53,6 +57,9 @@ class SlideTest {
         Rectangle itemBoundingBox = new Rectangle(0, 0, 100, 50);
         when(mockSlideItem.getBoundingBox(any(Graphics.class), any(ImageObserver.class), anyFloat(), any(Style.class)))
             .thenReturn(itemBoundingBox);
+        
+        // Mock Graphics2D properly
+        when(mockGraphics.create()).thenReturn(mockGraphics2D);
     }
 
     @Test
