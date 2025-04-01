@@ -5,10 +5,10 @@ import org.jabberpoint.src.Presentation;
 import org.jabberpoint.src.Slide;
 import org.jabberpoint.src.TextItem;
 import org.jabberpoint.src.XMLAccessor;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.io.TempDir;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -19,6 +19,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,6 +51,7 @@ class XMLAccessorTest {
         Files.writeString(xmlFile.toPath(),
             "<?xml version=\"1.0\"?>\n" +
             "<presentation>\n" +
+            "  <showtitle>Test Presentation</showtitle>\n" +
             "  <slide>\n" +
             "    <title>Test Title</title>\n" +
             "    <item kind=\"text\" level=\"1\">Test Item 1</item>\n" +
@@ -92,16 +95,29 @@ class XMLAccessorTest {
             "  <slide>\n" +
             "    <title>Test Title</title>\n" +
             "    <item kind=\"text\" level=\"1\">Test Item 1</item>\n" +
-            "  <!-- Missing closing tags -->"
+            "  Malformed XML - missing closing tags"
         );
         
         // Create a presentation
         Presentation presentation = new Presentation();
         
         // Act & Assert
-        assertThrows(Exception.class, () -> 
+        assertThrows(IOException.class, () -> 
             xmlAccessor.loadFile(presentation, xmlFile.getAbsolutePath()),
-            "Should throw exception for malformed XML"
+            "Should throw IOException for malformed XML"
+        );
+    }
+    
+    @Test
+    @DisplayName("Should handle non-existent file")
+    void shouldHandleNonExistentFile() {
+        // Create a presentation
+        Presentation presentation = new Presentation();
+        
+        // Act & Assert
+        assertThrows(FileNotFoundException.class, () -> 
+            xmlAccessor.loadFile(presentation, "non_existent_file.xml"),
+            "Should throw FileNotFoundException for non-existent file"
         );
     }
     
@@ -110,6 +126,7 @@ class XMLAccessorTest {
     void shouldSavePresentationToXMLFile() throws Exception {
         // Create a presentation with slides and items
         Presentation presentation = new Presentation();
+        presentation.setTitle("Test Presentation");
         
         // Add a slide with title and items
         Slide slide = new Slide();
@@ -136,10 +153,11 @@ class XMLAccessorTest {
         
         // Basic content checks
         assertTrue(content.contains("<presentation>"), "XML should have presentation tag");
+        assertTrue(content.contains("<showtitle>Test Presentation</showtitle>"), "XML should have presentation title");
         assertTrue(content.contains("<slide>"), "XML should have slide tag");
         assertTrue(content.contains("<title>Test Slide</title>"), "XML should have first slide title");
         assertTrue(content.contains("<title>Another Slide</title>"), "XML should have second slide title");
-        assertTrue(content.contains("Test Item 1"), "XML should contain text from items");
+        assertTrue(content.contains("<item kind=\"text\" level=\"1\">Test Item 1</item>"), "XML should contain text from items");
     }
     
     @Test
@@ -147,6 +165,7 @@ class XMLAccessorTest {
     void shouldLoadAndSaveCycleCorrectly() throws Exception {
         // Create a presentation with slides and items
         Presentation originalPresentation = new Presentation();
+        originalPresentation.setTitle("Original Presentation");
         
         // Add a slide with title and items
         Slide slide = new Slide();
@@ -158,6 +177,12 @@ class XMLAccessorTest {
         // Save the presentation
         File savedFile = tempDir.resolve("cycle-test.xml").toFile();
         xmlAccessor.saveFile(originalPresentation, savedFile.getAbsolutePath());
+        
+        // Verify the file exists and has content
+        assertTrue(savedFile.exists(), "File should be created");
+        String content = Files.readString(savedFile.toPath());
+        assertTrue(content.contains("<presentation>"), "XML should have presentation tag");
+        assertTrue(content.contains("<showtitle>Original Presentation</showtitle>"), "XML should have presentation title");
         
         // Load the presentation into a new object
         Presentation loadedPresentation = new Presentation();
@@ -191,13 +216,15 @@ class XMLAccessorTest {
         Element textItemElement = document.createElement("item");
         textItemElement.setAttribute("kind", "text");
         textItemElement.setAttribute("level", "2");
-        textItemElement.setTextContent("Test Text");
+        Text textNode = document.createTextNode("Test Text");
+        textItemElement.appendChild(textNode);
         
         // Create an image item element
         Element imageItemElement = document.createElement("item");
         imageItemElement.setAttribute("kind", "image");
         imageItemElement.setAttribute("level", "3");
-        imageItemElement.setTextContent("test.jpg");
+        Text imageTextNode = document.createTextNode("test.jpg");
+        imageItemElement.appendChild(imageTextNode);
         
         // Act - Need to access protected method via reflection
         Method loadSlideItemMethod = XMLAccessor.class.getDeclaredMethod("loadSlideItem", Slide.class, Element.class);
