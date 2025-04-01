@@ -39,15 +39,20 @@ class SlideTest {
     @Mock
     private Rectangle mockRectangle;
     
+    private Style style;
+    
     @BeforeAll
     static void setUpClass() {
-        // Initialize Style singleton
+        // Initialize Style singleton before any tests run
         Style.getInstance();
     }
     
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        
+        // Ensure Style is initialized before each test
+        style = Style.getInstance();
         
         // Create a new slide
         slide = new Slide();

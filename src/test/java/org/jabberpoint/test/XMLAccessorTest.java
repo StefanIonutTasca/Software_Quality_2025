@@ -298,6 +298,15 @@ class XMLAccessorTest {
             assertTrue(errorOutput.contains("unknown") || errorOutput.contains("unsupported") || 
                        errorOutput.contains("error"), "Should show error about unknown item");
             
+            // Verify the XML file was created with the right content
+            File savedFile = new File(outputFile);
+            assertTrue(savedFile.exists(), "File should be created");
+            
+            // Check the content to ensure showtitle is properly set
+            String fileContent = Files.readString(savedFile.toPath());
+            assertTrue(fileContent.contains("<showtitle>Unsupported Items Test</showtitle>"), 
+                       "XML should contain presentation title");
+            
             // Now try to load the file back
             Presentation loadedPresentation = new Presentation();
             xmlAccessor.loadFile(loadedPresentation, outputFile);
