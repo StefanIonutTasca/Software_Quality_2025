@@ -89,12 +89,12 @@ class TextItemTest {
     @DisplayName("getAttributedString should return AttributedString with style font")
     void getAttributedStringShouldReturnAttributedStringWithStyleFont() {
         // Skip this test if the Style class is not properly initialized
-        // since we're testing the integration with Style and not TextItem functionality
-        if (style.getFont() == null) {
+        float scale = 1.5f;
+        Font font = style.getFont(scale);
+        if (font == null) {
             return;
         }
         
-        float scale = 1.5f;
         AttributedString result = textItem.getAttributedString(style, scale);
         
         assertNotNull(result, "AttributedString should not be null");
