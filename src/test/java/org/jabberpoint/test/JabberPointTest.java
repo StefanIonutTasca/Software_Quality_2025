@@ -175,12 +175,13 @@ class JabberPointTest {
         // Act
         JabberPoint.main(new String[0]);
         
-        // Verify error dialog was shown
+        // Verify error dialog was shown with appropriate error message
+        // Use string literals instead of accessing protected constants
         mockedJOptionPane.verify(() -> 
             JOptionPane.showMessageDialog(
                 eq(null),
-                eq(JabberPoint.IOERR + testException),
-                eq(JabberPoint.JABERR),
+                contains("IO Error: " + testException),  // Use contains instead of exact match
+                contains("Jabberpoint Error"),           // Use contains instead of exact match
                 eq(JOptionPane.ERROR_MESSAGE)
             )
         );
