@@ -56,15 +56,13 @@ class JabberPointTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         System.setOut(new PrintStream(outContent));
-        
-        // Skip tests in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless(), 
-            "Skipping JabberPoint tests in headless environment");
             
-        // Setup static mocks
-        mockedFactory = Mockito.mockStatic(PresentationLoaderFactory.class);
-        mockedOptionPane = Mockito.mockStatic(JOptionPane.class);
-        mockedFrame = Mockito.mockStatic(SlideViewerFrame.class);
+        // Setup static mocks - only create these if we're not in headless mode
+        if (!GraphicsEnvironment.isHeadless()) {
+            mockedFactory = Mockito.mockStatic(PresentationLoaderFactory.class);
+            mockedOptionPane = Mockito.mockStatic(JOptionPane.class);
+            mockedFrame = Mockito.mockStatic(SlideViewerFrame.class);
+        }
     }
     
     @AfterEach
@@ -86,6 +84,9 @@ class JabberPointTest {
     @Test
     @DisplayName("Main method should load demo presentation when no arguments provided")
     void mainShouldLoadDemoPresentationWhenNoArgumentsProvided() throws Exception {
+        // Skip in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Arrange
         String[] noArgs = new String[0];
         
@@ -107,6 +108,9 @@ class JabberPointTest {
     @Test
     @DisplayName("Main method should load XML presentation when file argument provided")
     void mainShouldLoadXMLPresentationWhenFileArgumentProvided() throws Exception {
+        // Skip in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Arrange
         String[] args = new String[] {"test.xml"};
         
@@ -128,6 +132,9 @@ class JabberPointTest {
     @Test
     @DisplayName("Main method should show error dialog when IOException occurs")
     void mainShouldShowErrorDialogWhenIOExceptionOccurs() throws Exception {
+        // Skip in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Arrange
         String[] args = new String[] {"test.xml"};
         IOException testException = new IOException("Test exception");
@@ -157,6 +164,8 @@ class JabberPointTest {
     @Test
     @DisplayName("JabberPoint class should have expected constants")
     void jabberPointClassShouldHaveExpectedConstants() throws Exception {
+        // This test can run in headless mode as it only tests constants
+        
         // Use reflection to access protected constants
         Field ioErrField = JabberPoint.class.getDeclaredField("IOERR");
         Field jabErrField = JabberPoint.class.getDeclaredField("JABERR");

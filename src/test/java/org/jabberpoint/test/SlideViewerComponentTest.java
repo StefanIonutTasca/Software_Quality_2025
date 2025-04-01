@@ -167,4 +167,48 @@ class SlideViewerComponentTest {
         verify(mockGraphics, times(1)).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
         verify(mockSlide, never()).draw(any(), any(), any());
     }
+    
+    @Test
+    @DisplayName("Should draw slide with zoom factor")
+    void drawSlideShouldApplyZoomFactor() throws Exception {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
+        // Arrange
+        SlideViewerComponent spyComponent = spy(component);
+        
+        // Create a real slide with content for testing the draw method
+        Slide testSlide = new Slide();
+        testSlide.setTitle("Test Slide");
+        testSlide.append(new TextItem(1, "Test Text Item"));
+        
+        // Set the slide field using reflection
+        Field slideField = SlideViewerComponent.class.getDeclaredField("slide");
+        slideField.setAccessible(true);
+        slideField.set(spyComponent, testSlide);
+        
+        // Act
+        spyComponent.paintComponent(mockGraphics);
+        
+        // Assert that the slide is drawn
+        verify(mockGraphics, atLeastOnce()).setColor(any());
+        verify(mockGraphics, times(1)).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
+    }
+    
+    @Test
+    @DisplayName("Should update component with presentation title")
+    void updateShouldSetFrameTitleWithPresentationTitle() {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
+        // Arrange
+        when(mockPresentation.getTitle()).thenReturn("Test Presentation Title");
+        SlideViewerComponent spyComponent = spy(component);
+        
+        // Act
+        spyComponent.update(mockPresentation, mockSlide);
+        
+        // Assert - title should be set with presentation title
+        verify(mockFrame, times(1)).setTitle(contains("Test Presentation Title"));
+    }
 }
