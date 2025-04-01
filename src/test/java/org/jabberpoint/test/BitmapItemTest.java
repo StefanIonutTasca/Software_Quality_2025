@@ -188,24 +188,34 @@ class BitmapItemTest {
         // Arrange
         bitmapItem = new BitmapItem(1, "non_existent_image.jpg");
         
-        // When the image is null, attempting to get a bounding box should not cause
-        // a NullPointerException but should return a Rectangle with 0 dimensions
+        // Act & Assert
+        Rectangle boundingBox = bitmapItem.getBoundingBox(graphicsMock, observerMock, 1.0f, style);
         
-        // Mock the getBoundingBox behavior for null image
-        try {
-            // Set bufferedImage to null (it's already null for non-existent image)
-            Field bufferedImageField = BitmapItem.class.getDeclaredField("bufferedImage");
-            bufferedImageField.setAccessible(true);
-            bufferedImageField.set(bitmapItem, null);
-            
-            // We expect a NullPointerException here because getBoundingBox 
-            // tries to call bufferedImage.getWidth when bufferedImage is null
-            assertThrows(NullPointerException.class, 
-                () -> bitmapItem.getBoundingBox(graphicsMock, observerMock, 1.0f, style));
-        } catch (Exception e) {
-            // If reflection fails, we skip this test
-            System.out.println("Skipping test due to reflection exception: " + e.getMessage());
-        }
+        // Should return a non-null rectangle even if image isn't loaded
+        assertNotNull(boundingBox, "BoundingBox should not be null even when image is null");
+        
+        // The width and height should be based on the text shown instead of image dimensions
+        assertTrue(boundingBox.width > 0, "BoundingBox width should be positive");
+        assertTrue(boundingBox.height > 0, "BoundingBox height should be positive");
+    }
+    
+    @Test
+    @DisplayName("Should handle null bufferedImage in draw method gracefully")
+    void shouldHandleNullBufferedImageInDrawMethodGracefully() {
+        // Arrange
+        bitmapItem = new BitmapItem(1, "non_existent_image.jpg");
+        
+        // Act - should not throw exception
+        assertDoesNotThrow(() -> 
+            bitmapItem.draw(10, 10, 1.0f, graphicsMock, style, observerMock)
+        );
+        
+        // Assert - should draw text message instead
+        Mockito.verify(graphicsMock).drawString(
+            Mockito.contains("Image not found"), 
+            Mockito.anyInt(), 
+            Mockito.anyInt()
+        );
     }
 
     /**
