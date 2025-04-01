@@ -163,8 +163,8 @@ class OpenFileCommandTest {
                  MockedStatic<JOptionPane> mockedOptionPane = mockStatic(JOptionPane.class)) {
                 
                 // Set up the mock to throw exception
-                when(mockLoader.loadPresentation(any(Presentation.class), anyString()))
-                    .thenThrow(new IOException("Test exception"));
+                doThrow(new IOException("Test exception"))
+                    .when(mockLoader).loadPresentation(any(Presentation.class), anyString());
                 mockedFactory.when(() -> PresentationLoaderFactory.createLoader("xml")).thenReturn(mockLoader);
                 
                 // Mock JOptionPane to avoid showing dialog

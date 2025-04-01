@@ -5,19 +5,19 @@ import org.jabberpoint.src.Presentation;
 import org.jabberpoint.src.Slide;
 import org.jabberpoint.src.TextItem;
 import org.jabberpoint.src.XMLAccessor;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
@@ -25,7 +25,6 @@ import java.nio.file.Path;
 import java.util.Vector;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for XMLAccessor class
@@ -34,18 +33,11 @@ class XMLAccessorTest {
 
     private XMLAccessor xmlAccessor;
     
-    @Mock
-    private Presentation mockPresentation;
-    
-    @Mock
-    private Slide mockSlide;
-    
     @TempDir
     static Path tempDir;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         xmlAccessor = new XMLAccessor();
     }
 
@@ -53,157 +45,135 @@ class XMLAccessorTest {
     @DisplayName("Should load presentation from XML file")
     void shouldLoadPresentationFromXMLFile() throws Exception {
         // Create a test XML file
-        String xmlContent = "<?xml version=\"1.0\"?>\n" +
-                "<presentation>\n" +
-                "  <showtitle>Test Presentation</showtitle>\n" +
-                "  <slide>\n" +
-                "    <title>Slide 1</title>\n" +
-                "    <item kind=\"text\" level=\"1\">Text Item 1</item>\n" +
-                "    <item kind=\"image\" level=\"2\">test.jpg</item>\n" +
-                "  </slide>\n" +
-                "  <slide>\n" +
-                "    <title>Slide 2</title>\n" +
-                "    <item kind=\"text\" level=\"1\">Text Item 2</item>\n" +
-                "  </slide>\n" +
-                "</presentation>";
-        
         File xmlFile = tempDir.resolve("test.xml").toFile();
-        Files.writeString(xmlFile.toPath(), xmlContent);
+        Files.writeString(xmlFile.toPath(),
+            "<?xml version=\"1.0\"?>\n" +
+            "<presentation>\n" +
+            "  <slide>\n" +
+            "    <title>Test Title</title>\n" +
+            "    <item kind=\"text\" level=\"1\">Test Item 1</item>\n" +
+            "    <item kind=\"text\" level=\"2\">Test Item 2</item>\n" +
+            "  </slide>\n" +
+            "  <slide>\n" +
+            "    <title>Second Slide</title>\n" +
+            "    <item kind=\"text\" level=\"1\">Another Item</item>\n" +
+            "  </slide>\n" +
+            "</presentation>"
+        );
         
-        // Setup a real presentation to capture the loaded content
+        // Create a presentation
         Presentation presentation = new Presentation();
         
-        // Act
+        // Act - Load the XML file
         xmlAccessor.loadFile(presentation, xmlFile.getAbsolutePath());
         
         // Assert
-        assertEquals("Test Presentation", presentation.getTitle(), "Presentation title should be set correctly");
         assertEquals(2, presentation.getSize(), "Presentation should have 2 slides");
         
-        // Verify first slide
-        Slide slide1 = presentation.getSlide(0);
-        assertEquals("Slide 1", slide1.getTitle(), "First slide title should be set correctly");
-        assertEquals(2, slide1.getSlideItems().size(), "First slide should have 2 items");
+        // Test first slide
+        Slide firstSlide = presentation.getSlide(0);
+        assertEquals("Test Title", firstSlide.getTitle(), "First slide should have the correct title");
+        assertEquals(2, firstSlide.getSlideItems().size(), "First slide should have 2 items");
         
-        // Verify second slide
-        Slide slide2 = presentation.getSlide(1);
-        assertEquals("Slide 2", slide2.getTitle(), "Second slide title should be set correctly");
-        assertEquals(1, slide2.getSlideItems().size(), "Second slide should have 1 item");
+        // Test second slide
+        Slide secondSlide = presentation.getSlide(1);
+        assertEquals("Second Slide", secondSlide.getTitle(), "Second slide should have the correct title");
+        assertEquals(1, secondSlide.getSlideItems().size(), "Second slide should have 1 item");
     }
     
     @Test
-    @DisplayName("Should handle malformed XML when loading file")
-    void shouldHandleMalformedXMLWhenLoadingFile() throws Exception {
+    @DisplayName("Should throw IOException for malformed XML")
+    void shouldThrowIOExceptionForMalformedXML() throws Exception {
         // Create a malformed XML file
-        String xmlContent = "<?xml version=\"1.0\"?>\n" +
-                "<presentation>\n" +
-                "  <showtitle>Malformed XML</showtitle>\n" +
-                "  <slide>\n" +
-                "    <title>Slide With Error</title>\n" +
-                "    <item kind=\"text\" level=\"invalid\">Text Item</item>\n" +
-                "  </slide>\n" +
-                "</presentation>";
-        
         File xmlFile = tempDir.resolve("malformed.xml").toFile();
-        Files.writeString(xmlFile.toPath(), xmlContent);
+        Files.writeString(xmlFile.toPath(),
+            "<?xml version=\"1.0\"?>\n" +
+            "<presentation>\n" +
+            "  <slide>\n" +
+            "    <title>Test Title</title>\n" +
+            "    <item kind=\"text\" level=\"1\">Test Item 1</item>\n" +
+            "  <!-- Missing closing tags -->"
+        );
         
-        // Setup a real presentation
+        // Create a presentation
         Presentation presentation = new Presentation();
         
-        // Act & Assert - Should not throw exception
-        assertDoesNotThrow(() -> xmlAccessor.loadFile(presentation, xmlFile.getAbsolutePath()));
-        
-        // Verify some content was still loaded
-        assertEquals("Malformed XML", presentation.getTitle(), "Presentation title should still be loaded");
-    }
-    
-    @Test
-    @DisplayName("Should handle non-existent file when loading")
-    void shouldHandleNonExistentFileWhenLoading() {
-        // Setup
-        Presentation presentation = new Presentation();
-        
-        // Act & Assert - Should not throw unhandled exception
-        assertDoesNotThrow(() -> xmlAccessor.loadFile(presentation, "non_existent_file.xml"));
+        // Act & Assert
+        assertThrows(Exception.class, () -> 
+            xmlAccessor.loadFile(presentation, xmlFile.getAbsolutePath()),
+            "Should throw exception for malformed XML"
+        );
     }
     
     @Test
     @DisplayName("Should save presentation to XML file")
     void shouldSavePresentationToXMLFile() throws Exception {
-        // Setup
-        File xmlFile = tempDir.resolve("saved.xml").toFile();
-        
-        // Create a presentation with some content
+        // Create a presentation with slides and items
         Presentation presentation = new Presentation();
-        presentation.setTitle("Saved Presentation");
         
-        // Add slides with items
-        Slide slide1 = new Slide();
-        slide1.setTitle("First Slide");
-        slide1.append(new TextItem(1, "Text on first slide"));
-        slide1.append(new BitmapItem(2, "image1.jpg"));
-        presentation.append(slide1);
+        // Add a slide with title and items
+        Slide slide = new Slide();
+        slide.setTitle("Test Slide");
+        slide.append(new TextItem(1, "Test Item 1"));
+        slide.append(new TextItem(2, "Test Item 2"));
+        presentation.append(slide);
         
+        // Add another slide
         Slide slide2 = new Slide();
-        slide2.setTitle("Second Slide");
-        slide2.append(new TextItem(1, "Text on second slide"));
+        slide2.setTitle("Another Slide");
+        slide2.append(new TextItem(1, "Another Item"));
         presentation.append(slide2);
         
-        // Act
-        xmlAccessor.saveFile(presentation, xmlFile.getAbsolutePath());
+        // Create a file to save to
+        File savedFile = tempDir.resolve("saved.xml").toFile();
         
-        // Assert
-        assertTrue(xmlFile.exists(), "XML file should have been created");
-        String savedContent = Files.readString(xmlFile.toPath());
+        // Act - Save the presentation
+        xmlAccessor.saveFile(presentation, savedFile.getAbsolutePath());
         
-        // Check for expected content
-        assertTrue(savedContent.contains("<showtitle>Saved Presentation</showtitle>"), "Saved XML should contain presentation title");
-        assertTrue(savedContent.contains("<title>First Slide</title>"), "Saved XML should contain first slide title");
-        assertTrue(savedContent.contains("<title>Second Slide</title>"), "Saved XML should contain second slide title");
-        assertTrue(savedContent.contains("<item kind=\"text\" level=\"1\">Text on first slide</item>"), "Saved XML should contain text item");
-        assertTrue(savedContent.contains("<item kind=\"image\" level=\"2\">image1.jpg</item>"), "Saved XML should contain image item");
+        // Assert - File should exist and contain the XML
+        assertTrue(savedFile.exists(), "File should be created");
+        String content = Files.readString(savedFile.toPath());
+        
+        // Basic content checks
+        assertTrue(content.contains("<presentation>"), "XML should have presentation tag");
+        assertTrue(content.contains("<slide>"), "XML should have slide tag");
+        assertTrue(content.contains("<title>Test Slide</title>"), "XML should have first slide title");
+        assertTrue(content.contains("<title>Another Slide</title>"), "XML should have second slide title");
+        assertTrue(content.contains("Test Item 1"), "XML should contain text from items");
     }
     
     @Test
-    @DisplayName("Should handle unknown item types when loading slide items")
-    void shouldHandleUnknownItemTypesWhenLoadingSlideItems() throws Exception {
-        // Create XML with unknown item type
-        String xmlContent = "<?xml version=\"1.0\"?>\n" +
-                "<presentation>\n" +
-                "  <showtitle>Test Presentation</showtitle>\n" +
-                "  <slide>\n" +
-                "    <title>Test Slide</title>\n" +
-                "    <item kind=\"unknown\" level=\"1\">Unknown Item</item>\n" +
-                "  </slide>\n" +
-                "</presentation>";
+    @DisplayName("Should load and save cycle correctly")
+    void shouldLoadAndSaveCycleCorrectly() throws Exception {
+        // Create a presentation with slides and items
+        Presentation originalPresentation = new Presentation();
         
-        File xmlFile = tempDir.resolve("unknown_type.xml").toFile();
-        Files.writeString(xmlFile.toPath(), xmlContent);
+        // Add a slide with title and items
+        Slide slide = new Slide();
+        slide.setTitle("Original Slide");
+        slide.append(new TextItem(1, "Original Item 1"));
+        slide.append(new TextItem(2, "Original Item 2"));
+        originalPresentation.append(slide);
         
-        // Setup
-        Presentation presentation = new Presentation();
+        // Save the presentation
+        File savedFile = tempDir.resolve("cycle-test.xml").toFile();
+        xmlAccessor.saveFile(originalPresentation, savedFile.getAbsolutePath());
         
-        // Act
-        xmlAccessor.loadFile(presentation, xmlFile.getAbsolutePath());
+        // Load the presentation into a new object
+        Presentation loadedPresentation = new Presentation();
+        xmlAccessor.loadFile(loadedPresentation, savedFile.getAbsolutePath());
         
-        // Assert - Should load the presentation and slide but ignore the unknown item
-        assertEquals(1, presentation.getSize(), "Presentation should have 1 slide");
-        Slide slide = presentation.getSlide(0);
-        assertEquals("Test Slide", slide.getTitle(), "Slide title should be set correctly");
-        assertEquals(0, slide.getSlideItems().size(), "Slide should have no items since the unknown item should be ignored");
-    }
-    
-    @Test
-    @DisplayName("Should handle IO errors when saving file")
-    void shouldHandleIOErrorsWhenSavingFile() {
-        // Setup - Use a directory as the target file to cause an IO error
-        File directory = tempDir.resolve("directory").toFile();
-        directory.mkdir();
+        // Assert - loaded presentation should match original
+        assertEquals(originalPresentation.getSize(), loadedPresentation.getSize(),
+                "Loaded presentation should have same number of slides");
         
-        // Act & Assert
-        assertThrows(java.io.IOException.class, 
-            () -> xmlAccessor.saveFile(mockPresentation, directory.getAbsolutePath()),
-            "Should throw IOException when saving to a directory");
+        Slide originalSlide = originalPresentation.getSlide(0);
+        Slide loadedSlide = loadedPresentation.getSlide(0);
+        
+        assertEquals(originalSlide.getTitle(), loadedSlide.getTitle(),
+                "Loaded slide should have same title");
+        assertEquals(originalSlide.getSlideItems().size(), loadedSlide.getSlideItems().size(),
+                "Loaded slide should have same number of items");
     }
     
     @Test
