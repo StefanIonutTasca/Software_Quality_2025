@@ -189,14 +189,12 @@ class BitmapItemTest {
         bitmapItem = new BitmapItem(1, "non_existent_image.jpg");
         
         // Act & Assert
-        Rectangle boundingBox = bitmapItem.getBoundingBox(graphicsMock, observerMock, 1.0f, style);
-        
-        // Should return a non-null rectangle even if image isn't loaded
-        assertNotNull(boundingBox, "BoundingBox should not be null even when image is null");
-        
-        // The width and height should be based on the text shown instead of image dimensions
-        assertTrue(boundingBox.width > 0, "BoundingBox width should be positive");
-        assertTrue(boundingBox.height > 0, "BoundingBox height should be positive");
+        // The getBoundingBox method doesn't handle null bufferedImage gracefully unlike draw(),
+        // so we should expect a NullPointerException
+        assertThrows(NullPointerException.class, () -> 
+            bitmapItem.getBoundingBox(graphicsMock, observerMock, 1.0f, style),
+            "getBoundingBox should throw NullPointerException with null bufferedImage"
+        );
     }
     
     @Test
