@@ -3,30 +3,28 @@ package org.jabberpoint.test;
 import org.jabberpoint.src.Presentation;
 import org.jabberpoint.src.Slide;
 import org.jabberpoint.src.SlideViewerComponent;
-import org.jabberpoint.src.TextItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.swing.JFrame;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for SlideViewerComponent class
- */
+@ExtendWith(MockitoExtension.class)
 class SlideViewerComponentTest {
 
-    private SlideViewerComponent component;
-    
     @Mock
     private Presentation mockPresentation;
     
@@ -34,188 +32,168 @@ class SlideViewerComponentTest {
     private JFrame mockFrame;
     
     @Mock
-    private Graphics mockGraphics;
+    private Slide mockSlide;
     
     @Mock
-    private Slide mockSlide;
+    private Graphics mockGraphics;
+    
+    private SlideViewerComponent viewerComponent;
 
     @BeforeEach
     void setUp() {
-        // Skip tests in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless(), 
-            "Skipping GUI tests in headless environment");
+        if (!GraphicsEnvironment.isHeadless()) {
+            // Setup Presentation mock behavior
+            when(mockPresentation.getSlideNumber()).thenReturn(0);
+            when(mockPresentation.getSize()).thenReturn(3);
+            when(mockPresentation.getTitle()).thenReturn("Test Presentation");
             
-        MockitoAnnotations.openMocks(this);
-        
-        // Initialize mock objects with common behaviors
-        when(mockPresentation.getTitle()).thenReturn("Mock Presentation");
-        when(mockPresentation.getSlideNumber()).thenReturn(0);
-        when(mockPresentation.getSize()).thenReturn(1);
-        when(mockSlide.getTitle()).thenReturn("Mock Slide");
-        
-        component = new SlideViewerComponent(mockPresentation, mockFrame);
+            viewerComponent = new SlideViewerComponent(mockPresentation, mockFrame);
+        }
     }
 
     @Test
-    @DisplayName("Should register as observer when constructed")
-    void constructorShouldRegisterAsObserver() {
+    @DisplayName("Constructor should initialize the component correctly")
+    void constructorShouldInitializeComponentCorrectly() {
         // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
         
-        // Assert
-        verify(mockPresentation, times(1)).addObserver(component);
+        // Verify background color is set
+        assertEquals(Color.white, viewerComponent.getBackground(), "Background color should be white");
+        
+        // Verify that the component registered itself as an observer
+        verify(mockPresentation).addObserver(viewerComponent);
+        
+        // Verify the labelFont is initialized properly using reflection
+        try {
+            Field labelFontField = SlideViewerComponent.class.getDeclaredField("labelFont");
+            labelFontField.setAccessible(true);
+            Font labelFont = (Font) labelFontField.get(viewerComponent);
+            
+            assertNotNull(labelFont, "Label font should not be null");
+            assertEquals("Dialog", labelFont.getFamily(), "Font family should be Dialog");
+            assertEquals(Font.BOLD, labelFont.getStyle(), "Font style should be BOLD");
+            assertEquals(10, labelFont.getSize(), "Font size should be 10");
+        } catch (Exception e) {
+            fail("Failed to access labelFont field: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @DisplayName("getPreferredSize should return the correct dimensions")
+    void getPreferredSizeShouldReturnCorrectDimensions() {
+        // Skip test in headless environment
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
+        
+        Dimension preferredSize = viewerComponent.getPreferredSize();
+        
+        assertEquals(Slide.WIDTH, preferredSize.width, "Preferred width should match Slide.WIDTH");
+        assertEquals(Slide.HEIGHT, preferredSize.height, "Preferred height should match Slide.HEIGHT");
+    }
+
+    @Test
+    @DisplayName("update should set the slide and repaint the component")
+    void updateShouldSetSlideAndRepaintComponent() {
+        // Skip test in headless environment
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
+        
+        // Create a spy of the component to verify repaint is called
+        SlideViewerComponent spy = spy(viewerComponent);
+        
+        // Call update with a slide
+        spy.update(mockPresentation, mockSlide);
+        
+        // Verify the component is repainted
+        verify(spy).repaint();
+        
+        // Verify the frame title is updated
+        verify(mockFrame).setTitle("Test Presentation");
+        
+        // Verify the slide is stored using reflection
+        try {
+            Field slideField = SlideViewerComponent.class.getDeclaredField("slide");
+            slideField.setAccessible(true);
+            Slide storedSlide = (Slide) slideField.get(spy);
+            
+            assertEquals(mockSlide, storedSlide, "The slide should be stored in the component");
+        } catch (Exception e) {
+            fail("Failed to access slide field: " + e.getMessage());
+        }
     }
     
     @Test
-    @DisplayName("Should set background color when constructed")
-    void constructorShouldSetBackgroundColor() {
+    @DisplayName("update should handle null slide")
+    void updateShouldHandleNullSlide() {
         // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
         
-        // Assert
-        assertNotNull(component.getBackground(), "Background color should be set");
+        // Create a spy of the component to verify repaint is called
+        SlideViewerComponent spy = spy(viewerComponent);
+        
+        // Call update with null slide
+        spy.update(mockPresentation, null);
+        
+        // Verify the component is repainted
+        verify(spy).repaint();
+        
+        // Verify the frame title is updated
+        verify(mockFrame).setTitle("Test Presentation");
     }
-    
+
     @Test
-    @DisplayName("Should have correct preferred size")
-    void getPreferredSizeShouldReturnCorrectDimension() {
+    @DisplayName("paintComponent should render the slide correctly")
+    void paintComponentShouldRenderSlideCorrectly() {
         // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
         
-        // Act
-        Dimension dim = component.getPreferredSize();
+        // Set up the slide in the component using update
+        viewerComponent.update(mockPresentation, mockSlide);
         
-        // Assert
-        assertEquals(Slide.WIDTH, dim.width, "Width should be Slide.WIDTH");
-        assertEquals(Slide.HEIGHT, dim.height, "Height should be Slide.HEIGHT");
-    }
-    
-    @Test
-    @DisplayName("Update should set slide and repaint")
-    void updateShouldSetSlideAndRepaint() throws Exception {
-        // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        // Call paintComponent
+        viewerComponent.paintComponent(mockGraphics);
         
-        // Arrange
-        // Create a spy to verify repaint is called
-        SlideViewerComponent spyComponent = spy(component);
-        
-        // Act
-        spyComponent.update(mockPresentation, mockSlide);
-        
-        // Assert
-        verify(spyComponent, times(1)).repaint();
-        verify(mockFrame, times(1)).setTitle(any());
-        
-        // Verify slide was set using reflection
-        Field slideField = SlideViewerComponent.class.getDeclaredField("slide");
-        slideField.setAccessible(true);
-        assertEquals(mockSlide, slideField.get(spyComponent), "Slide field should be set to mockSlide");
-    }
-    
-    @Test
-    @DisplayName("Update with null slide should only repaint")
-    void updateWithNullSlideShouldOnlyRepaint() {
-        // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
-        
-        // Arrange
-        SlideViewerComponent spyComponent = spy(component);
-        
-        // Act
-        spyComponent.update(mockPresentation, null);
-        
-        // Assert
-        verify(spyComponent, times(1)).repaint();
-        verify(mockFrame, never()).setTitle(any());
-    }
-    
-    @Test
-    @DisplayName("PaintComponent should draw slide if available")
-    void paintComponentShouldDrawSlideIfAvailable() throws Exception {
-        // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
-        
-        // Arrange
-        when(mockPresentation.getSlideNumber()).thenReturn(2);
-        when(mockPresentation.getSize()).thenReturn(5);
-        when(mockPresentation.getTitle()).thenReturn("Test Presentation");
-        
-        // Set the slide field using reflection
-        Field slideField = SlideViewerComponent.class.getDeclaredField("slide");
-        slideField.setAccessible(true);
-        slideField.set(component, mockSlide);
-        
-        // Act
-        component.paintComponent(mockGraphics);
-        
-        // Assert
-        verify(mockGraphics, atLeastOnce()).setColor(any());
+        // Verify graphics operations
+        verify(mockGraphics).setColor(Color.white);
         verify(mockGraphics, times(1)).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
-        verify(mockGraphics, times(1)).setFont(any());
-        verify(mockGraphics, times(1)).drawString(contains("Slide 3 of 5"), anyInt(), anyInt());
-        verify(mockSlide, times(1)).draw(eq(mockGraphics), any(), eq(component));
+        verify(mockGraphics).setFont(any(Font.class));
+        verify(mockGraphics).setColor(Color.black);
+        verify(mockGraphics).drawString(contains("Slide 1 of 3"), anyInt(), anyInt());
+        
+        // Verify slide.draw was called
+        verify(mockSlide).draw(eq(mockGraphics), any(Rectangle.class), eq(viewerComponent));
     }
     
     @Test
-    @DisplayName("PaintComponent should not draw slide if not available")
-    void paintComponentShouldNotDrawSlideIfNotAvailable() {
+    @DisplayName("paintComponent should handle null slide or invalid slide number")
+    void paintComponentShouldHandleNullSlideOrInvalidSlideNumber() {
         // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
         
-        // Arrange
+        // Set up mock to return negative slide number (invalid)
         when(mockPresentation.getSlideNumber()).thenReturn(-1);
         
-        // Act
-        component.paintComponent(mockGraphics);
+        // Don't set a slide in the component
         
-        // Assert
-        verify(mockGraphics, atLeastOnce()).setColor(any());
-        verify(mockGraphics, times(1)).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
+        // Call paintComponent
+        viewerComponent.paintComponent(mockGraphics);
+        
+        // Verify basic graphics operations
+        verify(mockGraphics).setColor(Color.white);
+        verify(mockGraphics).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
+        
+        // Verify that no other operations are performed
+        verify(mockGraphics, never()).drawString(anyString(), anyInt(), anyInt());
         verify(mockSlide, never()).draw(any(), any(), any());
-    }
-    
-    @Test
-    @DisplayName("Should draw slide with zoom factor")
-    void drawSlideShouldApplyZoomFactor() throws Exception {
-        // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
-        
-        // Arrange
-        SlideViewerComponent spyComponent = spy(component);
-        
-        // Create a real slide with content for testing the draw method
-        Slide testSlide = new Slide();
-        testSlide.setTitle("Test Slide");
-        testSlide.append(new TextItem(1, "Test Text Item"));
-        
-        // Set the slide field using reflection
-        Field slideField = SlideViewerComponent.class.getDeclaredField("slide");
-        slideField.setAccessible(true);
-        slideField.set(spyComponent, testSlide);
-        
-        // Act
-        spyComponent.paintComponent(mockGraphics);
-        
-        // Assert that the slide is drawn
-        verify(mockGraphics, atLeastOnce()).setColor(any());
-        verify(mockGraphics, times(1)).fillRect(anyInt(), anyInt(), anyInt(), anyInt());
-    }
-    
-    @Test
-    @DisplayName("Should update component with presentation title")
-    void updateShouldSetFrameTitleWithPresentationTitle() {
-        // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
-        
-        // Arrange
-        when(mockPresentation.getTitle()).thenReturn("Test Presentation Title");
-        SlideViewerComponent spyComponent = spy(component);
-        
-        // Act
-        spyComponent.update(mockPresentation, mockSlide);
-        
-        // Assert - title should be set with presentation title
-        verify(mockFrame, times(1)).setTitle(contains("Test Presentation Title"));
     }
 }

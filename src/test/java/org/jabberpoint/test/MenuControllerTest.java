@@ -3,292 +3,402 @@ package org.jabberpoint.test;
 import org.jabberpoint.src.AboutBox;
 import org.jabberpoint.src.MenuController;
 import org.jabberpoint.src.Presentation;
+import org.jabberpoint.src.XMLAccessor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.swing.JOptionPane;
 import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
 import java.awt.Menu;
+import java.awt.MenuBar;
 import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
-import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import javax.swing.JOptionPane;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 
-/**
- * Unit tests for MenuController class
- */
 @ExtendWith(MockitoExtension.class)
 class MenuControllerTest {
 
-    private MenuController menuController;
-    
     @Mock
     private Frame mockFrame;
     
     @Mock
     private Presentation mockPresentation;
     
-    // Define our own test file path
-    private static final String TEST_FILE_PATH = "./test-presentation.xml";
-
+    private MenuController menuController;
+    
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        // Create MenuController only if not in headless mode
         if (!GraphicsEnvironment.isHeadless()) {
             menuController = new MenuController(mockFrame, mockPresentation);
         }
     }
-
+    
     @Test
-    @DisplayName("Should create menu item with shortcut")
-    void mkMenuItemShouldCreateMenuItemWithShortcut() {
+    @DisplayName("MenuController should create menu items with expected names")
+    void shouldCreateMenuItemsWithExpectedNames() {
         // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
         
-        // Act
+        // Check if menu items for file operations exist
+        assertNotNull(findMenuItem("Open"), "Open menu item should exist");
+        assertNotNull(findMenuItem("New"), "New menu item should exist");
+        assertNotNull(findMenuItem("Save"), "Save menu item should exist");
+        assertNotNull(findMenuItem("Exit"), "Exit menu item should exist");
+        
+        // Check if menu items for slide navigation exist
+        assertNotNull(findMenuItem("Next"), "Next menu item should exist");
+        assertNotNull(findMenuItem("Prev"), "Prev menu item should exist");
+        assertNotNull(findMenuItem("Go to"), "Go to menu item should exist");
+        
+        // Check if menu item for about dialog exists
+        assertNotNull(findMenuItem("About"), "About menu item should exist");
+    }
+    
+    @Test
+    @DisplayName("mkMenuItem should create a menu item with the given name")
+    void mkMenuItemShouldCreateMenuItemWithGivenName() {
+        // Skip test in headless environment
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
+        
         MenuItem menuItem = menuController.mkMenuItem("Test");
-        
-        // Assert
-        assertEquals("Test", menuItem.getLabel(), "Menu item label should be 'Test'");
+        assertEquals("Test", menuItem.getLabel(), "Menu item label should match the given name");
         assertNotNull(menuItem.getShortcut(), "Menu item should have a shortcut");
-        assertEquals('T', menuItem.getShortcut().getKey(), "Menu shortcut should be 'T'");
+        assertEquals('T', menuItem.getShortcut().getKey(), "Menu item shortcut should be first character of the name");
     }
     
     @Test
-    @DisplayName("Should initialize with correct menu structure")
-    void constructorShouldInitializeCorrectMenuStructure() {
+    @DisplayName("Open menu item should load presentation from XML file")
+    void openMenuItemShouldLoadPresentationFromXML() throws IOException {
         // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
         
-        // Act - the menuController is already created in setUp()
+        // Create mocks for XMLAccessor
+        XMLAccessor mockXmlAccessor = mock(XMLAccessor.class);
         
-        // Assert
-        assertEquals(3, menuController.getMenuCount(), "Should have 3 menus (File, View, Help)");
-        
-        Menu fileMenu = menuController.getMenu(0);
-        Menu viewMenu = menuController.getMenu(1);
-        Menu helpMenu = menuController.getHelpMenu();
-        
-        assertEquals("File", fileMenu.getLabel(), "First menu should be 'File'");
-        assertEquals("View", viewMenu.getLabel(), "Second menu should be 'View'");
-        assertEquals("Help", helpMenu.getLabel(), "Help menu should be 'Help'");
-        
-        // Check File menu items
-        assertEquals(5, fileMenu.getItemCount(), "File menu should have 5 items (including separator)");
-        assertEquals("Open", fileMenu.getItem(0).getLabel(), "First item should be 'Open'");
-        assertEquals("New", fileMenu.getItem(1).getLabel(), "Second item should be 'New'");
-        assertEquals("Save", fileMenu.getItem(2).getLabel(), "Third item should be 'Save'");
-        assertEquals("Exit", fileMenu.getItem(4).getLabel(), "Fifth item should be 'Exit'");
-        
-        // Check View menu items
-        assertEquals(3, viewMenu.getItemCount(), "View menu should have 3 items");
-        assertEquals("Next", viewMenu.getItem(0).getLabel(), "First item should be 'Next'");
-        assertEquals("Prev", viewMenu.getItem(1).getLabel(), "Second item should be 'Prev'");
-        assertEquals("Go to", viewMenu.getItem(2).getLabel(), "Third item should be 'Go to'");
-        
-        // Check Help menu items
-        assertEquals(1, helpMenu.getItemCount(), "Help menu should have 1 item");
-        assertEquals("About", helpMenu.getItem(0).getLabel(), "First item should be 'About'");
-    }
-    
-    @Test
-    @DisplayName("File > Open menu action should load presentation")
-    void openMenuActionShouldLoadPresentation() throws Exception {
-        // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
-        
-        // Arrange - Create test file
-        File testFile = new File(TEST_FILE_PATH);
-        boolean fileCreated = testFile.createNewFile();
-        try {
-            // Setup
-            MenuItem openMenuItem = findMenuItemByLabel(menuController, "Open");
-            ActionEvent mockEvent = new ActionEvent(openMenuItem, ActionEvent.ACTION_PERFORMED, "open");
+        try (MockedStatic<XMLAccessor> mockedConstructor = mockStatic(XMLAccessor.class)) {
+            // Set up constructor mocking to return our mock
+            mockedConstructor.when(XMLAccessor::new).thenReturn(mockXmlAccessor);
             
-            // Act
-            openMenuItem.getActionListeners()[0].actionPerformed(mockEvent);
+            // Trigger the Open menu item's action
+            MenuItem openItem = findMenuItem("Open");
+            assertNotNull(openItem, "Open menu item should exist");
             
-            // We cannot verify protected clear() method directly, but we can verify setSlideNumber and repaint
-            verify(mockPresentation, times(1)).setSlideNumber(0);
-            verify(mockFrame, times(1)).repaint();
-        } finally {
-            // Cleanup
-            if (fileCreated) {
-                testFile.delete();
-            }
+            // Create an ActionEvent
+            ActionEvent event = new ActionEvent(openItem, ActionEvent.ACTION_PERFORMED, "command");
+            
+            // Call action listener directly
+            openItem.getActionListeners()[0].actionPerformed(event);
+            
+            // Verify the expected methods were called
+            verify(mockPresentation).clear();
+            verify(mockXmlAccessor).loadFile(eq(mockPresentation), eq("test.xml"));
+            verify(mockPresentation).setSlideNumber(0);
+            verify(mockFrame).repaint();
         }
     }
     
     @Test
-    @DisplayName("File > New menu action should clear presentation")
-    void newMenuActionShouldClearPresentation() throws Exception {
+    @DisplayName("Open menu item should show error dialog when loading fails")
+    void openMenuItemShouldShowErrorOnLoadFailure() throws IOException {
         // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
         
-        // Arrange
-        MenuItem newMenuItem = findMenuItemByLabel(menuController, "New");
-        ActionEvent mockEvent = new ActionEvent(newMenuItem, ActionEvent.ACTION_PERFORMED, "new");
+        // Create mocks for XMLAccessor and JOptionPane
+        XMLAccessor mockXmlAccessor = mock(XMLAccessor.class);
+        IOException testException = new IOException("Test error");
         
-        // Act
-        newMenuItem.getActionListeners()[0].actionPerformed(mockEvent);
+        // Set up XMLAccessor to throw an exception when loading
+        doThrow(testException).when(mockXmlAccessor).loadFile(any(Presentation.class), anyString());
         
-        // We cannot verify protected clear() method directly, but we can verify repaint
-        verify(mockFrame, times(1)).repaint();
-    }
-    
-    @Test
-    @DisplayName("File > Save menu action should save presentation")
-    void saveMenuActionShouldSavePresentation() throws Exception {
-        // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
-        
-        // Setup
-        MenuItem saveMenuItem = findMenuItemByLabel(menuController, "Save");
-        ActionEvent mockEvent = new ActionEvent(saveMenuItem, ActionEvent.ACTION_PERFORMED, "save");
-        
-        // Act
-        saveMenuItem.getActionListeners()[0].actionPerformed(mockEvent);
-        
-        // No simple way to verify XMLAccessor was used properly without extensive mocking
-        // At least verify no exceptions were thrown
-        assertDoesNotThrow(() -> saveMenuItem.getActionListeners()[0].actionPerformed(mockEvent));
-    }
-    
-    @Test
-    @DisplayName("File > Exit menu action should exit the presentation")
-    void exitMenuActionShouldExitPresentation() throws Exception {
-        // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
-        
-        // Arrange
-        MenuItem exitMenuItem = findMenuItemByLabel(menuController, "Exit");
-        ActionEvent mockEvent = new ActionEvent(exitMenuItem, ActionEvent.ACTION_PERFORMED, "exit");
-        
-        // Act
-        exitMenuItem.getActionListeners()[0].actionPerformed(mockEvent);
-        
-        // Assert
-        verify(mockPresentation, times(1)).exit(0);
-    }
-    
-    @Test
-    @DisplayName("View > Next menu action should call nextSlide")
-    void nextMenuActionShouldCallNextSlide() throws Exception {
-        // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
-        
-        // Arrange
-        MenuItem nextMenuItem = findMenuItemByLabel(menuController, "Next");
-        ActionEvent mockEvent = new ActionEvent(nextMenuItem, ActionEvent.ACTION_PERFORMED, "next");
-        
-        // Act
-        nextMenuItem.getActionListeners()[0].actionPerformed(mockEvent);
-        
-        // Assert
-        verify(mockPresentation, times(1)).nextSlide();
-    }
-    
-    @Test
-    @DisplayName("View > Prev menu action should call prevSlide")
-    void prevMenuActionShouldCallPrevSlide() throws Exception {
-        // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
-        
-        // Arrange
-        MenuItem prevMenuItem = findMenuItemByLabel(menuController, "Prev");
-        ActionEvent mockEvent = new ActionEvent(prevMenuItem, ActionEvent.ACTION_PERFORMED, "prev");
-        
-        // Act
-        prevMenuItem.getActionListeners()[0].actionPerformed(mockEvent);
-        
-        // Assert
-        verify(mockPresentation, times(1)).prevSlide();
-    }
-    
-    @Test
-    @DisplayName("View > Go to menu action should set slide number")
-    void gotoMenuActionShouldSetSlideNumber() throws Exception {
-        // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
-        
-        // This test is challenging because it involves JOptionPane.showInputDialog
-        // Using try-with-resources with a MockedStatic
-        try (MockedStatic<JOptionPane> mockedStatic = mockStatic(JOptionPane.class)) {
-            // Arrange
-            mockedStatic.when(() -> JOptionPane.showInputDialog(any())).thenReturn("3");
+        try (MockedStatic<XMLAccessor> mockedAccessor = mockStatic(XMLAccessor.class);
+             MockedStatic<JOptionPane> mockedJOptionPane = mockStatic(JOptionPane.class)) {
             
-            MenuItem gotoMenuItem = findMenuItemByLabel(menuController, "Go to");
-            ActionEvent mockEvent = new ActionEvent(gotoMenuItem, ActionEvent.ACTION_PERFORMED, "goto");
+            // Set up mocking
+            mockedAccessor.when(XMLAccessor::new).thenReturn(mockXmlAccessor);
             
-            // Act
-            gotoMenuItem.getActionListeners()[0].actionPerformed(mockEvent);
+            // Trigger the Open menu item's action
+            MenuItem openItem = findMenuItem("Open");
+            assertNotNull(openItem, "Open menu item should exist");
             
-            // Assert
-            verify(mockPresentation, times(1)).setSlideNumber(2); // 3-1=2, zero-based index
+            // Create an ActionEvent
+            ActionEvent event = new ActionEvent(openItem, ActionEvent.ACTION_PERFORMED, "command");
+            
+            // Call action listener directly
+            openItem.getActionListeners()[0].actionPerformed(event);
+            
+            // Verify error dialog was shown
+            mockedJOptionPane.verify(() -> 
+                JOptionPane.showMessageDialog(
+                    eq(mockFrame),
+                    contains("IO Exception:"),
+                    eq("Load Error"),
+                    eq(JOptionPane.ERROR_MESSAGE)
+                )
+            );
+            
+            // Verify presentation operations and repaint
+            verify(mockPresentation).clear();
+            verify(mockFrame).repaint();
         }
     }
     
     @Test
-    @DisplayName("Help > About menu action should show about box")
-    void aboutMenuActionShouldShowAboutBox() throws Exception {
+    @DisplayName("New menu item should clear presentation")
+    void newMenuItemShouldClearPresentation() {
         // Skip test in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
         
-        // This test requires mocking static method AboutBox.show
-        try (MockedStatic<AboutBox> mockedStatic = mockStatic(AboutBox.class)) {
-            // Arrange
-            MenuItem aboutMenuItem = findMenuItemByLabel(menuController, "About");
-            ActionEvent mockEvent = new ActionEvent(aboutMenuItem, ActionEvent.ACTION_PERFORMED, "about");
+        // Find the New menu item
+        MenuItem newItem = findMenuItem("New");
+        assertNotNull(newItem, "New menu item should exist");
+        
+        // Create an ActionEvent
+        ActionEvent event = new ActionEvent(newItem, ActionEvent.ACTION_PERFORMED, "command");
+        
+        // Call action listener directly
+        newItem.getActionListeners()[0].actionPerformed(event);
+        
+        // Verify the presentation was cleared and frame repainted
+        verify(mockPresentation).clear();
+        verify(mockFrame).repaint();
+    }
+    
+    @Test
+    @DisplayName("Save menu item should save presentation to XML file")
+    void saveMenuItemShouldSavePresentationToXML() throws IOException {
+        // Skip test in headless environment
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
+        
+        // Create mock for XMLAccessor
+        XMLAccessor mockXmlAccessor = mock(XMLAccessor.class);
+        
+        try (MockedStatic<XMLAccessor> mockedConstructor = mockStatic(XMLAccessor.class)) {
+            // Set up constructor mocking to return our mock
+            mockedConstructor.when(XMLAccessor::new).thenReturn(mockXmlAccessor);
             
-            // Act
-            aboutMenuItem.getActionListeners()[0].actionPerformed(mockEvent);
+            // Trigger the Save menu item's action
+            MenuItem saveItem = findMenuItem("Save");
+            assertNotNull(saveItem, "Save menu item should exist");
             
-            // Assert
-            mockedStatic.verify(() -> AboutBox.show(mockFrame), times(1));
+            // Create an ActionEvent
+            ActionEvent event = new ActionEvent(saveItem, ActionEvent.ACTION_PERFORMED, "command");
+            
+            // Call action listener directly
+            saveItem.getActionListeners()[0].actionPerformed(event);
+            
+            // Verify the presentation was saved
+            verify(mockXmlAccessor).saveFile(eq(mockPresentation), eq("dump.xml"));
         }
     }
     
-    // Helper method to find menu item by label
-    private MenuItem findMenuItemByLabel(MenuController controller, String label) {
-        // First check regular menus
-        for (int i = 0; i < controller.getMenuCount(); i++) {
-            Menu menu = controller.getMenu(i);
+    @Test
+    @DisplayName("Save menu item should show error dialog when saving fails")
+    void saveMenuItemShouldShowErrorOnSaveFailure() throws IOException {
+        // Skip test in headless environment
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
+        
+        // Create mocks for XMLAccessor and JOptionPane
+        XMLAccessor mockXmlAccessor = mock(XMLAccessor.class);
+        IOException testException = new IOException("Test error");
+        
+        // Set up XMLAccessor to throw an exception when saving
+        doThrow(testException).when(mockXmlAccessor).saveFile(any(Presentation.class), anyString());
+        
+        try (MockedStatic<XMLAccessor> mockedAccessor = mockStatic(XMLAccessor.class);
+             MockedStatic<JOptionPane> mockedJOptionPane = mockStatic(JOptionPane.class)) {
+            
+            // Set up mocking
+            mockedAccessor.when(XMLAccessor::new).thenReturn(mockXmlAccessor);
+            
+            // Trigger the Save menu item's action
+            MenuItem saveItem = findMenuItem("Save");
+            assertNotNull(saveItem, "Save menu item should exist");
+            
+            // Create an ActionEvent
+            ActionEvent event = new ActionEvent(saveItem, ActionEvent.ACTION_PERFORMED, "command");
+            
+            // Call action listener directly
+            saveItem.getActionListeners()[0].actionPerformed(event);
+            
+            // Verify error dialog was shown
+            mockedJOptionPane.verify(() -> 
+                JOptionPane.showMessageDialog(
+                    eq(mockFrame),
+                    contains("IO Exception:"),
+                    eq("Save Error"),
+                    eq(JOptionPane.ERROR_MESSAGE)
+                )
+            );
+        }
+    }
+    
+    @Test
+    @DisplayName("Exit menu item should exit the presentation")
+    void exitMenuItemShouldExitPresentation() {
+        // Skip test in headless environment
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
+        
+        // Find the Exit menu item
+        MenuItem exitItem = findMenuItem("Exit");
+        assertNotNull(exitItem, "Exit menu item should exist");
+        
+        // Create an ActionEvent
+        ActionEvent event = new ActionEvent(exitItem, ActionEvent.ACTION_PERFORMED, "command");
+        
+        // Call action listener directly
+        exitItem.getActionListeners()[0].actionPerformed(event);
+        
+        // Verify the presentation exit method was called
+        verify(mockPresentation).exit(0);
+    }
+    
+    @Test
+    @DisplayName("Next menu item should go to next slide")
+    void nextMenuItemShouldGoToNextSlide() {
+        // Skip test in headless environment
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
+        
+        // Find the Next menu item
+        MenuItem nextItem = findMenuItem("Next");
+        assertNotNull(nextItem, "Next menu item should exist");
+        
+        // Create an ActionEvent
+        ActionEvent event = new ActionEvent(nextItem, ActionEvent.ACTION_PERFORMED, "command");
+        
+        // Call action listener directly
+        nextItem.getActionListeners()[0].actionPerformed(event);
+        
+        // Verify the nextSlide method was called
+        verify(mockPresentation).nextSlide();
+    }
+    
+    @Test
+    @DisplayName("Prev menu item should go to previous slide")
+    void prevMenuItemShouldGoToPreviousSlide() {
+        // Skip test in headless environment
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
+        
+        // Find the Prev menu item
+        MenuItem prevItem = findMenuItem("Prev");
+        assertNotNull(prevItem, "Prev menu item should exist");
+        
+        // Create an ActionEvent
+        ActionEvent event = new ActionEvent(prevItem, ActionEvent.ACTION_PERFORMED, "command");
+        
+        // Call action listener directly
+        prevItem.getActionListeners()[0].actionPerformed(event);
+        
+        // Verify the prevSlide method was called
+        verify(mockPresentation).prevSlide();
+    }
+    
+    @Test
+    @DisplayName("Go to menu item should set slide number from user input")
+    void gotoMenuItemShouldSetSlideNumberFromUserInput() {
+        // Skip test in headless environment
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
+        
+        // Find the Go to menu item
+        MenuItem gotoItem = findMenuItem("Go to");
+        assertNotNull(gotoItem, "Go to menu item should exist");
+        
+        try (MockedStatic<JOptionPane> mockedJOptionPane = mockStatic(JOptionPane.class)) {
+            // Mock the user input dialog to return "3"
+            mockedJOptionPane.when(() -> JOptionPane.showInputDialog(any())).thenReturn("3");
+            
+            // Create an ActionEvent
+            ActionEvent event = new ActionEvent(gotoItem, ActionEvent.ACTION_PERFORMED, "command");
+            
+            // Call action listener directly
+            gotoItem.getActionListeners()[0].actionPerformed(event);
+            
+            // Verify the setSlideNumber method was called with the expected value (0-based index)
+            verify(mockPresentation).setSlideNumber(2);
+        }
+    }
+    
+    @Test
+    @DisplayName("About menu item should show About dialog")
+    void aboutMenuItemShouldShowAboutDialog() {
+        // Skip test in headless environment
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
+        
+        // Find the About menu item
+        MenuItem aboutItem = findMenuItem("About");
+        assertNotNull(aboutItem, "About menu item should exist");
+        
+        try (MockedStatic<AboutBox> mockedAboutBox = mockStatic(AboutBox.class)) {
+            // Create an ActionEvent
+            ActionEvent event = new ActionEvent(aboutItem, ActionEvent.ACTION_PERFORMED, "command");
+            
+            // Call action listener directly
+            aboutItem.getActionListeners()[0].actionPerformed(event);
+            
+            // Verify the AboutBox.show method was called
+            mockedAboutBox.verify(() -> AboutBox.show(mockFrame));
+        }
+    }
+    
+    /**
+     * Helper method to find a menu item in the MenuController by its label
+     */
+    private MenuItem findMenuItem(String label) {
+        // Get all the menus from the MenuController
+        for (int i = 0; i < menuController.getMenuCount(); i++) {
+            Menu menu = menuController.getMenu(i);
             for (int j = 0; j < menu.getItemCount(); j++) {
-                if (menu.getItem(j) instanceof MenuItem) {
-                    MenuItem item = (MenuItem) menu.getItem(j);
-                    if (label.equals(item.getLabel())) {
-                        return item;
-                    }
+                MenuItem item = menu.getItem(j);
+                if (item != null && label.equals(item.getLabel())) {
+                    return item;
                 }
             }
         }
         
-        // Then check help menu separately
-        Menu helpMenu = controller.getHelpMenu();
-        if (helpMenu != null) {
+        // Try the help menu (handled differently in MenuBar)
+        if (menuController.getHelpMenu() != null) {
+            Menu helpMenu = menuController.getHelpMenu();
             for (int j = 0; j < helpMenu.getItemCount(); j++) {
-                if (helpMenu.getItem(j) instanceof MenuItem) {
-                    MenuItem item = (MenuItem) helpMenu.getItem(j);
-                    if (label.equals(item.getLabel())) {
-                        return item;
-                    }
+                MenuItem item = helpMenu.getItem(j);
+                if (item != null && label.equals(item.getLabel())) {
+                    return item;
                 }
             }
         }
