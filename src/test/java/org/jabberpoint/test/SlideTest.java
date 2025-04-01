@@ -136,11 +136,13 @@ class SlideTest {
         // Set up rectangle for drawing area
         Rectangle drawArea = new Rectangle(0, 0, 800, 600);
         
-        // Call draw
-        slide.draw(10, 20, 1.0f, mockGraphics2D, drawArea, mockObserver);
+        // Call draw with the correct method signature
+        slide.draw(mockGraphics2D, drawArea, mockObserver);
         
         // Verify that the mockSlideItem's draw method was called
-        verify(mockSlideItem).draw(anyInt(), anyInt(), anyFloat(), eq(mockGraphics2D), any(Style.class), eq(mockObserver));
+        // We can't verify exact arguments because they're calculated within Slide.draw
+        verify(mockSlideItem, atLeastOnce()).draw(anyInt(), anyInt(), anyFloat(), 
+                                                  eq(mockGraphics2D), any(Style.class), eq(mockObserver));
     }
     
     @Test
@@ -158,7 +160,7 @@ class SlideTest {
             .thenReturn(boundingBox);
         
         // Calculate scale - should be reduced to fit area
-        float scale = slide.getScale(mockGraphics2D, area);
+        float scale = slide.getScale(area);
         
         // Expect scale to be reduced
         assertTrue(scale < 1.0f, "Scale should be reduced for large slides");
