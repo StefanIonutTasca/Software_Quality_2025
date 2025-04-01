@@ -304,6 +304,185 @@ class XMLAccessorTest {
         assertEquals(1, items.get(0).getLevel(), "Item should have default level 1");
     }
 
+    @Test
+    @DisplayName("Should load presentation from XML file")
+    void shouldLoadPresentationFromXMLFile() throws Exception {
+        // Arrange
+        File testFile = new File(tempDir.toFile(), "test-presentation.xml");
+        String xmlContent = "<?xml version=\"1.0\"?>\n" +
+                            "<presentation>\n" +
+                            "  <showtitle>Test Presentation</showtitle>\n" +
+                            "  <slide>\n" +
+                            "    <title>Test Slide 1</title>\n" +
+                            "    <item kind=\"text\" level=\"1\">Text Item</item>\n" +
+                            "    <item kind=\"image\" level=\"2\">test.jpg</item>\n" +
+                            "  </slide>\n" +
+                            "  <slide>\n" +
+                            "    <title>Test Slide 2</title>\n" +
+                            "    <item kind=\"text\" level=\"1\">Another Text Item</item>\n" +
+                            "  </slide>\n" +
+                            "</presentation>";
+        Files.writeString(testFile.toPath(), xmlContent);
+        
+        Presentation presentation = new Presentation();
+        
+        // Act
+        xmlAccessor.loadFile(presentation, testFile.getAbsolutePath());
+        
+        // Assert
+        assertEquals("Test Presentation", presentation.getTitle(), "Presentation title should match");
+        assertEquals(2, presentation.getSize(), "Should have loaded 2 slides");
+        
+        // Check first slide
+        Slide slide1 = presentation.getSlide(0);
+        assertEquals("Test Slide 1", slide1.getTitle(), "First slide title should match");
+        assertEquals(2, slide1.getSlideItems().size(), "First slide should have 2 items");
+        
+        // Check second slide
+        Slide slide2 = presentation.getSlide(1);
+        assertEquals("Test Slide 2", slide2.getTitle(), "Second slide title should match");
+        assertEquals(1, slide2.getSlideItems().size(), "Second slide should have 1 item");
+    }
+    
+    @Test
+    @DisplayName("Should save presentation to XML file")
+    void shouldSavePresentationToXMLFile() throws Exception {
+        // Arrange
+        File outputFile = new File(tempDir.toFile(), "output-presentation.xml");
+        
+        Presentation presentation = new Presentation();
+        presentation.setTitle("Saved Presentation");
+        
+        // Add slides
+        Slide slide1 = new Slide();
+        slide1.setTitle("Slide One");
+        slide1.append(new TextItem(1, "Text Item 1"));
+        slide1.append(new BitmapItem(2, "image1.jpg"));
+        presentation.append(slide1);
+        
+        Slide slide2 = new Slide();
+        slide2.setTitle("Slide Two");
+        slide2.append(new TextItem(1, "Text Item 2"));
+        presentation.append(slide2);
+        
+        // Act
+        xmlAccessor.saveFile(presentation, outputFile.getAbsolutePath());
+        
+        // Assert
+        String savedContent = Files.readString(outputFile.toPath());
+        
+        // Check that key elements are in the saved XML
+        assertTrue(savedContent.contains("<showtitle>Saved Presentation</showtitle>"), 
+                "Saved XML should contain presentation title");
+        assertTrue(savedContent.contains("<title>Slide One</title>"), 
+                "Saved XML should contain first slide title");
+        assertTrue(savedContent.contains("<title>Slide Two</title>"), 
+                "Saved XML should contain second slide title");
+        assertTrue(savedContent.contains("<item kind=\"text\" level=\"1\">Text Item 1</item>"), 
+                "Saved XML should contain text item");
+        assertTrue(savedContent.contains("<item kind=\"image\" level=\"2\">image1.jpg</item>"), 
+                "Saved XML should contain image item");
+    }
+    
+    @Test
+    @DisplayName("Should handle IO exception when loading file")
+    void shouldHandleIOExceptionWhenLoadingFile() throws Exception {
+        // Arrange
+        File nonExistentFile = new File(tempDir.toFile(), "non-existent.xml");
+        Presentation presentation = new Presentation();
+        
+        // Act
+        xmlAccessor.loadFile(presentation, nonExistentFile.getAbsolutePath());
+        
+        // Assert - should catch exception internally and print to System.err
+        assertTrue(errContent.toString().contains("FileNotFoundException") || 
+                   errContent.toString().contains("NoSuchFileException"),
+                "Should log file not found error");
+    }
+    
+    @Test
+    @DisplayName("Should handle invalid XML when loading file")
+    void shouldHandleInvalidXMLWhenLoadingFile() throws Exception {
+        // Arrange
+        File invalidFile = new File(tempDir.toFile(), "invalid.xml");
+        String invalidXML = "<?xml version=\"1.0\"?>\n" +
+                           "<presentation>\n" +
+                           "  <showtitle>Invalid XML</showtitle>\n" +
+                           "  <slide>\n" +
+                           "    <title>Incomplete Slide\n" + // Missing closing tag
+                           "    <item kind=\"text\" level=\"1\">Text</item>\n" +
+                           "  </slide>\n" +
+                           "</presentation>";
+        Files.writeString(invalidFile.toPath(), invalidXML);
+        
+        Presentation presentation = new Presentation();
+        
+        // Act
+        xmlAccessor.loadFile(presentation, invalidFile.getAbsolutePath());
+        
+        // Assert - should catch SAXException internally and print to System.err
+        assertTrue(errContent.toString().contains("SAX"), 
+                "Should log SAX parsing error");
+    }
+    
+    @Test
+    @DisplayName("Should handle invalid level attribute in item")
+    void shouldHandleInvalidLevelAttributeInItem() throws Exception {
+        // Arrange
+        File invalidLevelFile = new File(tempDir.toFile(), "invalid-level.xml");
+        String invalidLevelXML = "<?xml version=\"1.0\"?>\n" +
+                               "<presentation>\n" +
+                               "  <showtitle>Invalid Level</showtitle>\n" +
+                               "  <slide>\n" +
+                               "    <title>Test Slide</title>\n" +
+                               "    <item kind=\"text\" level=\"invalid\">Text Item</item>\n" +
+                               "  </slide>\n" +
+                               "</presentation>";
+        Files.writeString(invalidLevelFile.toPath(), invalidLevelXML);
+        
+        Presentation presentation = new Presentation();
+        
+        // Act
+        xmlAccessor.loadFile(presentation, invalidLevelFile.getAbsolutePath());
+        
+        // Assert
+        assertEquals("Invalid Level", presentation.getTitle(), "Presentation title should be set");
+        assertEquals(1, presentation.getSize(), "Should have loaded 1 slide");
+        
+        // Check that the NFE error was logged
+        assertTrue(errContent.toString().contains("Number Format Exception"), 
+                "Should log NumberFormatException");
+    }
+    
+    @Test
+    @DisplayName("Should handle unknown item type")
+    void shouldHandleUnknownItemType() throws Exception {
+        // Arrange
+        File unknownTypeFile = new File(tempDir.toFile(), "unknown-type.xml");
+        String unknownTypeXML = "<?xml version=\"1.0\"?>\n" +
+                              "<presentation>\n" +
+                              "  <showtitle>Unknown Type</showtitle>\n" +
+                              "  <slide>\n" +
+                              "    <title>Test Slide</title>\n" +
+                              "    <item kind=\"unknown\" level=\"1\">Unknown Item</item>\n" +
+                              "  </slide>\n" +
+                              "</presentation>";
+        Files.writeString(unknownTypeFile.toPath(), unknownTypeXML);
+        
+        Presentation presentation = new Presentation();
+        
+        // Act
+        xmlAccessor.loadFile(presentation, unknownTypeFile.getAbsolutePath());
+        
+        // Assert
+        assertEquals("Unknown Type", presentation.getTitle(), "Presentation title should be set");
+        assertEquals(1, presentation.getSize(), "Should have loaded 1 slide");
+        
+        // Check that the unknown type error was logged
+        assertTrue(errContent.toString().contains("Unknown Element type"), 
+                "Should log unknown element type error");
+    }
+    
     private Document createEmptyDocument() throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
