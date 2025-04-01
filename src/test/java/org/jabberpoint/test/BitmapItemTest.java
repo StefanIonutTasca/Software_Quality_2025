@@ -188,4 +188,53 @@ class BitmapItemTest {
         String expected = "BitmapItem[" + testLevel + "," + imageName + "]";
         assertEquals(expected, bitmapItem.toString(), "toString should return formatted representation");
     }
+    
+    @Test
+    @DisplayName("Should handle null image name gracefully")
+    void shouldHandleNullImageNameGracefully() {
+        // Create BitmapItem with null name
+        BitmapItem nullNameItem = new BitmapItem(testLevel, null);
+        
+        // Should not throw exceptions when drawing
+        assertDoesNotThrow(() -> nullNameItem.draw(10, 10, 1.0f, mockGraphics, realStyle, mockObserver));
+        
+        // Get the image name
+        String name = nullNameItem.getName();
+        assertNull(name, "Name should be null");
+    }
+    
+    @Test
+    @DisplayName("Should return correct scale from getBoundingBox")
+    void shouldReturnCorrectScaleFromGetBoundingBox() throws Exception {
+        // Create valid image file
+        File imageFile = tempDir.resolve(testImageName).toFile();
+        ImageIO.write(testImage, "png", imageFile);
+        
+        // Create BitmapItem with valid image
+        BitmapItem validItem = new BitmapItem(testLevel, imageFile.getAbsolutePath());
+        
+        // Get bounding box at different scales
+        Rectangle box1 = validItem.getBoundingBox(mockGraphics, mockObserver, 1.0f, realStyle);
+        Rectangle box2 = validItem.getBoundingBox(mockGraphics, mockObserver, 2.0f, realStyle);
+        
+        // Second box should be twice as large
+        assertEquals(box1.width * 2, box2.width, "Width should scale proportionally");
+        assertEquals(box1.height * 2, box2.height, "Height should scale proportionally");
+    }
+    
+    @Test
+    @DisplayName("Should return image name correctly")
+    void shouldReturnImageNameCorrectly() {
+        // Create BitmapItem with known name
+        String imagePath = "/path/to/image.jpg";
+        BitmapItem namedItem = new BitmapItem(testLevel, imagePath);
+        
+        // Test getName method
+        assertEquals(imagePath, namedItem.getName(), "getName should return the original image path");
+        
+        // Test toString method
+        String toStringResult = namedItem.toString();
+        assertTrue(toStringResult.contains(imagePath), "toString should include the image path");
+        assertTrue(toStringResult.contains(String.valueOf(testLevel)), "toString should include the level");
+    }
 }
