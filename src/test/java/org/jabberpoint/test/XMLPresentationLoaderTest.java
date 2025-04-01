@@ -356,8 +356,7 @@ class XMLPresentationLoaderTest {
         Path xmlFile = tempDir.resolve("factory_test.xml");
         Files.writeString(xmlFile, textXml);
         
-        // Mock the SlideItemFactory to verify it's called correctly
-        SlideItemFactory originalFactory = SlideItemFactory.getInstance();
+        // No need to mock SlideItemFactory as it uses static methods
         
         try {
             // Create and load the presentation
@@ -378,8 +377,7 @@ class XMLPresentationLoaderTest {
             assertEquals(3, imageItem.getLevel(), "Image item should have level 3");
         } 
         finally {
-            // Clean up by setting the original factory back if needed
-            // This is just a precaution in case your code modified the factory behavior
+            // No cleanup needed
         }
     }
 }
