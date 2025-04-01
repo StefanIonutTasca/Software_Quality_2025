@@ -1,123 +1,199 @@
 package org.jabberpoint.test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.font.FontRenderContext;
-import java.awt.geom.AffineTransform;
-import java.awt.image.ImageObserver;
-import java.text.AttributedString;
-
 import org.jabberpoint.src.Style;
 import org.jabberpoint.src.TextItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-/**
- * Unit tests for TextItem class
- */
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.font.FontRenderContext;
+import java.awt.font.LineBreakMeasurer;
+import java.awt.font.TextAttribute;
+import java.awt.font.TextLayout;
+import java.awt.image.ImageObserver;
+import java.text.AttributedString;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 class TextItemTest {
 
     private TextItem textItem;
-    private Graphics2D graphicsMock; 
-    private ImageObserver observerMock;
-    private Style style;
-    private FontRenderContext frc;
+    private String testText = "Test text for TextItem";
+    private int testLevel = 2;
+
+    @Mock
+    private Graphics mockGraphics;
+    
+    @Mock
+    private Graphics2D mockGraphics2D;
+    
+    @Mock
+    private ImageObserver mockObserver;
+    
+    @Mock
+    private FontRenderContext mockFontRenderContext;
+    
+    @Mock
+    private LineBreakMeasurer mockMeasurer;
+    
+    @Mock
+    private TextLayout mockTextLayout;
+    
+    @Mock
+    private Style mockStyle;
 
     @BeforeEach
     void setUp() {
-        graphicsMock = Mockito.mock(Graphics2D.class);
-        observerMock = Mockito.mock(ImageObserver.class);
+        MockitoAnnotations.openMocks(this);
         
-        // Create a real FontRenderContext with an identity AffineTransform
-        AffineTransform at = new AffineTransform();
-        frc = new FontRenderContext(at, true, true);
+        // Create a text item with level and text
+        textItem = new TextItem(testLevel, testText);
         
-        // Configure the mock to return our real FontRenderContext
-        Mockito.when(graphicsMock.getFontRenderContext()).thenReturn(frc);
+        // Mock Style behavior
+        when(mockStyle.getFont(anyFloat())).thenReturn(new Font("Dialog", Font.PLAIN, 12));
+        when(mockStyle.indent).thenReturn(10f);
+        when(mockStyle.leading).thenReturn(20f);
+        when(mockStyle.color).thenReturn(Color.BLACK);
         
-        Style.createStyles();
-        style = Style.getStyle(1); 
+        // Mock Graphics and Graphics2D behavior
+        when(mockGraphics.create()).thenReturn(mockGraphics2D);
+        when(mockGraphics2D.getFontRenderContext()).thenReturn(mockFontRenderContext);
     }
 
     @Test
-    @DisplayName("Should create TextItem with level and text")
-    void shouldCreateTextItemWithLevelAndText() {
-        textItem = new TextItem(2, "Test Text");
+    @DisplayName("Constructor should initialize TextItem with level and text")
+    void constructorShouldInitializeWithLevelAndText() {
+        // Test constructor with parameters
+        assertEquals(testLevel, textItem.getLevel(), "Level should be initialized correctly");
+        assertEquals(testText, textItem.getText(), "Text should be initialized correctly");
         
-        assertEquals(2, textItem.getLevel());
-        assertEquals("Test Text", textItem.getText());
+        // Test default constructor
+        TextItem defaultItem = new TextItem();
+        assertEquals(0, defaultItem.getLevel(), "Default level should be 0");
+        assertEquals("No Text Given", defaultItem.getText(), "Default text should be 'No Text Given'");
     }
 
     @Test
-    @DisplayName("Should create empty TextItem with default values")
-    void shouldCreateEmptyTextItem() {
-        textItem = new TextItem();
+    @DisplayName("getText should return the text or empty string if null")
+    void getTextShouldReturnTextOrEmptyString() {
+        // With normal text
+        assertEquals(testText, textItem.getText(), "getText should return the text");
         
-        assertEquals(0, textItem.getLevel());
-        assertEquals("No Text Given", textItem.getText());
-    }
-
-    @Test
-    @DisplayName("Should handle null text")
-    void shouldHandleNullText() {
-        textItem = new TextItem(1, null);
-        
-        String result = textItem.getText();
-        
-        assertEquals("", result);
-    }
-
-    @Test
-    @DisplayName("Should create AttributedString with correct attributes")
-    void shouldCreateAttributedStringWithCorrectAttributes() {
-        textItem = new TextItem(1, "Test Text");
-        float scale = 1.0f;
-        
-        AttributedString result = textItem.getAttributedString(style, scale);
-        
-        assertNotNull(result);
-    }
-
-    @Test
-    @DisplayName("Should not draw anything when text is empty")
-    void shouldNotDrawAnythingWhenTextIsEmpty() {
-        textItem = new TextItem(1, "");
-        
-        textItem.draw(10, 10, 1.0f, graphicsMock, style, observerMock);
-        
-        Mockito.verify(graphicsMock, Mockito.never()).setColor(Mockito.any());
-    }
-
-    @Test
-    @DisplayName("Should return correct toString representation")
-    void shouldReturnCorrectToStringRepresentation() {
-        textItem = new TextItem(3, "Sample Text");
-        
-        String result = textItem.toString();
-        
-        assertEquals("TextItem[3,Sample Text]", result);
-    }
-
-    @Test
-    @DisplayName("Should create a bounding box with correct dimensions")
-    void shouldCreateBoundingBoxWithCorrectDimensions() {
-        textItem = new TextItem(1, "Test");
-        float scale = 1.0f;
-        
+        // Test with null text using reflection
         try {
-            Rectangle boundingBox = textItem.getBoundingBox(graphicsMock, observerMock, scale, style);
+            java.lang.reflect.Field textField = TextItem.class.getDeclaredField("text");
+            textField.setAccessible(true);
+            textField.set(textItem, null);
             
-            assertNotNull(boundingBox);
-            assertTrue(boundingBox.x >= 0);
-            assertEquals(0, boundingBox.y);
-        } catch (NullPointerException e) {
-            // Since we're using a mock Graphics2D, some exceptions might still occur 
-            // The important part is that we're testing the code path properly
-            // This is a unit test so we're not testing the complete rendering pipeline
+            assertEquals("", textItem.getText(), "getText should return empty string when text is null");
+        } catch (Exception e) {
+            fail("Failed to set text field to null: " + e.getMessage());
         }
+    }
+    
+    @Test
+    @DisplayName("getAttributedString should return AttributedString with style font")
+    void getAttributedStringShouldReturnAttributedStringWithStyleFont() {
+        float scale = 1.5f;
+        Font testFont = new Font("Arial", Font.BOLD, 14);
+        when(mockStyle.getFont(scale)).thenReturn(testFont);
+        
+        AttributedString result = textItem.getAttributedString(mockStyle, scale);
+        
+        // We can't directly check attributes, but we can verify the mock was called
+        verify(mockStyle).getFont(scale);
+        assertNotNull(result, "AttributedString should not be null");
+    }
+    
+    @Test
+    @DisplayName("getBoundingBox should calculate correct dimensions")
+    void getBoundingBoxShouldCalculateCorrectDimensions() {
+        // Need to use spy to partially mock TextItem
+        TextItem spyItem = spy(textItem);
+        
+        // Create a simple mock layout
+        TextLayout mockLayout = mock(TextLayout.class);
+        java.awt.geom.Rectangle2D mockBounds = new java.awt.geom.Rectangle2D.Double(0, 0, 100, 30);
+        
+        when(mockLayout.getBounds()).thenReturn(mockBounds);
+        when(mockLayout.getLeading()).thenReturn(2f);
+        when(mockLayout.getDescent()).thenReturn(3f);
+        
+        // Mock the getLayouts method to return our mock layout
+        java.util.List<TextLayout> layouts = new java.util.ArrayList<>();
+        layouts.add(mockLayout);
+        doReturn(layouts).when(spyItem).getLayouts(any(Graphics.class), any(Style.class), anyFloat());
+        
+        // Call the method
+        float scale = 1.0f;
+        Rectangle boundingBox = spyItem.getBoundingBox(mockGraphics, mockObserver, scale, mockStyle);
+        
+        // Verify results
+        assertNotNull(boundingBox, "Bounding box should not be null");
+        assertEquals((int)(mockStyle.indent * scale), boundingBox.x, "X position should be style indent * scale");
+        assertEquals(0, boundingBox.y, "Y position should be 0");
+        assertEquals((int)mockBounds.getWidth(), boundingBox.width, "Width should match the text layout bounds");
+        assertTrue(boundingBox.height > 0, "Height should be positive");
+    }
+    
+    @Test
+    @DisplayName("draw should not draw anything if text is empty")
+    void drawShouldNotDrawIfTextIsEmpty() {
+        // Create text item with empty text
+        TextItem emptyItem = new TextItem(1, "");
+        
+        // Call draw
+        emptyItem.draw(10, 10, 1.0f, mockGraphics, mockStyle, mockObserver);
+        
+        // Verify no drawing operations were performed
+        verify(mockGraphics, never()).create();
+    }
+    
+    @Test
+    @DisplayName("draw should draw text with proper styling")
+    void drawShouldDrawTextWithProperStyling() {
+        // Need to use spy to partially mock TextItem
+        TextItem spyItem = spy(textItem);
+        
+        // Create a simple mock layout
+        TextLayout mockLayout = mock(TextLayout.class);
+        
+        // Mock layout behavior
+        when(mockLayout.getAscent()).thenReturn(10f);
+        when(mockLayout.getDescent()).thenReturn(5f);
+        
+        // Mock the getLayouts method to return our mock layout
+        java.util.List<TextLayout> layouts = new java.util.ArrayList<>();
+        layouts.add(mockLayout);
+        doReturn(layouts).when(spyItem).getLayouts(any(Graphics.class), any(Style.class), anyFloat());
+        
+        // Mock Graphics2D casting
+        when(mockGraphics.create()).thenReturn(mockGraphics2D);
+        
+        // Call the draw method
+        int x = 5, y = 10;
+        float scale = 1.0f;
+        spyItem.draw(x, y, scale, mockGraphics, mockStyle, mockObserver);
+        
+        // Verify interactions
+        verify(mockGraphics2D).setColor(mockStyle.color);
+        verify(mockLayout).draw(eq(mockGraphics2D), anyFloat(), anyFloat());
+        verify(mockLayout).getAscent();
+        verify(mockLayout).getDescent();
+    }
+    
+    @Test
+    @DisplayName("toString should return formatted string representation")
+    void toStringShouldReturnFormattedStringRepresentation() {
+        String expected = "TextItem[" + testLevel + "," + testText + "]";
+        assertEquals(expected, textItem.toString(), "toString should return formatted representation");
     }
 }
