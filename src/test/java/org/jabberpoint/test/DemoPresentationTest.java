@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -34,7 +35,7 @@ class DemoPresentationTest {
 
     @Test
     @DisplayName("loadFile should create a presentation with demo content")
-    void loadFileShouldCreatePresentationWithDemoContent() {
+    void loadFileShouldCreatePresentationWithDemoContent() throws IOException {
         // Act
         demoPresentation.loadFile(presentation, "");
 
