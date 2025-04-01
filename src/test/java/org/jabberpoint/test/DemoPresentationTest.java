@@ -1,43 +1,38 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.Accessor;
 import org.jabberpoint.src.BitmapItem;
 import org.jabberpoint.src.Presentation;
+import org.jabberpoint.src.PresentationLoader;
+import org.jabberpoint.src.PresentationLoaderFactory;
 import org.jabberpoint.src.Slide;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests for DemoPresentation class
- * 
- * Note: Using reflection to access package-private class
+ * Unit tests for Demo presentation loader functionality
  */
 class DemoPresentationTest {
 
-    private Accessor demoPresentation;
+    private PresentationLoader demoLoader;
     private Presentation presentation;
 
     @BeforeEach
     void setUp() throws Exception {
-        // Create DemoPresentation using reflection since it's package-private
-        Class<?> demoPresentationClass = Class.forName("org.jabberpoint.src.DemoPresentation");
-        demoPresentation = (Accessor) demoPresentationClass.getDeclaredConstructor().newInstance();
-        
+        // Get the demo loader using the factory
+        demoLoader = PresentationLoaderFactory.createLoader("demo");
         presentation = new Presentation();
     }
 
     @Test
-    @DisplayName("loadFile should create a presentation with demo content")
-    void loadFileShouldCreatePresentationWithDemoContent() throws IOException {
+    @DisplayName("loadPresentation should create a presentation with demo content")
+    void loadPresentationShouldCreatePresentationWithDemoContent() throws IOException {
         // Act
-        demoPresentation.loadFile(presentation, "");
+        demoLoader.loadPresentation(presentation, "");
 
         // Assert
         assertEquals("Demo Presentation", presentation.getTitle(), "Presentation title should be set to 'Demo Presentation'");
@@ -71,12 +66,12 @@ class DemoPresentationTest {
     }
 
     @Test
-    @DisplayName("saveFile should throw IllegalStateException")
-    void saveFileShouldThrowIllegalStateException() {
-        // Assert
+    @DisplayName("savePresentation should throw IllegalStateException")
+    void savePresentationShouldThrowIllegalStateException() {
+        // Assert that saving with the demo loader throws an exception
         IllegalStateException exception = assertThrows(IllegalStateException.class, 
-            () -> demoPresentation.saveFile(presentation, ""),
-            "saveFile should throw IllegalStateException");
+            () -> demoLoader.savePresentation(presentation, ""),
+            "savePresentation should throw IllegalStateException");
         
         assertEquals("Save As->Demo! called", exception.getMessage(), 
             "Exception message should be 'Save As->Demo! called'");
