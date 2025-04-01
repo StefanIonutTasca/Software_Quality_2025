@@ -7,12 +7,14 @@ import org.jabberpoint.src.TextItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assumptions;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import javax.swing.JFrame;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.GraphicsEnvironment;
 import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,6 +41,10 @@ class SlideViewerComponentTest {
 
     @BeforeEach
     void setUp() {
+        // Skip tests in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless(), 
+            "Skipping GUI tests in headless environment");
+            
         MockitoAnnotations.openMocks(this);
         component = new SlideViewerComponent(mockPresentation, mockFrame);
     }
@@ -46,6 +52,9 @@ class SlideViewerComponentTest {
     @Test
     @DisplayName("Should register as observer when constructed")
     void constructorShouldRegisterAsObserver() {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Assert
         verify(mockPresentation, times(1)).addObserver(component);
     }
@@ -53,6 +62,9 @@ class SlideViewerComponentTest {
     @Test
     @DisplayName("Should set background color when constructed")
     void constructorShouldSetBackgroundColor() {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Assert
         assertNotNull(component.getBackground(), "Background color should be set");
     }
@@ -60,6 +72,9 @@ class SlideViewerComponentTest {
     @Test
     @DisplayName("Should have correct preferred size")
     void getPreferredSizeShouldReturnCorrectDimension() {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Act
         Dimension dim = component.getPreferredSize();
         
@@ -71,6 +86,9 @@ class SlideViewerComponentTest {
     @Test
     @DisplayName("Update should set slide and repaint")
     void updateShouldSetSlideAndRepaint() throws Exception {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Arrange
         // Create a spy to verify repaint is called
         SlideViewerComponent spyComponent = spy(component);
@@ -91,6 +109,9 @@ class SlideViewerComponentTest {
     @Test
     @DisplayName("Update with null slide should only repaint")
     void updateWithNullSlideShouldOnlyRepaint() {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Arrange
         SlideViewerComponent spyComponent = spy(component);
         
@@ -105,6 +126,9 @@ class SlideViewerComponentTest {
     @Test
     @DisplayName("PaintComponent should draw slide if available")
     void paintComponentShouldDrawSlideIfAvailable() throws Exception {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Arrange
         when(mockPresentation.getSlideNumber()).thenReturn(2);
         when(mockPresentation.getSize()).thenReturn(5);
@@ -129,6 +153,9 @@ class SlideViewerComponentTest {
     @Test
     @DisplayName("PaintComponent should not draw slide if not available")
     void paintComponentShouldNotDrawSlideIfNotAvailable() {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Arrange
         when(mockPresentation.getSlideNumber()).thenReturn(-1);
         

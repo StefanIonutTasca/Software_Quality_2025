@@ -5,10 +5,12 @@ import org.jabberpoint.src.Presentation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assumptions;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.awt.Frame;
+import java.awt.GraphicsEnvironment;
 import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
@@ -33,6 +35,10 @@ class MenuControllerTest {
 
     @BeforeEach
     void setUp() {
+        // Skip tests in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless(), 
+            "Skipping GUI tests in headless environment");
+            
         MockitoAnnotations.openMocks(this);
         menuController = new MenuController(mockFrame, mockPresentation);
     }
@@ -40,6 +46,9 @@ class MenuControllerTest {
     @Test
     @DisplayName("Should create menu item with shortcut")
     void mkMenuItemShouldCreateMenuItemWithShortcut() {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Act
         MenuItem menuItem = menuController.mkMenuItem("Test");
         
@@ -52,6 +61,9 @@ class MenuControllerTest {
     @Test
     @DisplayName("Should initialize with correct menu structure")
     void constructorShouldInitializeCorrectMenuStructure() {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Act - the menuController is already created in setUp()
         
         // Assert
@@ -80,6 +92,9 @@ class MenuControllerTest {
     @Test
     @DisplayName("File > New menu action should call appropriate methods")
     void newMenuActionShouldCallAppropriateMethod() throws Exception {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Arrange
         MenuItem newMenuItem = findMenuItemByLabel(menuController, "New");
         ActionEvent mockEvent = new ActionEvent(newMenuItem, ActionEvent.ACTION_PERFORMED, "new");
@@ -95,6 +110,9 @@ class MenuControllerTest {
     @Test
     @DisplayName("File > Exit menu action should exit the presentation")
     void exitMenuActionShouldExitPresentation() throws Exception {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Arrange
         MenuItem exitMenuItem = findMenuItemByLabel(menuController, "Exit");
         ActionEvent mockEvent = new ActionEvent(exitMenuItem, ActionEvent.ACTION_PERFORMED, "exit");
@@ -109,6 +127,9 @@ class MenuControllerTest {
     @Test
     @DisplayName("View > Next menu action should call nextSlide")
     void nextMenuActionShouldCallNextSlide() throws Exception {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Arrange
         MenuItem nextMenuItem = findMenuItemByLabel(menuController, "Next");
         ActionEvent mockEvent = new ActionEvent(nextMenuItem, ActionEvent.ACTION_PERFORMED, "next");
@@ -123,6 +144,9 @@ class MenuControllerTest {
     @Test
     @DisplayName("View > Prev menu action should call prevSlide")
     void prevMenuActionShouldCallPrevSlide() throws Exception {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
         // Arrange
         MenuItem prevMenuItem = findMenuItemByLabel(menuController, "Prev");
         ActionEvent mockEvent = new ActionEvent(prevMenuItem, ActionEvent.ACTION_PERFORMED, "prev");
