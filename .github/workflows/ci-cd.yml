@@ -4,7 +4,9 @@ on:
   push:
     branches: [ main, development, testing, acceptance ]
   pull_request:
-    branches: [ main, development, testing, acceptance ]
+    branches:
+      - '**'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -20,17 +22,12 @@ jobs:
         distribution: 'temurin'
         cache: maven
         
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
-      
-    - name: Test with Maven
-      run: mvn test
-      
-    - name: Generate JaCoCo Report
-      run: mvn jacoco:report
+    - name: Build and Test with Maven (including JaCoCo reports)
+      run: mvn -B verify --file pom.xml
       
     - name: Upload JaCoCo coverage report
       uses: actions/upload-artifact@v4
       with:
         name: jacoco-report
         path: target/site/jacoco/
+        if-no-files-found: warn  # Warn instead of failing if no files found
