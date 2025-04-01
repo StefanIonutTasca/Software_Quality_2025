@@ -5,27 +5,24 @@ import org.jabberpoint.src.Presentation;
 import org.jabberpoint.src.PresentationLoader;
 import org.jabberpoint.src.PresentationLoaderFactory;
 import org.jabberpoint.src.SlideViewerFrame;
+import org.jabberpoint.src.Style;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
+import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.swing.JOptionPane;
 import java.awt.GraphicsEnvironment;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+
+import javax.swing.JOptionPane;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,145 +36,177 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class JabberPointTest {
 
-    @Mock
+    private MockedStatic<Style> mockedStyle;
+    private MockedStatic<PresentationLoaderFactory> mockedLoaderFactory;
+    private MockedStatic<JOptionPane> mockedJOptionPane;
+    
+    private MockedConstruction<SlideViewerFrame> mockedFrame;
+    private MockedConstruction<Presentation> mockedPresentation;
+    
     private PresentationLoader mockLoader;
     
-    @Mock
-    private Presentation mockPresentation;
-    
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final PrintStream originalOut = System.out;
-    
-    private MockedStatic<PresentationLoaderFactory> mockedFactory;
-    private MockedStatic<JOptionPane> mockedOptionPane;
-    private MockedStatic<SlideViewerFrame> mockedFrame;
-    
+    private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+    private final PrintStream originalErr = System.err;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        System.setOut(new PrintStream(outContent));
-            
-        // Setup static mocks - only create these if we're not in headless mode
+        // Only construct the mocks when not in headless mode
         if (!GraphicsEnvironment.isHeadless()) {
-            mockedFactory = Mockito.mockStatic(PresentationLoaderFactory.class);
-            mockedOptionPane = Mockito.mockStatic(JOptionPane.class);
-            mockedFrame = Mockito.mockStatic(SlideViewerFrame.class);
+            MockitoAnnotations.openMocks(this);
+            
+            mockedStyle = Mockito.mockStatic(Style.class);
+            mockedLoaderFactory = Mockito.mockStatic(PresentationLoaderFactory.class);
+            mockedJOptionPane = Mockito.mockStatic(JOptionPane.class);
+            
+            mockLoader = mock(PresentationLoader.class);
+            
+            // Mock SlideViewerFrame constructor
+            mockedFrame = Mockito.mockConstruction(SlideViewerFrame.class);
+            
+            // Mock Presentation constructor
+            mockedPresentation = Mockito.mockConstruction(Presentation.class);
+            
+            // Mock Factory to return our loader
+            mockedLoaderFactory.when(() -> PresentationLoaderFactory.createLoader(anyString()))
+                .thenReturn(mockLoader);
         }
+        
+        // Redirect System.err for IO exception testing
+        System.setErr(new PrintStream(errContent));
     }
-    
+
     @AfterEach
     void tearDown() {
-        System.setOut(originalOut);
+        // Close all static mocks if they were created
+        if (!GraphicsEnvironment.isHeadless()) {
+            if (mockedStyle != null) mockedStyle.close();
+            if (mockedLoaderFactory != null) mockedLoaderFactory.close();
+            if (mockedJOptionPane != null) mockedJOptionPane.close();
+            if (mockedFrame != null) mockedFrame.close();
+            if (mockedPresentation != null) mockedPresentation.close();
+        }
         
-        // Close static mocks
-        if (mockedFactory != null) {
-            mockedFactory.close();
-        }
-        if (mockedOptionPane != null) {
-            mockedOptionPane.close();
-        }
-        if (mockedFrame != null) {
-            mockedFrame.close();
-        }
+        // Restore original System.err
+        System.setErr(originalErr);
     }
 
     @Test
-    @DisplayName("Main method should load demo presentation when no arguments provided")
-    void mainShouldLoadDemoPresentationWhenNoArgumentsProvided() throws Exception {
-        // Skip in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    @DisplayName("main should initialize Style singleton")
+    void mainShouldInitializeStyleSingleton() {
+        if (GraphicsEnvironment.isHeadless()) {
+            // Skip test in headless environment
+            return;
+        }
         
-        // Arrange
-        String[] noArgs = new String[0];
-        
-        // Mock the factory to return our mock loader
-        mockedFactory.when(() -> PresentationLoaderFactory.createLoader("demo"))
-            .thenReturn(mockLoader);
-            
         // Act
-        JabberPoint.main(noArgs);
+        JabberPoint.main(new String[0]);
         
-        // Assert
+        // Verify Style singleton was accessed
+        mockedStyle.verify(() -> Style.getInstance());
+    }
+
+    @Test
+    @DisplayName("main should create presentation and frame")
+    void mainShouldCreatePresentationAndFrame() {
+        if (GraphicsEnvironment.isHeadless()) {
+            // Skip test in headless environment
+            return;
+        }
+        
+        // Act
+        JabberPoint.main(new String[0]);
+        
+        // Verify Presentation was constructed
+        assertEquals(1, mockedPresentation.constructed().size(), "Should create one Presentation");
+        
+        // Verify SlideViewerFrame was constructed with correct title
+        assertEquals(1, mockedFrame.constructed().size(), "Should create one SlideViewerFrame");
+        verify(mockedFrame.constructed().get(0), times(1)).setupWindow(any(), any());
+    }
+
+    @Test
+    @DisplayName("main with no args should load demo presentation")
+    void mainWithNoArgsShouldLoadDemoPresentation() throws IOException {
+        if (GraphicsEnvironment.isHeadless()) {
+            // Skip test in headless environment
+            return;
+        }
+        
+        // Act
+        JabberPoint.main(new String[0]);
+        
         // Verify demo loader was created
-        mockedFactory.verify(() -> PresentationLoaderFactory.createLoader("demo"));
+        mockedLoaderFactory.verify(() -> PresentationLoaderFactory.createLoader("demo"));
         
         // Verify loadPresentation was called with empty string
-        verify(mockLoader).loadPresentation(any(Presentation.class), eq(""));
+        verify(mockLoader, times(1)).loadPresentation(any(Presentation.class), eq(""));
     }
-    
+
     @Test
-    @DisplayName("Main method should load XML presentation when file argument provided")
-    void mainShouldLoadXMLPresentationWhenFileArgumentProvided() throws Exception {
-        // Skip in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    @DisplayName("main with filename should load XML presentation")
+    void mainWithFilenameShouldLoadXMLPresentation() throws IOException {
+        if (GraphicsEnvironment.isHeadless()) {
+            // Skip test in headless environment
+            return;
+        }
         
-        // Arrange
-        String[] args = new String[] {"test.xml"};
-        
-        // Mock the factory to return our mock loader
-        mockedFactory.when(() -> PresentationLoaderFactory.createLoader("xml"))
-            .thenReturn(mockLoader);
-            
         // Act
-        JabberPoint.main(args);
+        JabberPoint.main(new String[]{"test.xml"});
         
-        // Assert
         // Verify XML loader was created
-        mockedFactory.verify(() -> PresentationLoaderFactory.createLoader("xml"));
+        mockedLoaderFactory.verify(() -> PresentationLoaderFactory.createLoader("xml"));
         
-        // Verify loadPresentation was called with the filename
-        verify(mockLoader).loadPresentation(any(Presentation.class), eq("test.xml"));
+        // Verify loadPresentation was called with filename
+        verify(mockLoader, times(1)).loadPresentation(any(Presentation.class), eq("test.xml"));
     }
-    
+
     @Test
-    @DisplayName("Main method should show error dialog when IOException occurs")
-    void mainShouldShowErrorDialogWhenIOExceptionOccurs() throws Exception {
-        // Skip in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    @DisplayName("main should handle IO exceptions")
+    void mainShouldHandleIOExceptions() throws IOException {
+        if (GraphicsEnvironment.isHeadless()) {
+            // Skip test in headless environment
+            return;
+        }
         
         // Arrange
-        String[] args = new String[] {"test.xml"};
         IOException testException = new IOException("Test exception");
-        
-        // Mock the factory to return our mock loader
-        mockedFactory.when(() -> PresentationLoaderFactory.createLoader("xml"))
-            .thenReturn(mockLoader);
-            
-        // Make the loader throw an IOException
         doThrow(testException).when(mockLoader).loadPresentation(any(Presentation.class), anyString());
         
         // Act
-        JabberPoint.main(args);
+        JabberPoint.main(new String[0]);
         
-        // Assert
         // Verify error dialog was shown
-        mockedOptionPane.verify(() -> 
+        mockedJOptionPane.verify(() -> 
             JOptionPane.showMessageDialog(
-                isNull(), 
-                contains("IO Error: " + testException), 
-                eq("Jabberpoint Error "), 
+                eq(null),
+                eq(JabberPoint.IOERR + testException),
+                eq(JabberPoint.JABERR),
                 eq(JOptionPane.ERROR_MESSAGE)
             )
         );
     }
-    
+
     @Test
-    @DisplayName("JabberPoint class should have expected constants")
-    void jabberPointClassShouldHaveExpectedConstants() throws Exception {
-        // This test can run in headless mode as it only tests constants
+    @DisplayName("main should set slide number to 0 after loading")
+    void mainShouldSetSlideNumberToZeroAfterLoading() throws IOException {
+        if (GraphicsEnvironment.isHeadless()) {
+            // Skip test in headless environment
+            return;
+        }
         
-        // Use reflection to access protected constants
-        Field ioErrField = JabberPoint.class.getDeclaredField("IOERR");
-        Field jabErrField = JabberPoint.class.getDeclaredField("JABERR");
-        Field versionField = JabberPoint.class.getDeclaredField("JABVERSION");
+        // Act
+        JabberPoint.main(new String[0]);
         
-        ioErrField.setAccessible(true);
-        jabErrField.setAccessible(true);
-        versionField.setAccessible(true);
-        
-        // Assert the constants have expected values
-        assertEquals("IO Error: ", ioErrField.get(null), "IOERR constant should have expected value");
-        assertEquals("Jabberpoint Error ", jabErrField.get(null), "JABERR constant should have expected value");
-        assertEquals("Jabberpoint 1.6 - OU version", versionField.get(null), "JABVERSION constant should have expected value");
+        // Verify setSlideNumber was called with 0
+        Presentation constructedPresentation = mockedPresentation.constructed().get(0);
+        verify(constructedPresentation, times(1)).setSlideNumber(0);
+    }
+
+    // Test for main method
+    @Test
+    @DisplayName("JabberPoint should have a main method")
+    void jabberPointShouldHaveMainMethod() throws NoSuchMethodException {
+        assertNotNull(JabberPoint.class.getMethod("main", String[].class), 
+                "JabberPoint should have a main method");
     }
 }

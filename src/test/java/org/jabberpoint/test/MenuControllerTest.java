@@ -49,12 +49,11 @@ class MenuControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Skip tests in headless environment
-        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless(), 
-            "Skipping GUI tests in headless environment");
-            
         MockitoAnnotations.openMocks(this);
-        menuController = new MenuController(mockFrame, mockPresentation);
+        // Create MenuController only if not in headless mode
+        if (!GraphicsEnvironment.isHeadless()) {
+            menuController = new MenuController(mockFrame, mockPresentation);
+        }
     }
 
     @Test

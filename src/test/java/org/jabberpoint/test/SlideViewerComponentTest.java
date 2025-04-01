@@ -46,6 +46,13 @@ class SlideViewerComponentTest {
             "Skipping GUI tests in headless environment");
             
         MockitoAnnotations.openMocks(this);
+        
+        // Initialize mock objects with common behaviors
+        when(mockPresentation.getTitle()).thenReturn("Mock Presentation");
+        when(mockPresentation.getSlideNumber()).thenReturn(0);
+        when(mockPresentation.getSize()).thenReturn(1);
+        when(mockSlide.getTitle()).thenReturn("Mock Slide");
+        
         component = new SlideViewerComponent(mockPresentation, mockFrame);
     }
 
