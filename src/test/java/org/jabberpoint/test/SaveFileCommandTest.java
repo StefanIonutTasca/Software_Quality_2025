@@ -27,6 +27,8 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -150,7 +152,7 @@ class SaveFileCommandTest {
             
             // Mock JOptionPane to avoid showing dialog
             mockedOptionPane.when(() -> JOptionPane.showMessageDialog(
-                any(), anyString(), anyString(), anyInt())).thenReturn(null);
+                any(), anyString(), anyString(), anyInt())).thenAnswer(invocation -> null);
             
             // Act
             saveFileCommand.execute();
