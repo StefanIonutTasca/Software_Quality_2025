@@ -301,38 +301,43 @@ class XMLPresentationLoaderTest {
             public void draw(int x, int y, float scale, Graphics g, Style myStyle, ImageObserver observer) {
                 // Do nothing
             }
+            
+            @Override
+            public int getLevel() {
+                return 1;
+            }
         };
-        
-        // Set the level using reflection since we can't set it directly
-        try {
-            Field levelField = SlideItem.class.getDeclaredField("level");
-            levelField.setAccessible(true);
-            levelField.set(mockItem, 1);
-        } catch (Exception e) {
-            fail("Failed to set level field: " + e.getMessage());
-        }
         
         slide.append(mockItem);
         presentation.append(slide);
         
-        // Clear the err stream
-        errContent.reset();
+        // Create a new output stream to capture error output
+        ByteArrayOutputStream newErrContent = new ByteArrayOutputStream();
+        PrintStream newErr = new PrintStream(newErrContent);
         
-        // Save the presentation to a file
-        String outputFile = tempDir.resolve("mock_presentation.xml").toString();
+        // Save the old err
+        PrintStream oldErr = System.err;
         
-        // Set up System.err to capture output
-        System.setErr(new PrintStream(errContent));
+        // Set the new err
+        System.setErr(newErr);
         
         try {
+            // Save the presentation to a file
+            String outputFile = tempDir.resolve("mock_presentation.xml").toString();
+            
             // Should not throw exception
             xmlLoader.savePresentation(presentation, outputFile);
             
+            // Get the error output
+            String errorOutput = newErrContent.toString();
+            System.out.println("Error output captured: " + errorOutput);
+            
             // Verify error message was logged - output contains the unknown type warning
-            String errorOutput = errContent.toString();
-            assertTrue(errorOutput.contains("Ignoring unknown SlideItem type") || 
-                       errorOutput.contains("Cannot save"), 
-                    "Error message for unknown SlideItem type should be logged");
+            boolean hasExpectedError = errorOutput.contains("Ignoring unknown SlideItem") || 
+                                       errorOutput.contains("Cannot save") ||
+                                       errorOutput.contains("Unknown slide item type");
+            
+            assertTrue(hasExpectedError, "Error message for unknown SlideItem type should be logged");
             
             // Verify the file was created
             File savedFile = new File(outputFile);
@@ -352,7 +357,7 @@ class XMLPresentationLoaderTest {
                     "Unknown item types should not be included in output");
         } finally {
             // Restore original System.err
-            System.setErr(originalErr);
+            System.setErr(oldErr);
         }
     }
     

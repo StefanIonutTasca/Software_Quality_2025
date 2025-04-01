@@ -10,17 +10,18 @@ import org.mockito.MockitoAnnotations;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.font.FontRenderContext;
-import java.awt.font.LineBreakMeasurer;
-import java.awt.font.TextAttribute;
-import java.awt.font.TextLayout;
+import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
-import java.text.AttributedString;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 class TextItemTest {
@@ -28,44 +29,38 @@ class TextItemTest {
     private TextItem textItem;
     private String testText = "Test text for TextItem";
     private int testLevel = 2;
-
-    @Mock
-    private Graphics mockGraphics;
+    private Style style;
+    private Graphics2D graphics2D;
+    private final float scale = 1.0f;
     
     @Mock
-    private Graphics2D mockGraphics2D;
+    private ImageObserver observer;
     
     @Mock
-    private ImageObserver mockObserver;
+    private FontMetrics fontMetrics;
     
-    @Mock
-    private FontRenderContext mockFontRenderContext;
-    
-    @Mock
-    private LineBreakMeasurer mockMeasurer;
-    
-    @Mock
-    private TextLayout mockTextLayout;
-    
-    // We'll use a real Style instance instead of a mock to avoid direct field access
-    private Style realStyle;
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         
-        // Create a text item with level and text
+        // Initialize Style singleton
+        Style.createStyles();
+        style = Style.getStyle(testLevel);
+        
+        // Create a text item for testing
         textItem = new TextItem(testLevel, testText);
         
-        // Initialize Style
-        Style.createStyles();
-        realStyle = Style.getStyle(testLevel);
+        // Create a real Graphics2D from a BufferedImage
+        BufferedImage image = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
+        graphics2D = image.createGraphics();
         
-        // Mock Graphics and Graphics2D behavior - properly setup mock to return Graphics2D
-        when(mockGraphics.create()).thenReturn(mockGraphics2D);
-        when(mockGraphics2D.getFontRenderContext()).thenReturn(mockFontRenderContext);
+        // Mock the font metrics
+        when(graphics2D.getFontMetrics(any(Font.class))).thenReturn(fontMetrics);
+        when(fontMetrics.getHeight()).thenReturn(20);
+        when(fontMetrics.stringWidth(anyString())).thenReturn(100);
+        when(fontMetrics.getAscent()).thenReturn(15);
     }
-
+    
     @Test
     @DisplayName("Constructor should initialize TextItem with level and text")
     void constructorShouldInitializeWithLevelAndText() {
@@ -101,7 +96,7 @@ class TextItemTest {
     @DisplayName("getAttributedString should return AttributedString with style font")
     void getAttributedStringShouldReturnAttributedStringWithStyleFont() {
         float scale = 1.5f;
-        AttributedString result = textItem.getAttributedString(realStyle, scale);
+        AttributedString result = textItem.getAttributedString(style, scale);
         
         assertNotNull(result, "AttributedString should not be null");
     }
@@ -109,13 +104,14 @@ class TextItemTest {
     @Test
     @DisplayName("getBoundingBox should calculate correct dimensions")
     void getBoundingBoxShouldCalculateCorrectDimensions() {
-        // Set up minimal test environment
-        float scale = 1.0f;
-        Rectangle boundingBox = textItem.getBoundingBox(mockGraphics, mockObserver, scale, realStyle);
+        // Get the bounding box
+        Rectangle boundingBox = textItem.getBoundingBox(graphics2D, observer, scale, style);
         
-        // Basic assertions without relying on internal implementation details
+        // Verify dimensions
         assertNotNull(boundingBox, "Bounding box should not be null");
+        assertEquals(style.getIndent(), boundingBox.x, "X coordinate should match style indent");
         assertTrue(boundingBox.width > 0, "Width should be positive");
+        assertTrue(boundingBox.height > 0, "Height should be positive");
     }
     
     @Test
@@ -125,29 +121,28 @@ class TextItemTest {
         TextItem emptyItem = new TextItem(1, "");
         
         // Call draw
-        emptyItem.draw(10, 10, 1.0f, mockGraphics, realStyle, mockObserver);
+        emptyItem.draw(10, 10, 1.0f, graphics2D, style, observer);
         
         // Verify no drawing operations were performed
-        verify(mockGraphics, never()).create();
+        verify(graphics2D, never()).setColor(any(Color.class));
+        verify(graphics2D, never()).setFont(any(Font.class));
+        verify(graphics2D, never()).drawString(anyString(), anyInt(), anyInt());
     }
     
     @Test
     @DisplayName("draw should draw text with proper styling")
     void drawShouldDrawTextWithProperStyling() {
-        // Mock Graphics2D casting
-        when(mockGraphics.create()).thenReturn(mockGraphics2D);
+        // Create a spy on the Graphics2D to verify method calls
+        Graphics2D spyGraphics = spy(graphics2D);
         
-        // Call the draw method
+        // Call draw method
         int x = 5, y = 10;
-        float scale = 1.0f;
-        textItem.draw(x, y, scale, mockGraphics, realStyle, mockObserver);
+        textItem.draw(x, y, scale, spyGraphics, style, observer);
         
-        // Verify the graphics context was created
-        verify(mockGraphics).create();
-        
-        // We can't verify style-dependent operations without accessing fields directly
-        // So we just verify the graphics context was disposed
-        verify(mockGraphics2D).dispose();
+        // Verify proper methods were called with correct arguments
+        verify(spyGraphics).setColor(any(Color.class));
+        verify(spyGraphics).setFont(any(Font.class));
+        verify(spyGraphics).drawString(eq(testText), anyInt(), anyInt());
     }
     
     @Test

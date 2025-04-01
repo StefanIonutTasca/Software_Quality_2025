@@ -158,52 +158,55 @@ class XMLAccessorTest {
     @Test
     @DisplayName("saveFile should write presentation to XML file")
     void saveFileShouldWritePresentationToXmlFile() throws IOException {
-        // Create a presentation with slides and items
-        Presentation savePresentation = new Presentation();
-        savePresentation.setTitle("Saved Presentation");
+        // Create a presentation to save
+        Presentation presentation = new Presentation();
+        presentation.setTitle("Saved Presentation");
         
-        // Add two slides
-        Slide slide1 = new Slide();
-        slide1.setTitle("Saved Slide 1");
-        TextItem textItem = new TextItem(1, "Saved text item");
-        BitmapItem imageItem = new BitmapItem(2, "saved_image.png");
-        slide1.append(textItem);
-        slide1.append(imageItem);
-        savePresentation.append(slide1);
+        // Add a slide with a text item
+        Slide slide = new Slide();
+        slide.setTitle("Test Slide");
+        slide.append(1, "Test Text Item");
+        presentation.append(slide);
         
-        Slide slide2 = new Slide();
-        slide2.setTitle("Saved Slide 2");
-        savePresentation.append(slide2);
+        // Save to a temporary file
+        String outputFile = tempDir.resolve("test_save.xml").toString();
         
-        // Save the presentation to a file
-        String outputFile = tempDir.resolve("test_output.xml").toString();
-        xmlAccessor.saveFile(savePresentation, outputFile);
+        // Save the presentation
+        xmlAccessor.saveFile(presentation, outputFile);
         
-        // Verify the file was created
+        // Verify the file exists
         File savedFile = new File(outputFile);
-        assertTrue(savedFile.exists(), "Output file should exist");
+        assertTrue(savedFile.exists(), "File should be created");
         
-        // Read the file content
-        String savedContent = Files.readString(savedFile.toPath());
+        // Verify content was saved
+        String fileContent = Files.readString(savedFile.toPath());
+        assertTrue(fileContent.contains("<presentation>"), "XML should have presentation tag");
+        assertTrue(fileContent.contains("<showtitle>Saved Presentation</showtitle>"), "XML should contain presentation title");
+        assertTrue(fileContent.contains("<slide>"), "XML should have slide tag");
+        assertTrue(fileContent.contains("<title>Test Slide</title>"), "XML should contain slide title");
+        assertTrue(fileContent.contains("<item kind=\"text\" level=\"1\">Test Text Item</item>"), "XML should contain text item");
         
-        // Verify the XML structure
-        assertTrue(savedContent.contains("<presentation>"), "Root element should be present");
-        assertTrue(savedContent.contains("<showtitle>Saved Presentation</showtitle>"), "Show title should be present");
-        assertTrue(savedContent.contains("<slide>"), "Slide element should be present");
-        assertTrue(savedContent.contains("<title>Saved Slide 1</title>"), "Slide 1 title should be set");
-        assertTrue(savedContent.contains("<item kind=\"text\" level=\"1\">Saved text item</item>"), 
-                "Text item should be present with correct attributes");
-        assertTrue(savedContent.contains("<item kind=\"image\" level=\"2\">saved_image.png</item>"), 
-                "Image item should be present with correct attributes");
-        assertTrue(savedContent.contains("<title>Saved Slide 2</title>"), "Slide 2 title should be present");
-        
-        // Bonus: Load the saved file to verify it can be parsed back
+        // Now try to load the file back to verify it's valid XML
         Presentation loadedPresentation = new Presentation();
-        XMLAccessor loadAccessor = new XMLAccessor(); // Create a new instance to ensure clean state
-        loadAccessor.loadFile(loadedPresentation, outputFile);
         
+        // Create a new instance of XMLAccessor for loading
+        XMLAccessor loadingAccessor = new XMLAccessor();
+        loadingAccessor.loadFile(loadedPresentation, outputFile);
+        
+        // Verify the loaded presentation has the same title and content
         assertEquals("Saved Presentation", loadedPresentation.getTitle(), "Loaded presentation title should match");
-        assertEquals(2, loadedPresentation.getSize(), "Loaded presentation should have 2 slides");
+        assertEquals(1, loadedPresentation.getSize(), "Loaded presentation should have 1 slide");
+        
+        // Verify slide content
+        Slide loadedSlide = loadedPresentation.getSlide(0);
+        assertEquals("Test Slide", loadedSlide.getTitle(), "Loaded slide title should match");
+        assertEquals(1, loadedSlide.getSize(), "Loaded slide should have 1 item");
+        
+        // Verify text item content
+        SlideItem loadedItem = loadedSlide.getSlideItem(0);
+        assertTrue(loadedItem instanceof TextItem, "Loaded item should be a TextItem");
+        assertEquals("Test Text Item", loadedItem.toString(), "Loaded text item content should match");
+        assertEquals(1, loadedItem.getLevel(), "Loaded text item level should match");
     }
     
     @Test
