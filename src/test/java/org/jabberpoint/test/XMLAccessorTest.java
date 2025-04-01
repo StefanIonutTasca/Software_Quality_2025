@@ -7,6 +7,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.image.ImageObserver;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
