@@ -2,15 +2,21 @@ package org.jabberpoint.test;
 
 import org.jabberpoint.src.SaveFileCommand;
 import org.jabberpoint.src.Presentation;
+import org.jabberpoint.src.XMLPresentationLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
@@ -21,11 +27,13 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for SaveFileCommand class
  */
+@ExtendWith(MockitoExtension.class)
 class SaveFileCommandTest {
 
     private SaveFileCommand saveFileCommand;
@@ -69,10 +77,52 @@ class SaveFileCommandTest {
         Assumptions.assumeFalse(GraphicsEnvironment.isHeadless(), 
             "Skipping GUI test in headless environment");
             
-        // We need to mock the JFileChooser and replace it in the command
-        // This requires some reflection or a more testable design
-        // For now, we'll just test that the command doesn't throw exceptions
-        assertDoesNotThrow(() -> saveFileCommand.execute());
+        // Create a temp file
+        File tempFile = tempDir.resolve("save.xml").toFile();
+        
+        // Mock JFileChooser
+        try (MockedConstruction<JFileChooser> mockConstruction = mockConstruction(JFileChooser.class, 
+                (mock, context) -> {
+                    when(mock.showSaveDialog(any(Frame.class))).thenReturn(JFileChooser.APPROVE_OPTION);
+                    when(mock.getSelectedFile()).thenReturn(tempFile);
+                });
+             MockedConstruction<XMLPresentationLoader> mockedLoader = mockConstruction(XMLPresentationLoader.class,
+                (mock, context) -> {
+                    // No need to do anything with this mock
+                })) {
+            
+            // Act
+            saveFileCommand.execute();
+            
+            // Assert
+            assertEquals(1, mockedLoader.constructed().size(), "XMLPresentationLoader should be constructed");
+            
+            // Verify savePresentation was called once on the XMLPresentationLoader instance
+            verify(mockedLoader.constructed().get(0), times(1))
+                .savePresentation(eq(mockPresentation), eq(tempFile.getPath()));
+        }
+    }
+    
+    @Test
+    @DisplayName("Should handle when user cancels file chooser")
+    void shouldHandleWhenUserCancelsFileChooser() throws Exception {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless(), 
+            "Skipping GUI test in headless environment");
+            
+        // Mock JFileChooser with CANCEL_OPTION
+        try (MockedConstruction<JFileChooser> mockConstruction = mockConstruction(JFileChooser.class, 
+                (mock, context) -> {
+                    when(mock.showSaveDialog(any(Frame.class))).thenReturn(JFileChooser.CANCEL_OPTION);
+                });
+             MockedConstruction<XMLPresentationLoader> mockedLoader = mockConstruction(XMLPresentationLoader.class)) {
+            
+            // Act
+            saveFileCommand.execute();
+            
+            // Assert
+            assertTrue(mockedLoader.constructed().isEmpty(), "XMLPresentationLoader should not be constructed");
+        }
     }
     
     @Test
@@ -82,8 +132,32 @@ class SaveFileCommandTest {
         Assumptions.assumeFalse(GraphicsEnvironment.isHeadless(), 
             "Skipping GUI test in headless environment");
             
-        // The SaveFileCommand uses XMLPresentationLoader directly for saving
-        // For now, we'll just verify the command doesn't throw unhandled exceptions
-        assertDoesNotThrow(() -> saveFileCommand.execute());
+        // Setup temp file
+        File tempFile = tempDir.resolve("error.xml").toFile();
+        
+        // Mock JFileChooser
+        try (MockedConstruction<JFileChooser> mockConstruction = mockConstruction(JFileChooser.class, 
+                (mock, context) -> {
+                    when(mock.showSaveDialog(any(Frame.class))).thenReturn(JFileChooser.APPROVE_OPTION);
+                    when(mock.getSelectedFile()).thenReturn(tempFile);
+                });
+             MockedConstruction<XMLPresentationLoader> mockedLoader = mockConstruction(XMLPresentationLoader.class,
+                (mock, context) -> {
+                    doThrow(new IOException("Test exception"))
+                        .when(mock).savePresentation(any(Presentation.class), anyString());
+                });
+             MockedStatic<JOptionPane> mockedOptionPane = mockStatic(JOptionPane.class)) {
+            
+            // Mock JOptionPane to avoid showing dialog
+            mockedOptionPane.when(() -> JOptionPane.showMessageDialog(
+                any(), anyString(), anyString(), anyInt())).thenReturn(null);
+            
+            // Act
+            saveFileCommand.execute();
+            
+            // Assert error dialog was shown
+            mockedOptionPane.verify(() -> JOptionPane.showMessageDialog(
+                eq(mockFrame), contains("IO Exception"), eq("Jabberpoint Error"), eq(JOptionPane.ERROR_MESSAGE)));
+        }
     }
 }

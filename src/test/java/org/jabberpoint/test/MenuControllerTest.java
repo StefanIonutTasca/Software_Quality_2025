@@ -1,13 +1,17 @@
 package org.jabberpoint.test;
 
+import org.jabberpoint.src.AboutBox;
 import org.jabberpoint.src.MenuController;
 import org.jabberpoint.src.Presentation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
@@ -16,6 +20,8 @@ import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.io.File;
+import javax.swing.JOptionPane;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -23,6 +29,7 @@ import static org.mockito.Mockito.*;
 /**
  * Unit tests for MenuController class
  */
+@ExtendWith(MockitoExtension.class)
 class MenuControllerTest {
 
     private MenuController menuController;
@@ -71,9 +78,11 @@ class MenuControllerTest {
         
         Menu fileMenu = menuController.getMenu(0);
         Menu viewMenu = menuController.getMenu(1);
+        Menu helpMenu = menuController.getHelpMenu();
         
         assertEquals("File", fileMenu.getLabel(), "First menu should be 'File'");
         assertEquals("View", viewMenu.getLabel(), "Second menu should be 'View'");
+        assertEquals("Help", helpMenu.getLabel(), "Help menu should be 'Help'");
         
         // Check File menu items
         assertEquals(5, fileMenu.getItemCount(), "File menu should have 5 items (including separator)");
@@ -87,11 +96,44 @@ class MenuControllerTest {
         assertEquals("Next", viewMenu.getItem(0).getLabel(), "First item should be 'Next'");
         assertEquals("Prev", viewMenu.getItem(1).getLabel(), "Second item should be 'Prev'");
         assertEquals("Go to", viewMenu.getItem(2).getLabel(), "Third item should be 'Go to'");
+        
+        // Check Help menu items
+        assertEquals(1, helpMenu.getItemCount(), "Help menu should have 1 item");
+        assertEquals("About", helpMenu.getItem(0).getLabel(), "First item should be 'About'");
     }
     
     @Test
-    @DisplayName("File > New menu action should call appropriate methods")
-    void newMenuActionShouldCallAppropriateMethod() throws Exception {
+    @DisplayName("File > Open menu action should load presentation")
+    void openMenuActionShouldLoadPresentation() throws Exception {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
+        // Arrange - Create test file
+        File testFile = new File(MenuController.TESTFILE);
+        boolean fileCreated = testFile.createNewFile();
+        try {
+            // Setup
+            MenuItem openMenuItem = findMenuItemByLabel(menuController, "Open");
+            ActionEvent mockEvent = new ActionEvent(openMenuItem, ActionEvent.ACTION_PERFORMED, "open");
+            
+            // Act
+            openMenuItem.getActionListeners()[0].actionPerformed(mockEvent);
+            
+            // Assert
+            verify(mockPresentation, times(1)).clear();
+            verify(mockPresentation, times(1)).setSlideNumber(0);
+            verify(mockFrame, times(1)).repaint();
+        } finally {
+            // Cleanup
+            if (fileCreated) {
+                testFile.delete();
+            }
+        }
+    }
+    
+    @Test
+    @DisplayName("File > New menu action should clear presentation")
+    void newMenuActionShouldClearPresentation() throws Exception {
         // Skip test in headless environment
         Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
         
@@ -102,9 +144,27 @@ class MenuControllerTest {
         // Act
         newMenuItem.getActionListeners()[0].actionPerformed(mockEvent);
         
-        // Assert - Since we can't directly verify presentation.clear() because it's protected,
-        // we can at least verify the frame was repainted
+        // Assert
+        verify(mockPresentation, times(1)).clear();
         verify(mockFrame, times(1)).repaint();
+    }
+    
+    @Test
+    @DisplayName("File > Save menu action should save presentation")
+    void saveMenuActionShouldSavePresentation() throws Exception {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
+        // Setup
+        MenuItem saveMenuItem = findMenuItemByLabel(menuController, "Save");
+        ActionEvent mockEvent = new ActionEvent(saveMenuItem, ActionEvent.ACTION_PERFORMED, "save");
+        
+        // Act
+        saveMenuItem.getActionListeners()[0].actionPerformed(mockEvent);
+        
+        // No simple way to verify XMLAccessor was used properly without extensive mocking
+        // At least verify no exceptions were thrown
+        assertDoesNotThrow(() -> saveMenuItem.getActionListeners()[0].actionPerformed(mockEvent));
     }
     
     @Test
@@ -158,8 +218,52 @@ class MenuControllerTest {
         verify(mockPresentation, times(1)).prevSlide();
     }
     
+    @Test
+    @DisplayName("View > Go to menu action should set slide number")
+    void gotoMenuActionShouldSetSlideNumber() throws Exception {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
+        // This test is challenging because it involves JOptionPane.showInputDialog
+        // Using try-with-resources with a MockedStatic
+        try (MockedStatic<JOptionPane> mockedStatic = mockStatic(JOptionPane.class)) {
+            // Arrange
+            mockedStatic.when(() -> JOptionPane.showInputDialog(any())).thenReturn("3");
+            
+            MenuItem gotoMenuItem = findMenuItemByLabel(menuController, "Go to");
+            ActionEvent mockEvent = new ActionEvent(gotoMenuItem, ActionEvent.ACTION_PERFORMED, "goto");
+            
+            // Act
+            gotoMenuItem.getActionListeners()[0].actionPerformed(mockEvent);
+            
+            // Assert
+            verify(mockPresentation, times(1)).setSlideNumber(2); // 3-1=2, zero-based index
+        }
+    }
+    
+    @Test
+    @DisplayName("Help > About menu action should show about box")
+    void aboutMenuActionShouldShowAboutBox() throws Exception {
+        // Skip test in headless environment
+        Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+        
+        // This test requires mocking static method AboutBox.show
+        try (MockedStatic<AboutBox> mockedStatic = mockStatic(AboutBox.class)) {
+            // Arrange
+            MenuItem aboutMenuItem = findMenuItemByLabel(menuController, "About");
+            ActionEvent mockEvent = new ActionEvent(aboutMenuItem, ActionEvent.ACTION_PERFORMED, "about");
+            
+            // Act
+            aboutMenuItem.getActionListeners()[0].actionPerformed(mockEvent);
+            
+            // Assert
+            mockedStatic.verify(() -> AboutBox.show(mockFrame), times(1));
+        }
+    }
+    
     // Helper method to find menu item by label
     private MenuItem findMenuItemByLabel(MenuController controller, String label) {
+        // First check regular menus
         for (int i = 0; i < controller.getMenuCount(); i++) {
             Menu menu = controller.getMenu(i);
             for (int j = 0; j < menu.getItemCount(); j++) {
@@ -171,6 +275,20 @@ class MenuControllerTest {
                 }
             }
         }
+        
+        // Then check help menu separately
+        Menu helpMenu = controller.getHelpMenu();
+        if (helpMenu != null) {
+            for (int j = 0; j < helpMenu.getItemCount(); j++) {
+                if (helpMenu.getItem(j) instanceof MenuItem) {
+                    MenuItem item = (MenuItem) helpMenu.getItem(j);
+                    if (label.equals(item.getLabel())) {
+                        return item;
+                    }
+                }
+            }
+        }
+        
         return null;
     }
 }
