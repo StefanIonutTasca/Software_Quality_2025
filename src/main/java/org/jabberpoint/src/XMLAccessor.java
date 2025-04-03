@@ -47,8 +47,11 @@ public class XMLAccessor extends Accessor {
     
     private String getTitle(Element element, String tagName) {
     	NodeList titles = element.getElementsByTagName(tagName);
-    	return titles.item(0).getTextContent();
-    	
+    	if (titles == null || titles.getLength() == 0) {
+    	    return ""; // Return empty string if no title found
+    	}
+    	String titleText = titles.item(0).getTextContent();
+    	return titleText == null ? "" : titleText.trim();
     }
 
 	public void loadFile(Presentation presentation, String filename) throws IOException {
@@ -77,6 +80,7 @@ public class XMLAccessor extends Accessor {
 		} 
 		catch (IOException iox) {
 			System.err.println(iox.toString());
+			// Don't rethrow to maintain backward compatibility
 		}
 		catch (SAXException sax) {
 			System.err.println(sax.getMessage());
@@ -115,7 +119,6 @@ public class XMLAccessor extends Accessor {
 	public void saveFile(Presentation presentation, String filename) throws IOException {
 		PrintWriter out = new PrintWriter(new FileWriter(filename));
 		out.println("<?xml version=\"1.0\"?>");
-		out.println("<!DOCTYPE presentation SYSTEM \"jabberpoint.dtd\">");
 		out.println("<presentation>");
 		out.print("<showtitle>");
 		out.print(presentation.getTitle());
@@ -138,7 +141,9 @@ public class XMLAccessor extends Accessor {
 						out.print( ( (BitmapItem) slideItem).getName());
 					}
 					else {
-						System.out.println("Ignoring " + slideItem);
+						System.err.println("Unknown or unsupported SlideItem type: " + slideItem);
+						// Skip closing the item tag for unsupported items
+						continue;
 					}
 				}
 				out.println("</item>");

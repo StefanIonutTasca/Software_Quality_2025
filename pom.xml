@@ -144,6 +144,24 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.10</version>
+                <configuration>
+                    <!-- Ensure all classes are included in coverage -->
+                    <includes>
+                        <include>**/*</include>
+                    </includes>
+                    <!-- Exclude UI components and other hard-to-test classes -->
+                    <excludes>
+                        <exclude>**/JabberPoint.class</exclude>
+                        <exclude>**/MenuController.class</exclude>
+                        <exclude>**/DemoPresentation.class</exclude>
+                        <exclude>**/SlideViewerComponent.class</exclude>
+                        <exclude>**/SlideViewerFrame.class</exclude>
+                        <exclude>**/AboutBox.class</exclude>
+                        <exclude>**/MenuController$*ActionListener*.class</exclude>
+                        <exclude>**/SlideViewerFrame$*WindowAdapter*.class</exclude>
+                        <exclude>**/DummyComponent.class</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -153,16 +171,12 @@
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>verify</phase>
+                        <phase>test</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
-                        <configuration>
-                            <!-- Use standard output directory expected by GitHub Actions -->
-                            <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
-                        </configuration>
                     </execution>
-                    <!-- Temporarily commenting out the check execution
+                    <!-- Re-enable the check with appropriate thresholds -->
                     <execution>
                         <id>check</id>
                         <goals>
@@ -176,19 +190,33 @@
                                         <limit>
                                             <counter>INSTRUCTION</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.70</minimum>
+                                            <minimum>0.80</minimum>
                                         </limit>
                                         <limit>
                                             <counter>BRANCH</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.60</minimum>
+                                            <minimum>0.75</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.80</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>METHOD</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.75</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>CLASS</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.65</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
                             </rules>
                         </configuration>
                     </execution>
-                    -->
                 </executions>
             </plugin>
             
