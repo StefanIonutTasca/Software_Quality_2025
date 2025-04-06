@@ -8,13 +8,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.jabberpoint.src.command.NextSlideCommand;
-import org.jabberpoint.src.command.PreviousSlideCommand;
+import org.jabberpoint.src.command.PrevSlideCommand;
 import org.jabberpoint.src.io.XMLAccessor;
 import org.jabberpoint.src.model.BitmapItem;
 import org.jabberpoint.src.model.Presentation;
 import org.jabberpoint.src.model.Slide;
 import org.jabberpoint.src.model.TextItem;
-import org.jabberpoint.src.ui.SlideViewerComponent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -32,7 +31,6 @@ public class IntegrationTestSuite {
   Path tempDir;
   
   private Presentation presentation;
-  private SlideViewerComponent mockViewer;
   
   @BeforeEach
   public void setUp() {
@@ -52,15 +50,11 @@ public class IntegrationTestSuite {
     // Add slides to presentation
     presentation.append(slide1);
     presentation.append(slide2);
-    
-    // Create a mock SlideViewerComponent
-    mockViewer = mock(SlideViewerComponent.class);
   }
   
   @AfterEach
   public void tearDown() {
     presentation = null;
-    mockViewer = null;
   }
 
   /**
@@ -99,9 +93,9 @@ public class IntegrationTestSuite {
    */
   @Test
   public void testCommandIntegration() {
-    // Set up commands with the presentation and viewer
-    NextSlideCommand nextCommand = new NextSlideCommand(presentation, mockViewer);
-    PreviousSlideCommand prevCommand = new PreviousSlideCommand(presentation, mockViewer);
+    // Set up commands with the presentation
+    NextSlideCommand nextCommand = new NextSlideCommand(presentation);
+    PrevSlideCommand prevCommand = new PrevSlideCommand(presentation);
     
     // Initial state
     assertEquals(0, presentation.getSlideNumber());
@@ -109,12 +103,10 @@ public class IntegrationTestSuite {
     // Execute next slide command
     nextCommand.execute();
     assertEquals(1, presentation.getSlideNumber());
-    verify(mockViewer).update(presentation, 1);
     
     // Execute previous slide command
     prevCommand.execute();
     assertEquals(0, presentation.getSlideNumber());
-    verify(mockViewer).update(presentation, 0);
   }
 
   /**
