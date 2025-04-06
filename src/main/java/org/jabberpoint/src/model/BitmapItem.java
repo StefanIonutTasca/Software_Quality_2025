@@ -1,4 +1,6 @@
 package org.jabberpoint.src.model;
+import org.jabberpoint.src.model.Style;
+import org.jabberpoint.src.model.SlideItem;
 
 import java.awt.Rectangle;
 import java.awt.Graphics;
@@ -140,6 +142,7 @@ public class BitmapItem extends SlideItem {
 		return "BitmapItem[" + getLevel() + "," + imageName + "]";
 	}
 }
+
 
 
 

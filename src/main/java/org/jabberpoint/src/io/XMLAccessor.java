@@ -1,4 +1,10 @@
 package org.jabberpoint.src.io;
+import org.jabberpoint.src.model.BitmapItem;
+import org.jabberpoint.src.io.Accessor;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.model.SlideItem;
+import org.jabberpoint.src.model.Slide;
+import org.jabberpoint.src.model.TextItem;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -154,6 +160,7 @@ public class XMLAccessor extends Accessor {
 		out.close();
 	}
 }
+
 
 
 

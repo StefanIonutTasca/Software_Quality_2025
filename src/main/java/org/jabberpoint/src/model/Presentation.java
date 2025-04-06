@@ -1,4 +1,6 @@
 package org.jabberpoint.src.model;
+import org.jabberpoint.src.model.PresentationObserver;
+import org.jabberpoint.src.model.Slide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,6 +119,7 @@ public class Presentation {
 		System.exit(n);
 	}
 }
+
 
 
 

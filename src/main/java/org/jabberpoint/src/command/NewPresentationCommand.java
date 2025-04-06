@@ -1,4 +1,6 @@
 package org.jabberpoint.src.command;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.command.Command;
 
 /**
  * Command implementation for creating a new presentation
@@ -24,6 +26,7 @@ public class NewPresentationCommand implements Command {
         presentation.setSlideNumber(-1);
     }
 }
+
 
 
 

@@ -1,4 +1,6 @@
 package org.jabberpoint.src.io;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.io.DemoPresentation;
 
 import java.io.IOException;
 
@@ -32,6 +34,7 @@ public abstract class Accessor {
 
   abstract public void saveFile(Presentation p, String fn) throws IOException;
 }
+
 
 
 

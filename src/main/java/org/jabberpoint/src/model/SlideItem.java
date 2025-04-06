@@ -1,4 +1,6 @@
 package org.jabberpoint.src.model;
+import org.jabberpoint.src.model.Style;
+import org.jabberpoint.src.model.Slide;
 
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -43,6 +45,7 @@ public abstract class SlideItem {
 	public abstract void draw(int x, int y, float scale, 
 			Graphics g, Style style, ImageObserver observer);
 }
+
 
 
 

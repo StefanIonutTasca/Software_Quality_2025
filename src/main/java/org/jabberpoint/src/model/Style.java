@@ -1,4 +1,5 @@
 package org.jabberpoint.src.model;
+import org.jabberpoint.src.model.Slide;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -77,6 +78,7 @@ public class Style {
 		return font.deriveFont(fontSize * scale);
 	}
 }
+
 
 
 

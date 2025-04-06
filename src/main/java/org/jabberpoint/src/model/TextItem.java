@@ -1,4 +1,7 @@
 package org.jabberpoint.src.model;
+import org.jabberpoint.src.model.Style;
+import org.jabberpoint.src.model.SlideItem;
+import org.jabberpoint.src.model.Slide;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -128,6 +131,7 @@ public class TextItem extends SlideItem {
 		return "TextItem[" + getLevel()+","+getText()+"]";
 	}
 }
+
 
 
 

@@ -1,4 +1,7 @@
 package org.jabberpoint.src.command;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.model.Slide;
+import org.jabberpoint.src.command.Command;
 
 /**
  * Command implementation for moving to the next slide
@@ -22,6 +25,7 @@ public class NextSlideCommand implements Command {
         presentation.nextSlide();
     }
 }
+
 
 
 

@@ -1,4 +1,7 @@
 package org.jabberpoint.src.ui;
+import org.jabberpoint.src.model.PresentationObserver;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.model.Slide;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -75,6 +78,7 @@ public class SlideViewerComponent extends JComponent implements PresentationObse
 		slide.draw(g, area, this);
 	}
 }
+
 
 
 

@@ -1,4 +1,7 @@
 package org.jabberpoint.src.io;
+import org.jabberpoint.src.io.DemoPresentationLoader;
+import org.jabberpoint.src.io.XMLPresentationLoader;
+import org.jabberpoint.src.io.PresentationLoader;
 
 /**
  * Factory for creating PresentationLoader instances
@@ -21,6 +24,7 @@ public class PresentationLoaderFactory {
         }
     }
 }
+
 
 
 

@@ -1,4 +1,8 @@
 package org.jabberpoint.src.control;
+import org.jabberpoint.src.io.Accessor;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.io.XMLAccessor;
+import org.jabberpoint.src.ui.AboutBox;
 
 import java.awt.Frame;
 import java.awt.Menu;
@@ -138,6 +142,7 @@ public class MenuController extends MenuBar {
     return new MenuItem(name, new MenuShortcut(name.charAt(0)));
   }
 }
+
 
 
 

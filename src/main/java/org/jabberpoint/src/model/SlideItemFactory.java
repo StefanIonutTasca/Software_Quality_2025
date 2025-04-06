@@ -1,4 +1,8 @@
 package org.jabberpoint.src.model;
+import org.jabberpoint.src.model.BitmapItem;
+import org.jabberpoint.src.model.SlideItem;
+import org.jabberpoint.src.model.Slide;
+import org.jabberpoint.src.model.TextItem;
 
 /**
  * Factory for creating slide items
@@ -23,6 +27,7 @@ public class SlideItemFactory {
         }
     }
 }
+
 
 
 

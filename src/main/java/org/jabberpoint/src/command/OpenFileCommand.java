@@ -1,4 +1,9 @@
 package org.jabberpoint.src.command;
+import org.jabberpoint.src.app.JabberPoint;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.io.PresentationLoader;
+import org.jabberpoint.src.io.PresentationLoaderFactory;
+import org.jabberpoint.src.command.Command;
 
 import java.io.IOException;
 import javax.swing.JFileChooser;
@@ -50,6 +55,7 @@ public class OpenFileCommand implements Command {
         }
     }
 }
+
 
 
 

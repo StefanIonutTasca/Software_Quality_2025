@@ -1,4 +1,12 @@
 package org.jabberpoint.src.io;
+import org.jabberpoint.src.model.BitmapItem;
+import org.jabberpoint.src.app.JabberPoint;
+import org.jabberpoint.src.model.SlideItemFactory;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.model.SlideItem;
+import org.jabberpoint.src.model.Slide;
+import org.jabberpoint.src.io.PresentationLoader;
+import org.jabberpoint.src.model.TextItem;
 
 import java.io.File;
 import java.io.IOException;
@@ -148,6 +156,7 @@ public class XMLPresentationLoader implements PresentationLoader {
         out.close();
     }
 }
+
 
 
 

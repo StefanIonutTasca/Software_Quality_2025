@@ -1,4 +1,10 @@
 package org.jabberpoint.src.ui;
+import org.jabberpoint.src.ui.SlideViewerComponent;
+import org.jabberpoint.src.control.KeyController;
+import org.jabberpoint.src.control.MenuController;
+import org.jabberpoint.src.app.JabberPoint;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.model.Slide;
 
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
@@ -44,6 +50,7 @@ public class SlideViewerFrame extends JFrame {
 		setVisible(true);
 	}
 }
+
 
 
 

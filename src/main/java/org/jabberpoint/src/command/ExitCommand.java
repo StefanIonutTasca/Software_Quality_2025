@@ -1,4 +1,6 @@
 package org.jabberpoint.src.command;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.command.Command;
 
 import java.util.Objects;
 
@@ -25,6 +27,7 @@ public class ExitCommand implements Command {
         presentation.exit(0);
     }
 }
+
 
 
 

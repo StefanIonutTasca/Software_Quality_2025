@@ -1,4 +1,5 @@
 package org.jabberpoint.src.io;
+import org.jabberpoint.src.model.Presentation;
 
 import java.io.IOException;
 
@@ -15,6 +16,7 @@ public interface PresentationLoader {
      */
     void loadPresentation(Presentation presentation, String source) throws IOException;
 }
+
 
 
 

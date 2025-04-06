@@ -1,4 +1,9 @@
 package org.jabberpoint.src.control;
+import org.jabberpoint.src.command.NextSlideCommand;
+import org.jabberpoint.src.command.ExitCommand;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.command.PrevSlideCommand;
+import org.jabberpoint.src.command.Command;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyAdapter;
@@ -41,6 +46,7 @@ public class KeyController extends KeyAdapter {
 		}
 	}
 }
+
 
 
 

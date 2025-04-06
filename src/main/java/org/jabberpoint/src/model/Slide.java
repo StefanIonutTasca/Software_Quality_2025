@@ -1,4 +1,7 @@
 package org.jabberpoint.src.model;
+import org.jabberpoint.src.model.Style;
+import org.jabberpoint.src.model.SlideItem;
+import org.jabberpoint.src.model.TextItem;
 
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -83,6 +86,7 @@ public class Slide {
 		return Math.min(((float)area.width) / ((float)WIDTH), ((float)area.height) / ((float)HEIGHT));
 	}
 }
+
 
 
 

@@ -1,4 +1,5 @@
 package org.jabberpoint.src.ui;
+import org.jabberpoint.src.app.JabberPoint;
 
 import java.awt.Frame;
 import javax.swing.JOptionPane;
@@ -29,6 +30,7 @@ public class AboutBox {
 		);
 	}
 }
+
 
 
 
