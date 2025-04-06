@@ -19,7 +19,7 @@ import java.util.Vector;
 public class Slide {
 	public final static int WIDTH = 1200;
 	public final static int HEIGHT = 800;
-	protected String title; // title is saved separately
+	protected String title = ""; // title is saved separately and initialized to empty string
 	protected Vector<SlideItem> items; // slide items are saved in a Vector
 
 	public Slide() {
@@ -33,12 +33,12 @@ public class Slide {
 
 	// give the title of the slide
 	public String getTitle() {
-		return title;
+		return title == null ? "" : title;
 	}
 
 	// change the title of the slide
 	public void setTitle(String newTitle) {
-		title = newTitle;
+		title = newTitle == null ? "" : newTitle;
 	}
 
 	// Create TextItem of String, and add the TextItem 
