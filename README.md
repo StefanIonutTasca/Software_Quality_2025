@@ -50,6 +50,19 @@ Code quality is enforced at multiple levels:
 2. During pull request reviews
 3. During automated testing on all DTAP environments
 
+### Accessing Code Coverage Reports
+
+JaCoCo code coverage reports are automatically generated during CI/CD pipeline runs and are available as downloadable artifacts:
+
+1. Go to the [Actions tab](https://github.com/StefanIonutTasca/Software_Quality_2025/actions) in the GitHub repository
+2. Select the "JaCoCo Code Coverage - Java CI/CD with Maven" workflow
+3. Choose the latest successful run
+4. Scroll down to the "Artifacts" section
+5. Download the "jacoco-report" artifact
+6. Extract the ZIP file and open `index.html` in your browser to view the detailed coverage report
+
+For more details on our code coverage setup and configuration, see the [JaCoCo Setup](docs/JaCoCo_Setup.md) documentation.
+
 ## Getting Started
 
 ### Prerequisites
