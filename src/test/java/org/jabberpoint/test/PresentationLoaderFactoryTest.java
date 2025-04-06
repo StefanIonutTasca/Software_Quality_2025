@@ -7,10 +7,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.jabberpoint.src.PresentationLoader;
-import org.jabberpoint.src.PresentationLoaderFactory;
-import org.jabberpoint.src.XMLPresentationLoader;
-import org.jabberpoint.src.DemoPresentationLoader;
+import org.jabberpoint.io.PresentationLoader;
+import org.jabberpoint.io.PresentationLoaderFactory;
+import org.jabberpoint.io.XMLPresentationLoader;
+import org.jabberpoint.io.DemoPresentationLoader;
 
 /**
  * Unit tests for PresentationLoaderFactory
@@ -87,3 +87,4 @@ class PresentationLoaderFactoryTest {
         );
     }
 }
+

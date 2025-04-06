@@ -1,11 +1,11 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.JabberPoint;
-import org.jabberpoint.src.Presentation;
-import org.jabberpoint.src.PresentationLoader;
-import org.jabberpoint.src.PresentationLoaderFactory;
-import org.jabberpoint.src.SlideViewerFrame;
-import org.jabberpoint.src.Style;
+import org.jabberpoint.core.JabberPoint;
+import org.jabberpoint.model.Presentation;
+import org.jabberpoint.io.PresentationLoader;
+import org.jabberpoint.io.PresentationLoaderFactory;
+import org.jabberpoint.ui.SlideViewerFrame;
+import org.jabberpoint.core.Style;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -211,3 +211,4 @@ class JabberPointTest {
                 "JabberPoint should have a main method");
     }
 }
+

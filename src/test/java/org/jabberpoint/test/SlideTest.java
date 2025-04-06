@@ -1,9 +1,9 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.Slide;
-import org.jabberpoint.src.SlideItem;
-import org.jabberpoint.src.Style;
-import org.jabberpoint.src.TextItem;
+import org.jabberpoint.model.Slide;
+import org.jabberpoint.model.SlideItem;
+import org.jabberpoint.core.Style;
+import org.jabberpoint.model.TextItem;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -192,3 +192,4 @@ class SlideTest {
         assertTrue(true, "The draw operation completed successfully");
     }
 }
+

@@ -1,12 +1,12 @@
 package org.jabberpoint.test;
 
 import java.io.IOException;
-import org.jabberpoint.src.BitmapItem;
-import org.jabberpoint.src.DemoPresentationLoader;
-import org.jabberpoint.src.Presentation;
-import org.jabberpoint.src.Slide;
-import org.jabberpoint.src.SlideItem;
-import org.jabberpoint.src.TextItem;
+import org.jabberpoint.model.BitmapItem;
+import org.jabberpoint.io.DemoPresentationLoader;
+import org.jabberpoint.model.Presentation;
+import org.jabberpoint.model.Slide;
+import org.jabberpoint.model.SlideItem;
+import org.jabberpoint.model.TextItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -129,3 +129,4 @@ class DemoPresentationLoaderTest {
         }
     }
 }
+

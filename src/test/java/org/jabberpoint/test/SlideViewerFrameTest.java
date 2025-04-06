@@ -1,10 +1,10 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.KeyController;
-import org.jabberpoint.src.MenuController;
-import org.jabberpoint.src.Presentation;
-import org.jabberpoint.src.SlideViewerComponent;
-import org.jabberpoint.src.SlideViewerFrame;
+import org.jabberpoint.ui.KeyController;
+import org.jabberpoint.ui.MenuController;
+import org.jabberpoint.model.Presentation;
+import org.jabberpoint.ui.SlideViewerComponent;
+import org.jabberpoint.ui.SlideViewerFrame;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -301,3 +301,4 @@ class SlideViewerFrameTest {
         }
     }
 }
+

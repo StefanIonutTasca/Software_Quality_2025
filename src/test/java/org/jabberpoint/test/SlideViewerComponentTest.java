@@ -1,8 +1,8 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.Presentation;
-import org.jabberpoint.src.Slide;
-import org.jabberpoint.src.SlideViewerComponent;
+import org.jabberpoint.model.Presentation;
+import org.jabberpoint.model.Slide;
+import org.jabberpoint.ui.SlideViewerComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -197,3 +197,4 @@ class SlideViewerComponentTest {
         verify(mockSlide, never()).draw(any(), any(), any());
     }
 }
+

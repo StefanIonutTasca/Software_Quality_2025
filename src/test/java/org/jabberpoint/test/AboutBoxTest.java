@@ -1,6 +1,6 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.AboutBox;
+import org.jabberpoint.ui.AboutBox;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -87,3 +87,4 @@ class AboutBoxTest {
         );
     }
 }
+

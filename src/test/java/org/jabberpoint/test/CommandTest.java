@@ -1,15 +1,15 @@
 package org.jabberpoint.test;
 
 import java.awt.Frame;
-import org.jabberpoint.src.Command;
-import org.jabberpoint.src.ExitCommand;
-import org.jabberpoint.src.NewPresentationCommand;
-import org.jabberpoint.src.NextSlideCommand;
-import org.jabberpoint.src.OpenFileCommand;
-import org.jabberpoint.src.Presentation;
-import org.jabberpoint.src.PrevSlideCommand;
-import org.jabberpoint.src.SaveFileCommand;
-import org.jabberpoint.src.Slide;
+import org.jabberpoint.command.Command;
+import org.jabberpoint.command.ExitCommand;
+import org.jabberpoint.command.NewPresentationCommand;
+import org.jabberpoint.command.NextSlideCommand;
+import org.jabberpoint.command.OpenFileCommand;
+import org.jabberpoint.model.Presentation;
+import org.jabberpoint.command.PrevSlideCommand;
+import org.jabberpoint.command.SaveFileCommand;
+import org.jabberpoint.model.Slide;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -223,3 +223,4 @@ public class CommandTest {
         }
     }
 }
+

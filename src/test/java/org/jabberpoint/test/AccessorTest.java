@@ -1,7 +1,7 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.Accessor;
-import org.jabberpoint.src.Presentation;
+import org.jabberpoint.io.Accessor;
+import org.jabberpoint.model.Presentation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,3 +76,4 @@ class AccessorTest {
         }
     }
 }
+

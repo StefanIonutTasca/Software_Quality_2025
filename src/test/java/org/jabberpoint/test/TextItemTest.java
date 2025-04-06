@@ -1,7 +1,7 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.Style;
-import org.jabberpoint.src.TextItem;
+import org.jabberpoint.core.Style;
+import org.jabberpoint.model.TextItem;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -97,3 +97,4 @@ class TextItemTest {
         assertTrue(result.width <= 10, "Width should be small for empty text");
     }
 }
+

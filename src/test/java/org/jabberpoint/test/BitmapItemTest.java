@@ -1,7 +1,7 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.BitmapItem;
-import org.jabberpoint.src.Style;
+import org.jabberpoint.model.BitmapItem;
+import org.jabberpoint.core.Style;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -238,3 +238,4 @@ class BitmapItemTest {
         assertTrue(toStringResult.contains(String.valueOf(testLevel)), "toString should include the level");
     }
 }
+

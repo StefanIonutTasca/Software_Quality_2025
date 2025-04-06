@@ -1,9 +1,9 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.BitmapItem;
-import org.jabberpoint.src.SlideItem;
-import org.jabberpoint.src.SlideItemFactory;
-import org.jabberpoint.src.TextItem;
+import org.jabberpoint.model.BitmapItem;
+import org.jabberpoint.model.SlideItem;
+import org.jabberpoint.model.SlideItemFactory;
+import org.jabberpoint.model.TextItem;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -93,3 +93,4 @@ class SlideItemFactoryTest {
         assertEquals(level, item.getLevel(), "Level should be set correctly");
     }
 }
+

@@ -1,9 +1,9 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.OpenFileCommand;
-import org.jabberpoint.src.Presentation;
-import org.jabberpoint.src.PresentationLoader;
-import org.jabberpoint.src.PresentationLoaderFactory;
+import org.jabberpoint.command.OpenFileCommand;
+import org.jabberpoint.model.Presentation;
+import org.jabberpoint.io.PresentationLoader;
+import org.jabberpoint.io.PresentationLoaderFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -181,3 +181,4 @@ class OpenFileCommandTest {
         }
     }
 }
+
