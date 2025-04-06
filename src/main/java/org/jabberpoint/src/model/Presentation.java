@@ -1,6 +1,5 @@
 package org.jabberpoint.src.model;
-import org.jabberpoint.src.model.PresentationObserver;
-import org.jabberpoint.src.model.Slide;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,103 +18,104 @@ import java.util.List;
  * @version 1.6 2014/05/16 Sylvia Stuurman
  */
 public class Presentation {
-	private String showTitle; // title of the presentation
-	private ArrayList<Slide> showList = null; // an ArrayList with Slides
-	private int currentSlideNumber = 0; // the slidenummer of the current Slide
-	private List<PresentationObserver> observers = new ArrayList<>(); // observers for the Observer pattern
+  private String showTitle; // title of the presentation
+  private ArrayList<Slide> showList = null; // an ArrayList with Slides
+  private int currentSlideNumber = 0; // the slidenummer of the current Slide
+  private List<PresentationObserver> observers =
+      new ArrayList<>(); // observers for the Observer pattern
 
-	public Presentation() {
-		clear();
-	}
+  public Presentation() {
+    clear();
+  }
 
-	/**
-	 * Add an observer to the presentation
-	 * @param observer The observer to add
-	 */
-	public void addObserver(PresentationObserver observer) {
-		observers.add(observer);
-	}
-	
-	/**
-	 * Remove an observer from the presentation
-	 * @param observer The observer to remove
-	 */
-	public void removeObserver(PresentationObserver observer) {
-		observers.remove(observer);
-	}
-	
-	/**
-	 * Notify all observers of a change
-	 */
-	private void notifyObservers() {
-		Slide currentSlide = getCurrentSlide();
-		for (PresentationObserver observer : observers) {
-			observer.update(this, currentSlide);
-		}
-	}
+  /**
+   * Add an observer to the presentation
+   *
+   * @param observer The observer to add
+   */
+  public void addObserver(PresentationObserver observer) {
+    observers.add(observer);
+  }
 
-	public int getSize() {
-		return showList.size();
-	}
+  /**
+   * Remove an observer from the presentation
+   *
+   * @param observer The observer to remove
+   */
+  public void removeObserver(PresentationObserver observer) {
+    observers.remove(observer);
+  }
 
-	public String getTitle() {
-		return showTitle;
-	}
+  /** Notify all observers of a change */
+  private void notifyObservers() {
+    Slide currentSlide = getCurrentSlide();
+    for (PresentationObserver observer : observers) {
+      observer.update(this, currentSlide);
+    }
+  }
 
-	public void setTitle(String nt) {
-		showTitle = nt;
-	}
+  public int getSize() {
+    return showList.size();
+  }
 
-	// give the number of the current slide
-	public int getSlideNumber() {
-		return currentSlideNumber;
-	}
+  public String getTitle() {
+    return showTitle;
+  }
 
-	// change the current slide number and signal it to the observers
-	public void setSlideNumber(int number) {
-		currentSlideNumber = number;
-		notifyObservers();
-	}
+  public void setTitle(String nt) {
+    showTitle = nt;
+  }
 
-	// go to the previous slide unless your at the beginning of the presentation
-	public void prevSlide() {
-		if (currentSlideNumber > 0) {
-			setSlideNumber(currentSlideNumber - 1);
-	    }
-	}
+  // give the number of the current slide
+  public int getSlideNumber() {
+    return currentSlideNumber;
+  }
 
-	// go to the next slide unless your at the end of the presentation.
-	public void nextSlide() {
-		if (currentSlideNumber < (showList.size()-1)) {
-			setSlideNumber(currentSlideNumber + 1);
-		}
-	}
+  // change the current slide number and signal it to the observers
+  public void setSlideNumber(int number) {
+    currentSlideNumber = number;
+    notifyObservers();
+  }
 
-	// Delete the presentation to be ready for the next one.
-	public void clear() {
-		showList = new ArrayList<Slide>();
-		setSlideNumber(-1);
-	}
+  // go to the previous slide unless your at the beginning of the presentation
+  public void prevSlide() {
+    if (currentSlideNumber > 0) {
+      setSlideNumber(currentSlideNumber - 1);
+    }
+  }
 
-	// Add a slide to the presentation
-	public void append(Slide slide) {
-		showList.add(slide);
-	}
+  // go to the next slide unless your at the end of the presentation.
+  public void nextSlide() {
+    if (currentSlideNumber < (showList.size() - 1)) {
+      setSlideNumber(currentSlideNumber + 1);
+    }
+  }
 
-	// Get a slide with a certain slidenumber
-	public Slide getSlide(int number) {
-		if (number < 0 || number >= getSize()){
-			return null;
-	    }
-			return (Slide)showList.get(number);
-	}
+  // Delete the presentation to be ready for the next one.
+  public void clear() {
+    showList = new ArrayList<Slide>();
+    setSlideNumber(-1);
+  }
 
-	// Give the current slide
-	public Slide getCurrentSlide() {
-		return getSlide(currentSlideNumber);
-	}
+  // Add a slide to the presentation
+  public void append(Slide slide) {
+    showList.add(slide);
+  }
 
-	public void exit(int n) {
-		System.exit(n);
-	}
+  // Get a slide with a certain slidenumber
+  public Slide getSlide(int number) {
+    if (number < 0 || number >= getSize()) {
+      return null;
+    }
+    return (Slide) showList.get(number);
+  }
+
+  // Give the current slide
+  public Slide getCurrentSlide() {
+    return getSlide(currentSlideNumber);
+  }
+
+  public void exit(int n) {
+    System.exit(n);
+  }
 }
