@@ -87,3 +87,50 @@ The JaCoCo HTML report provides:
 ## CI/CD Integration
 
 Our GitHub Actions workflow automatically generates and uploads the JaCoCo report as an artifact for each build, making it easy to track coverage metrics over time.
+
+## Accessing JaCoCo Reports in GitHub Actions
+
+The JaCoCo code coverage reports are automatically generated and uploaded as artifacts during CI/CD pipeline runs. Here's how to access them:
+
+1. Go to the [Actions tab](https://github.com/StefanIonutTasca/Software_Quality_2025/actions) in the GitHub repository
+2. Select the "JaCoCo Code Coverage - Java CI/CD with Maven" workflow
+3. Choose the latest successful run (or any specific run you're interested in)
+4. Scroll down to the "Artifacts" section
+5. Download the "jacoco-report" artifact
+6. Extract the ZIP file to a local directory
+7. Open the `index.html` file in your web browser to view the detailed coverage report
+
+### Understanding the JaCoCo Report
+
+The JaCoCo HTML report provides detailed coverage information:
+
+- **Package View**: Overall coverage for each package
+- **Class View**: Coverage details for each class
+- **Method View**: Coverage for individual methods
+- **Source View**: Line-by-line coverage highlighting in the source code
+
+The report uses color coding:
+- **Green**: Fully covered code
+- **Yellow**: Partially covered code (e.g., branches)
+- **Red**: Uncovered code
+
+### Integration Tests Coverage
+
+Our integration tests (located in `src/test/java/org/jabberpoint/integration`) verify the interaction between different components of the application. These tests contribute to the overall code coverage and help ensure that the refactored package structure maintains proper functionality across component boundaries.
+
+### Excluded Classes
+
+Some UI classes and the main application class are excluded from coverage requirements as they are difficult to test automatically:
+
+```xml
+<excludes>
+    <exclude>**/JabberPoint.class</exclude>
+    <exclude>**/MenuController.class</exclude>
+    <exclude>**/DemoPresentation.class</exclude>
+    <exclude>**/SlideViewerComponent.class</exclude>
+    <exclude>**/SlideViewerFrame.class</exclude>
+    <exclude>**/AboutBox.class</exclude>
+    <exclude>**/MenuController$*ActionListener*.class</exclude>
+    <exclude>**/SlideViewerFrame$*WindowAdapter*.class</exclude>
+    <exclude>**/DummyComponent.class</exclude>
+</excludes>

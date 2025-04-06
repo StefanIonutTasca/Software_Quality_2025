@@ -1,3 +1,11 @@
+package org.jabberpoint.src.io;
+import org.jabberpoint.src.model.BitmapItem;
+import org.jabberpoint.src.io.Accessor;
+import org.jabberpoint.src.model.Style;
+import org.jabberpoint.src.app.JabberPoint;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.model.Slide;
+
 /**
  * A built in demo-presentation
  *
@@ -9,7 +17,7 @@
  * @version 1.5 2010/03/03 Sylvia Stuurman
  * @version 1.6 2014/05/16 Sylvia Stuurman
  */
-class DemoPresentation extends Accessor {
+public class DemoPresentation extends Accessor {
 
   public void loadFile(Presentation presentation, String unusedFilename) {
     presentation.setTitle("Demo Presentation");
