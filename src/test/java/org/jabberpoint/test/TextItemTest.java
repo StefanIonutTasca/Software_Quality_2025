@@ -9,8 +9,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.ImageObserver;
 import java.text.AttributedString;
 
-import org.jabberpoint.src.Style;
-import org.jabberpoint.src.TextItem;
+import org.jabberpoint.src.model.Style;
+import org.jabberpoint.src.model.TextItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -121,3 +121,4 @@ class TextItemTest {
         }
     }
 }
+

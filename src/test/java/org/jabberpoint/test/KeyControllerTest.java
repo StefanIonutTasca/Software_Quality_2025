@@ -1,9 +1,9 @@
 package org.jabberpoint.test;
 
 import java.awt.event.KeyEvent;
-import org.jabberpoint.src.DummyComponent;
-import org.jabberpoint.src.KeyController;
-import org.jabberpoint.src.Presentation;
+import org.jabberpoint.src.ui.DummyComponent;
+import org.jabberpoint.src.control.KeyController;
+import org.jabberpoint.src.model.Presentation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -195,3 +195,4 @@ class KeyControllerTest {
         private static final long serialVersionUID = 1L;
     }
 }
+

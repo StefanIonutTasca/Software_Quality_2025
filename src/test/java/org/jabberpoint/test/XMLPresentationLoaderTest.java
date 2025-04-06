@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import javax.xml.parsers.ParserConfigurationException;
-import org.jabberpoint.src.BitmapItem;
-import org.jabberpoint.src.Presentation;
-import org.jabberpoint.src.Slide;
-import org.jabberpoint.src.SlideItem;
-import org.jabberpoint.src.TextItem;
-import org.jabberpoint.src.XMLPresentationLoader;
+import org.jabberpoint.src.model.BitmapItem;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.model.Slide;
+import org.jabberpoint.src.model.SlideItem;
+import org.jabberpoint.src.model.TextItem;
+import org.jabberpoint.src.io.XMLPresentationLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -191,3 +191,4 @@ class XMLPresentationLoaderTest {
         assertEquals(1, slide.getSlideItem(0).getLevel(), "Item should have default level 1");
     }
 }
+

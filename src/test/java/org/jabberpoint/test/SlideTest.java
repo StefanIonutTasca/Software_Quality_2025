@@ -9,10 +9,10 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.ImageObserver;
 import java.util.Vector;
 
-import org.jabberpoint.src.Slide;
-import org.jabberpoint.src.SlideItem;
-import org.jabberpoint.src.Style;
-import org.jabberpoint.src.TextItem;
+import org.jabberpoint.src.model.Slide;
+import org.jabberpoint.src.model.SlideItem;
+import org.jabberpoint.src.model.Style;
+import org.jabberpoint.src.model.TextItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -193,3 +193,4 @@ class SlideTest {
         );
     }
 }
+
