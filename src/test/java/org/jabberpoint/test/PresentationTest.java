@@ -2,9 +2,9 @@ package org.jabberpoint.test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.jabberpoint.src.Presentation;
-import org.jabberpoint.src.PresentationObserver;
-import org.jabberpoint.src.Slide;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.model.PresentationObserver;
+import org.jabberpoint.src.model.Slide;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -202,3 +202,4 @@ class PresentationTest {
         Mockito.verify(mockObserver, Mockito.never()).update(Mockito.any(), Mockito.any());
     }
 }
+

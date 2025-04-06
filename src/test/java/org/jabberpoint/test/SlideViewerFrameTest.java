@@ -1,10 +1,11 @@
 package org.jabberpoint.test;
+import org.jabberpoint.src.app.JabberPoint;
 
-import org.jabberpoint.src.KeyController;
-import org.jabberpoint.src.MenuController;
-import org.jabberpoint.src.Presentation;
-import org.jabberpoint.src.SlideViewerComponent;
-import org.jabberpoint.src.SlideViewerFrame;
+import org.jabberpoint.src.control.KeyController;
+import org.jabberpoint.src.control.MenuController;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.ui.SlideViewerComponent;
+import org.jabberpoint.src.ui.SlideViewerFrame;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -60,7 +61,7 @@ class SlideViewerFrameTest {
             
             // Assert
             assertEquals("Jabberpoint 1.6 - OU", frame.getTitle(), "Title should be set to JABTITLE constant");
-            assertEquals(new Dimension(SlideViewerFrame.WIDTH, SlideViewerFrame.HEIGHT), frame.getSize(), 
+            assertEquals(new Dimension(org.jabberpoint.src.ui.SlideViewerFrame.WIDTH, org.jabberpoint.src.ui.SlideViewerFrame.HEIGHT), frame.getSize(), 
                     "Frame size should match WIDTH and HEIGHT constants");
             assertTrue(frame.isVisible(), "Frame should be visible");
             
@@ -301,3 +302,6 @@ class SlideViewerFrameTest {
         }
     }
 }
+
+
+

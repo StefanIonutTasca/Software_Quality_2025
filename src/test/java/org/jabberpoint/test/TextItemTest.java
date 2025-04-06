@@ -1,11 +1,22 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.Style;
-import org.jabberpoint.src.TextItem;
-import org.junit.jupiter.api.BeforeAll;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
+import java.awt.image.ImageObserver;
+import java.text.AttributedString;
+
+import org.jabberpoint.src.model.Style;
+import org.jabberpoint.src.model.TextItem;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -97,3 +108,4 @@ class TextItemTest {
         assertTrue(result.width <= 10, "Width should be small for empty text");
     }
 }
+

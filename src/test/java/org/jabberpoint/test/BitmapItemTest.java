@@ -1,7 +1,14 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.BitmapItem;
-import org.jabberpoint.src.Style;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.image.ImageObserver;
+import java.lang.reflect.Field;
+
+import org.jabberpoint.src.model.BitmapItem;
+import org.jabberpoint.src.model.Style;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,13 +17,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import javax.imageio.ImageIO;
-import java.awt.Graphics;
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -1,6 +1,12 @@
 package org.jabberpoint.test;
+import org.jabberpoint.src.model.Style;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.model.SlideItem;
+import org.jabberpoint.src.io.XMLAccessor;
+import org.jabberpoint.src.model.Slide;
+import org.jabberpoint.src.model.TextItem;
+import org.jabberpoint.src.model.BitmapItem;
 
-import org.jabberpoint.src.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;

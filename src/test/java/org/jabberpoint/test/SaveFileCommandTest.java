@@ -1,8 +1,9 @@
 package org.jabberpoint.test;
-
-import org.jabberpoint.src.SaveFileCommand;
-import org.jabberpoint.src.Presentation;
-import org.jabberpoint.src.XMLPresentationLoader;
+import org.jabberpoint.src.app.JabberPoint;
+import org.jabberpoint.src.command.SaveFileCommand;
+import org.jabberpoint.src.command.Command;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.io.XMLPresentationLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

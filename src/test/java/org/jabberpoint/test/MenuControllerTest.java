@@ -1,9 +1,10 @@
 package org.jabberpoint.test;
+import org.jabberpoint.src.model.Slide;
 
-import org.jabberpoint.src.AboutBox;
-import org.jabberpoint.src.MenuController;
-import org.jabberpoint.src.Presentation;
-import org.jabberpoint.src.XMLAccessor;
+import org.jabberpoint.src.ui.AboutBox;
+import org.jabberpoint.src.control.MenuController;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.io.XMLAccessor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -404,3 +405,5 @@ class MenuControllerTest {
         return null;
     }
 }
+
+

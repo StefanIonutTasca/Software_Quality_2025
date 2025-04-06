@@ -1,6 +1,18 @@
 package org.jabberpoint.test;
+import org.jabberpoint.src.model.Style;
+import org.jabberpoint.src.model.SlideItemFactory;
 
-import org.jabberpoint.src.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import javax.xml.parsers.ParserConfigurationException;
+import org.jabberpoint.src.model.BitmapItem;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.model.Slide;
+import org.jabberpoint.src.model.SlideItem;
+import org.jabberpoint.src.model.TextItem;
+import org.jabberpoint.src.io.XMLPresentationLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +47,7 @@ class XMLPresentationLoaderTest {
     void setUp() {
         xmlLoader = new XMLPresentationLoader();
         presentation = new Presentation();
-        Style.createStyles(); // Initialize styles for tests
+        org.jabberpoint.src.model.Style.createStyles(); // Initialize styles for tests
         
         // Redirect System.err to capture error messages
         System.setErr(new PrintStream(errContent));
@@ -293,12 +305,12 @@ class XMLPresentationLoaderTest {
             }
             
             @Override
-            public Rectangle getBoundingBox(Graphics g, ImageObserver observer, float scale, Style myStyle) {
+            public Rectangle getBoundingBox(Graphics g, ImageObserver observer, float scale, org.jabberpoint.src.model.Style myStyle) {
                 return new Rectangle(0, 0, 50, 50);
             }
             
             @Override
-            public void draw(int x, int y, float scale, Graphics g, Style myStyle, ImageObserver observer) {
+            public void draw(int x, int y, float scale, Graphics g, org.jabberpoint.src.model.Style myStyle, ImageObserver observer) {
                 // Do nothing
             }
             
@@ -396,3 +408,5 @@ class XMLPresentationLoaderTest {
         }
     }
 }
+
+

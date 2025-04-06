@@ -1,25 +1,31 @@
 package org.jabberpoint.test;
 
-import org.jabberpoint.src.Slide;
-import org.jabberpoint.src.SlideItem;
-import org.jabberpoint.src.Style;
-import org.jabberpoint.src.TextItem;
-import org.junit.jupiter.api.BeforeAll;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
+import java.awt.image.ImageObserver;
+import java.util.Vector;
+
+import org.jabberpoint.src.model.Slide;
+import org.jabberpoint.src.model.SlideItem;
+import org.jabberpoint.src.model.Style;
+import org.jabberpoint.src.model.TextItem;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeAll;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
-import java.util.Vector;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -192,3 +198,4 @@ class SlideTest {
         assertTrue(true, "The draw operation completed successfully");
     }
 }
+

@@ -1,6 +1,7 @@
 package org.jabberpoint.test;
+import org.jabberpoint.src.app.JabberPoint;
 
-import org.jabberpoint.src.AboutBox;
+import org.jabberpoint.src.ui.AboutBox;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,7 +53,7 @@ class AboutBoxTest {
         }
 
         // Act
-        AboutBox.show(mockFrame);
+        org.jabberpoint.src.ui.AboutBox.show(mockFrame);
 
         // Verify JOptionPane.showMessageDialog was called with correct parameters
         mockedJOptionPane.verify(() ->
@@ -74,7 +75,7 @@ class AboutBoxTest {
         }
 
         // Act
-        AboutBox.show(null);
+        org.jabberpoint.src.ui.AboutBox.show(null);
 
         // Verify JOptionPane.showMessageDialog was called with null frame
         mockedJOptionPane.verify(() ->
@@ -87,3 +88,6 @@ class AboutBoxTest {
         );
     }
 }
+
+
+
