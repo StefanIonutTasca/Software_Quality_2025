@@ -1,6 +1,5 @@
 package org.jabberpoint.src.model;
 
-
 /** Factory for creating slide items Implements the Factory Method pattern */
 public class SlideItemFactory {
 
