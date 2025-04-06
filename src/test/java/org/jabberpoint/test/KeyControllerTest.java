@@ -1,6 +1,5 @@
 package org.jabberpoint.test;
 
-
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.awt.event.KeyEvent;
