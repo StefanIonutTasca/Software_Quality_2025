@@ -2,7 +2,7 @@ name: Google Java Format
 
 on:
   push:
-    branches: [ development, testing ]
+    branches: [ development ]
   pull_request:
     branches: [ development, testing, acceptance, main, theme-support ]
 

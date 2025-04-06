@@ -2,11 +2,11 @@ package org.jabberpoint.src.app;
 
 import java.io.IOException;
 import javax.swing.JOptionPane;
-import org.jabberpoint.src.model.Style;
-import org.jabberpoint.src.model.Presentation;
-import org.jabberpoint.src.ui.SlideViewerFrame;
 import org.jabberpoint.src.io.PresentationLoader;
 import org.jabberpoint.src.io.PresentationLoaderFactory;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.model.Style;
+import org.jabberpoint.src.ui.SlideViewerFrame;
 
 /**
  * JabberPoint Main Programma
@@ -24,40 +24,38 @@ import org.jabberpoint.src.io.PresentationLoaderFactory;
  * @version 1.6 2014/05/16 Sylvia Stuurman
  */
 public class JabberPoint {
-	protected static final String IOERR = "IO Error: ";
-	protected static final String JABERR = "Jabberpoint Error ";
-	protected static final String JABVERSION = "Jabberpoint 1.6 - OU version";
+  protected static final String IOERR = "IO Error: ";
+  protected static final String JABERR = "Jabberpoint Error ";
+  protected static final String JABVERSION = "Jabberpoint 1.6 - OU version";
 
-	/** The Main Program */
-	public static void main(String argv[]) {
-		
-		// Initialize styles using Singleton pattern
-		Style.getInstance();
-		
-		// Create the presentation
-		Presentation presentation = new Presentation();
-		
-		// Create the frame with the presentation
-		new SlideViewerFrame(JABVERSION, presentation);
-		
-		try {
-			// Use the Strategy pattern with Factory Method to load the presentation
-			PresentationLoader loader;
-			
-			if (argv.length == 0) {
-				// Load a demo presentation
-				loader = PresentationLoaderFactory.createLoader("demo");
-			} else {
-				// Load from XML file
-				loader = PresentationLoaderFactory.createLoader("xml");
-			}
-			
-			loader.loadPresentation(presentation, argv.length == 0 ? "" : argv[0]);
-			presentation.setSlideNumber(0);
-		} catch (IOException ex) {
-			JOptionPane.showMessageDialog(null,
-					IOERR + ex, JABERR,
-					JOptionPane.ERROR_MESSAGE);
-		}
-	}
+  /** The Main Program */
+  public static void main(String argv[]) {
+
+    // Initialize styles using Singleton pattern
+    Style.getInstance();
+
+    // Create the presentation
+    Presentation presentation = new Presentation();
+
+    // Create the frame with the presentation
+    new SlideViewerFrame(JABVERSION, presentation);
+
+    try {
+      // Use the Strategy pattern with Factory Method to load the presentation
+      PresentationLoader loader;
+
+      if (argv.length == 0) {
+        // Load a demo presentation
+        loader = PresentationLoaderFactory.createLoader("demo");
+      } else {
+        // Load from XML file
+        loader = PresentationLoaderFactory.createLoader("xml");
+      }
+
+      loader.loadPresentation(presentation, argv.length == 0 ? "" : argv[0]);
+      presentation.setSlideNumber(0);
+    } catch (IOException ex) {
+      JOptionPane.showMessageDialog(null, IOERR + ex, JABERR, JOptionPane.ERROR_MESSAGE);
+    }
+  }
 }
