@@ -92,7 +92,7 @@ public class Presentation {
 	}
 
 	// Delete the presentation to be ready for the next one.
-	void clear() {
+	public void clear() {
 		showList = new ArrayList<Slide>();
 		setSlideNumber(-1);
 	}
@@ -119,7 +119,3 @@ public class Presentation {
 		System.exit(n);
 	}
 }
-
-
-
-
