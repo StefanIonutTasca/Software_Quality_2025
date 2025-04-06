@@ -41,8 +41,8 @@ public class MenuController extends MenuBar {
   protected static final String SAVE = "Save";
   protected static final String VIEW = "View";
 
-  protected static final String TESTFILE = "test.xml";
-  protected static final String SAVEFILE = "dump.xml";
+  protected static final String TESTFILE = "src/main/java/org/jabberpoint/OurPresentation.xml";
+  protected static final String SAVEFILE = "src/main/java/org/jabberpoint/dump.xml";
 
   protected static final String IOEX = "IO Exception: ";
   protected static final String LOADERR = "Load Error";

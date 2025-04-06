@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE presentation SYSTEM
+        "C:\Users\radu\Desktop\software quality resit project folder\Software_Quality_2025\src\main\java\org\jabberpoint\jabberpoint.dtd">
+<presentation>
+    <showtitle>XML-Based Presentation for Jabberpoint</showtitle>
+    <slide>
+        <title>JabberPoint XML - DEMO made By Dumitrache Radu and Tasca Stefan</title>
+        <item kind="text"  level="1">Welkom to Jabberpoint</item>
+    </slide>
+    <slide>
+        <title>This demo presentation was made to test if new presentations can be made</title>
+        <item kind="text"  level="1"> Text Item 1 </item>
+        <item kind="text"  level="2"> Text Item 2 </item>
+    </slide>
+    <slide>
+        <title>This demo presentation was made to test if new presentations can be made</title>
+        <item kind="image"  level="1">testPhoto.jpg</item>
+
+    </slide>
+
+</presentation>
