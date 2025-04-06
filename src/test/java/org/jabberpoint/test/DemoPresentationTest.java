@@ -1,11 +1,12 @@
 package org.jabberpoint.test;
+import org.jabberpoint.src.io.XMLAccessor;
 
-import org.jabberpoint.src.Accessor;
-import org.jabberpoint.src.BitmapItem;
-import org.jabberpoint.src.Presentation;
-import org.jabberpoint.src.PresentationLoader;
-import org.jabberpoint.src.PresentationLoaderFactory;
-import org.jabberpoint.src.Slide;
+import org.jabberpoint.src.io.Accessor;
+import org.jabberpoint.src.model.BitmapItem;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.io.PresentationLoader;
+import org.jabberpoint.src.io.PresentationLoaderFactory;
+import org.jabberpoint.src.model.Slide;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -84,3 +85,5 @@ class DemoPresentationTest {
         // test it through the PresentationLoader interface.
     }
 }
+
+

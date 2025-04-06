@@ -1,8 +1,10 @@
 package org.jabberpoint.test;
+import org.jabberpoint.src.command.SaveFileCommand;
+import org.jabberpoint.src.model.Slide;
 
-import org.jabberpoint.src.AboutBox;
-import org.jabberpoint.src.MenuController;
-import org.jabberpoint.src.Presentation;
+import org.jabberpoint.src.ui.AboutBox;
+import org.jabberpoint.src.control.MenuController;
+import org.jabberpoint.src.model.Presentation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -385,3 +387,5 @@ class MenuControllerActionListenerTest {
         }
     }
 }
+
+

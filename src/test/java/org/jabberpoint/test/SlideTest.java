@@ -14,8 +14,11 @@ import org.jabberpoint.src.model.SlideItem;
 import org.jabberpoint.src.model.Style;
 import org.jabberpoint.src.model.TextItem;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeAll;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -195,3 +198,4 @@ class SlideTest {
         assertTrue(true, "The draw operation completed successfully");
     }
 }
+

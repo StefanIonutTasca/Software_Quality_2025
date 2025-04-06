@@ -1,4 +1,5 @@
 package org.jabberpoint.test;
+import org.jabberpoint.src.model.Slide;
 
 import java.awt.event.KeyEvent;
 import org.jabberpoint.src.ui.DummyComponent;
@@ -195,4 +196,5 @@ class KeyControllerTest {
         private static final long serialVersionUID = 1L;
     }
 }
+
 

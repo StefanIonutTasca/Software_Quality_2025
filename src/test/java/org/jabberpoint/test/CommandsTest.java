@@ -1,10 +1,14 @@
 package org.jabberpoint.test;
+import org.jabberpoint.src.command.NextSlideCommand;
+import org.jabberpoint.src.command.ExitCommand;
+import org.jabberpoint.src.command.PrevSlideCommand;
+import org.jabberpoint.src.command.Command;
 
-import org.jabberpoint.src.Command;
-import org.jabberpoint.src.ExitCommand;
-import org.jabberpoint.src.NextSlideCommand;
-import org.jabberpoint.src.PrevSlideCommand;
-import org.jabberpoint.src.Presentation;
+import org.jabberpoint.src.command.Command.Command;
+import org.jabberpoint.src.command.Command.ExitCommand;
+import org.jabberpoint.src.command.Command.NextSlideCommand;
+import org.jabberpoint.src.command.Command.PrevSlideCommand;
+import org.jabberpoint.src.model.Presentation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -71,3 +75,5 @@ class CommandsTest {
         verifyNoMoreInteractions(mockPresentation);
     }
 }
+
+
