@@ -15,7 +15,7 @@ The primary workflow that:
 - Runs tests
 - Generates JaCoCo reports
 - Uploads artifacts
-- Triggers only on push to development branch and pull requests to main, development, testing, and acceptance branches
+- Triggers on push to development branch and pull requests to main, development, testing, and acceptance branches
 
 ### 2. `build.yml` - Build Pipeline
 
@@ -23,7 +23,7 @@ Tests compatibility for the development branch:
 - Builds and tests on Java 17
 - Archives build artifacts
 - Archives test results
-- Triggers only on push to development branch
+- Triggers on push to development branch and pull requests to development, testing, acceptance, and main branches when specific paths are modified (src/, pom.xml, workflow file)
 
 ### 3. `google_linter.yml` - Code Formatting
 
@@ -31,13 +31,15 @@ Ensures consistent code formatting:
 - Uses Google Java Format
 - Automatically formats code
 - Creates PRs for formatting changes
+- Triggers on push to development branch and pull requests to development, testing, acceptance, main, and theme-support branches
 
 ### 4. `code_check.yml` - Code Quality
 
 Static code analysis:
-- Integrates with SonarCloud (when configured)
+- Integrates with SonarCloud
 - Analyzes code quality metrics
 - Identifies code smells, bugs, and vulnerabilities
+- Triggers on pull requests to development, testing, acceptance, and main branches
 
 ### 5. `labeler.yml` - PR Labeling
 
