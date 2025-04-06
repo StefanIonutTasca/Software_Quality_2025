@@ -2,8 +2,6 @@ package org.jabberpoint.test;
 import org.jabberpoint.src.command.OpenFileCommand;
 import org.jabberpoint.src.app.JabberPoint;
 import org.jabberpoint.src.command.Command;
-
-import org.jabberpoint.src.command.Command.OpenFileCommand;
 import org.jabberpoint.src.model.Presentation;
 import org.jabberpoint.src.io.PresentationLoader;
 import org.jabberpoint.src.io.PresentationLoaderFactory;
@@ -184,5 +182,3 @@ class OpenFileCommandTest {
         }
     }
 }
-
-

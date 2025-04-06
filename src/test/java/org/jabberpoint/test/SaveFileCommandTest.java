@@ -2,8 +2,6 @@ package org.jabberpoint.test;
 import org.jabberpoint.src.app.JabberPoint;
 import org.jabberpoint.src.command.SaveFileCommand;
 import org.jabberpoint.src.command.Command;
-
-import org.jabberpoint.src.command.Command.SaveFileCommand;
 import org.jabberpoint.src.model.Presentation;
 import org.jabberpoint.src.io.XMLPresentationLoader;
 import org.junit.jupiter.api.BeforeEach;
@@ -166,5 +164,3 @@ class SaveFileCommandTest {
         }
     }
 }
-
-
