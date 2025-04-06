@@ -14,8 +14,8 @@
     </slide>
     <slide>
         <title>This demo presentation was made to test if new presentations can be made</title>
-        <item kind="image"  level="1">testPhoto.jpg</item>
-
+        <item kind="image"  level="1">testImage.png</item>
+        <item kind="image"  level="2">campus.jpg</item>
     </slide>
 
 </presentation>
