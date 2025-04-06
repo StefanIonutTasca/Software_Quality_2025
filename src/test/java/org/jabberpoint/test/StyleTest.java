@@ -6,7 +6,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.lang.reflect.Field;
 
-import org.jabberpoint.src.Style;
+import org.jabberpoint.src.model.Style;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -131,3 +131,4 @@ class StyleTest {
         }
     }
 }
+

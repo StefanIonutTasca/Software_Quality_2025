@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<!DOCTYPE presentation SYSTEM "jabberpoint.dtd">
+<!DOCTYPE presentation SYSTEM
+		"C:\Users\radu\Desktop\software quality resit project folder\Software_Quality_2025\src\main\java\org\jabberpoint\jabberpoint.dtd">
 <presentation>
 	<showtitle>XML-Based Presentation for Jabberpoint</showtitle>
 	<slide>
