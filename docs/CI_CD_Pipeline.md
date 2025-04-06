@@ -15,15 +15,13 @@ The primary workflow that:
 - Runs tests
 - Generates JaCoCo reports
 - Uploads artifacts
-- Triggers only on push to development branch and pull requests to main, development, testing, and acceptance branches
 
-### 2. `build.yml` - Build Pipeline
+### 2. `build.yml` - Multi-Java Build
 
-Tests compatibility for the development branch:
-- Builds and tests on Java 17
+Tests compatibility across multiple Java versions:
+- Builds and tests on Java 11 and 17
 - Archives build artifacts
 - Archives test results
-- Triggers only on push to development branch
 
 ### 3. `google_linter.yml` - Code Formatting
 
@@ -48,9 +46,8 @@ Automates PR management:
 ### 6. `automated_integration_tests.yml` - Integration Testing
 
 Runs integration tests on specific branches:
-- Executes integration tests on pull requests to testing, acceptance, and main branches
+- Executes integration tests on testing, acceptance, and main branches
 - Uploads test results
-- Prevents duplicate runs by only triggering on pull requests (not on push events)
 
 ### 7. `pullRequest.yml` - PR Validation
 

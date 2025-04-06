@@ -43,11 +43,9 @@ mvn clean test
 
 This runs all tests and generates a JaCoCo report in `target/site/jacoco/`.
 
-> **Note**: Maven is not required for simply running the Jabberpoint application. It's only needed if you want to build the project from source, run tests, or generate code coverage reports.
+## Coverage Thresholds (Future Enhancement)
 
-## Coverage Thresholds
-
-Our project enforces minimum code coverage thresholds:
+In a future update, we plan to add coverage thresholds to ensure minimum coverage requirements are met:
 
 ```xml
 <execution>
@@ -68,12 +66,7 @@ Our project enforces minimum code coverage thresholds:
                     <limit>
                         <counter>BRANCH</counter>
                         <value>COVEREDRATIO</value>
-                        <minimum>0.75</minimum>
-                    </limit>
-                    <limit>
-                        <counter>LINE</counter>
-                        <value>COVEREDRATIO</value>
-                        <minimum>0.80</minimum>
+                        <minimum>0.70</minimum>
                     </limit>
                 </limits>
             </rule>
@@ -93,9 +86,7 @@ The JaCoCo HTML report provides:
 
 ## CI/CD Integration
 
-Our GitHub Actions workflow automatically generates and uploads the JaCoCo report as an artifact for each build, making it easy to track coverage metrics over time. The workflow is configured to run on:
-- Push events to the development branch
-- Pull requests to main, development, testing, and acceptance branches
+Our GitHub Actions workflow automatically generates and uploads the JaCoCo report as an artifact for each build, making it easy to track coverage metrics over time.
 
 ## Accessing JaCoCo Reports in GitHub Actions
 
@@ -125,17 +116,7 @@ The report uses color coding:
 
 ### Integration Tests Coverage
 
-Our integration tests (located in `src/test/java/org/jabberpoint/integration`) verify the interaction between different components of the application. These tests:
-
-- Run automatically on pull requests to testing, acceptance, and main branches
-- Are configured to avoid duplicate runs (only trigger on pull request events, not on push events)
-- Contribute to the overall code coverage
-- Help ensure that the refactored package structure maintains proper functionality across component boundaries
-
-To run integration tests locally:
-```bash
-mvn verify -P integration-test
-```
+Our integration tests (located in `src/test/java/org/jabberpoint/integration`) verify the interaction between different components of the application. These tests contribute to the overall code coverage and help ensure that the refactored package structure maintains proper functionality across component boundaries.
 
 ### Excluded Classes
 
