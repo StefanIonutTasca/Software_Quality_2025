@@ -2,10 +2,9 @@ name: JaCoCo Code Coverage - Java CI/CD with Maven
 
 on:
   push:
-    branches: [ main, development, testing, acceptance ]
+    branches: [ main, development ]
   pull_request:
-    branches:
-      - '**'
+    branches: [ main, development, testing, acceptance ]
   workflow_dispatch:
 
 jobs:
