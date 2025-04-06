@@ -67,10 +67,23 @@ For more details on our code coverage setup and configuration, see the [JaCoCo S
 
 ### Prerequisites
 - Java 17 or higher
-- Maven 3.6.0+
 - Git
 
-### Build and Run
+Maven is **not necessary** for simply running the project. It's only required if you want to:
+- Build the project from source
+- Run the automated tests
+- Generate code coverage reports
+
+### Running the Application
+There are two ways to run the application:
+
+#### Option 1: Run the Main File Directly (No Maven Required)
+Simply run the main JabberPoint class located at:
+```
+src/main/java/org/jabberpoint/src/app/JabberPoint.java
+```
+
+#### Option 2: Building from Source (Maven Required)
 1. Clone the repository
 ```bash
 git clone https://github.com/YourUsername/Software_Quality_2025.git
@@ -86,6 +99,35 @@ mvn clean install
 ```bash
 mvn exec:java -Dexec.mainClass="org.jabberpoint.JabberPoint"
 ```
+
+### Automated Testing
+Our project includes both unit tests and integration tests:
+
+#### Unit Tests
+Run unit tests with:
+```bash
+mvn test
+```
+
+#### Integration Tests
+Integration tests are located at:
+```
+src/test/java/org/jabberpoint/integration/
+```
+
+These tests verify the interaction between different components of the application and run automatically on pull requests to testing, acceptance, and main branches.
+
+#### Accessing Test Reports
+Test reports and code coverage reports are automatically generated during CI/CD pipeline runs:
+
+1. Go to the [Actions tab](https://github.com/StefanIonutTasca/Software_Quality_2025/actions) in the GitHub repository
+2. Select the relevant workflow:
+   - "JaCoCo Code Coverage - Java CI/CD with Maven" for code coverage reports
+   - "Integration Tests" for integration test results
+3. Choose the latest successful run
+4. Scroll down to the "Artifacts" section
+5. Download the relevant artifact ("jacoco-report" for code coverage)
+6. Extract the ZIP file and open `index.html` in your browser to view the detailed report
 
 ### Development Workflow
 1. Create a feature branch from `development`
