@@ -1,3 +1,5 @@
+package org.jabberpoint.src.model;
+
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -49,13 +51,22 @@ public class TextItem extends SlideItem {
 
   // geef de AttributedString voor het item
   public AttributedString getAttributedString(Style style, float scale) {
-    AttributedString attrStr = new AttributedString(getText());
-    attrStr.addAttribute(TextAttribute.FONT, style.getFont(scale), 0, text.length());
+    String textToUse = getText();
+    if (textToUse.isEmpty()) {
+      textToUse = " "; // Use a space for empty text to avoid IllegalArgumentException
+    }
+    AttributedString attrStr = new AttributedString(textToUse);
+    attrStr.addAttribute(TextAttribute.FONT, style.getFont(scale), 0, textToUse.length());
     return attrStr;
   }
 
   // give the bounding box of the item
   public Rectangle getBoundingBox(Graphics g, ImageObserver observer, float scale, Style myStyle) {
+    if (g == null) {
+      // Return a default bounding box if no graphics context
+      return new Rectangle((int) (myStyle.indent * scale), 0, 10, (int) (myStyle.leading * scale));
+    }
+
     List<TextLayout> layouts = getLayouts(g, myStyle, scale);
     int xsize = 0, ysize = (int) (myStyle.leading * scale);
     Iterator<TextLayout> iterator = layouts.iterator();
@@ -75,9 +86,10 @@ public class TextItem extends SlideItem {
 
   // draw the item
   public void draw(int x, int y, float scale, Graphics g, Style myStyle, ImageObserver o) {
-    if (text == null || text.length() == 0) {
+    if (g == null || getText().isEmpty()) {
       return;
     }
+
     List<TextLayout> layouts = getLayouts(g, myStyle, scale);
     Point pen = new Point(x + (int) (myStyle.indent * scale), y + (int) (myStyle.leading * scale));
     Graphics2D g2d = (Graphics2D) g;
@@ -93,6 +105,10 @@ public class TextItem extends SlideItem {
 
   private List<TextLayout> getLayouts(Graphics g, Style s, float scale) {
     List<TextLayout> layouts = new ArrayList<TextLayout>();
+    if (g == null || getText().isEmpty()) {
+      return layouts; // Return empty list if no graphics context or empty text
+    }
+
     AttributedString attrStr = getAttributedString(s, scale);
     Graphics2D g2d = (Graphics2D) g;
     FontRenderContext frc = g2d.getFontRenderContext();

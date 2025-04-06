@@ -1,3 +1,5 @@
+package org.jabberpoint.src.io;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -6,6 +8,11 @@ import java.util.Vector;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.jabberpoint.src.model.BitmapItem;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.model.Slide;
+import org.jabberpoint.src.model.SlideItem;
+import org.jabberpoint.src.model.TextItem;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -25,7 +32,6 @@ import org.xml.sax.SAXException;
  */
 public class XMLAccessor extends Accessor {
 
-  /** Default API to use. */
   protected static final String DEFAULT_API_TO_USE = "dom";
 
   /** namen van xml tags of attributen */
@@ -47,7 +53,11 @@ public class XMLAccessor extends Accessor {
 
   private String getTitle(Element element, String tagName) {
     NodeList titles = element.getElementsByTagName(tagName);
-    return titles.item(0).getTextContent();
+    if (titles == null || titles.getLength() == 0) {
+      return ""; // Return empty string if no title found
+    }
+    String titleText = titles.item(0).getTextContent();
+    return titleText == null ? "" : titleText.trim();
   }
 
   public void loadFile(Presentation presentation, String filename) throws IOException {
@@ -75,6 +85,7 @@ public class XMLAccessor extends Accessor {
       }
     } catch (IOException iox) {
       System.err.println(iox.toString());
+      // Don't rethrow to maintain backward compatibility
     } catch (SAXException sax) {
       System.err.println(sax.getMessage());
     } catch (ParserConfigurationException pcx) {
@@ -108,7 +119,6 @@ public class XMLAccessor extends Accessor {
   public void saveFile(Presentation presentation, String filename) throws IOException {
     PrintWriter out = new PrintWriter(new FileWriter(filename));
     out.println("<?xml version=\"1.0\"?>");
-    out.println("<!DOCTYPE presentation SYSTEM \"jabberpoint.dtd\">");
     out.println("<presentation>");
     out.print("<showtitle>");
     out.print(presentation.getTitle());
@@ -129,7 +139,9 @@ public class XMLAccessor extends Accessor {
             out.print("\"image\" level=\"" + slideItem.getLevel() + "\">");
             out.print(((BitmapItem) slideItem).getName());
           } else {
-            System.out.println("Ignoring " + slideItem);
+            System.err.println("Unknown or unsupported SlideItem type: " + slideItem);
+            // Skip closing the item tag for unsupported items
+            continue;
           }
         }
         out.println("</item>");

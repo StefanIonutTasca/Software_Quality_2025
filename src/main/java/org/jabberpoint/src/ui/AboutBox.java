@@ -1,3 +1,5 @@
+package org.jabberpoint.src.ui;
+
 import java.awt.Frame;
 import javax.swing.JOptionPane;
 

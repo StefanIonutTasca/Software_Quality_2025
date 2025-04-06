@@ -1,3 +1,5 @@
+package org.jabberpoint.src.model;
+
 import java.awt.Color;
 import java.awt.Font;
 
@@ -16,6 +18,9 @@ import java.awt.Font;
  * @version 1.6 2014/05/16 Sylvia Stuurman
  */
 public class Style {
+  // Singleton instance
+  private static Style instance = null;
+
   private static Style[] styles; // de styles
 
   private static final String FONTNAME = "Helvetica";
@@ -25,7 +30,9 @@ public class Style {
   int fontSize;
   int leading;
 
-  public static void createStyles() {
+  // Private constructor for Singleton pattern
+  private Style() {
+    // Initialize styles
     styles = new Style[5];
     // The styles are fixed.
     styles[0] = new Style(0, Color.red, 48, 20); // style for item-level 0
@@ -33,6 +40,19 @@ public class Style {
     styles[2] = new Style(50, Color.black, 36, 10); // style for item-level 2
     styles[3] = new Style(70, Color.black, 30, 10); // style for item-level 3
     styles[4] = new Style(90, Color.black, 24, 10); // style for item-level 4
+  }
+
+  // Get the singleton instance
+  public static Style getInstance() {
+    if (instance == null) {
+      instance = new Style();
+    }
+    return instance;
+  }
+
+  // For backward compatibility
+  public static void createStyles() {
+    getInstance();
   }
 
   public static Style getStyle(int level) {

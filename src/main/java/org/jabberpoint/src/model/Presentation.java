@@ -1,4 +1,7 @@
+package org.jabberpoint.src.model;
+
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Presentation maintains the slides in the presentation.
@@ -17,16 +20,37 @@ public class Presentation {
   private String showTitle; // title of the presentation
   private ArrayList<Slide> showList = null; // an ArrayList with Slides
   private int currentSlideNumber = 0; // the slidenummer of the current Slide
-  private SlideViewerComponent slideViewComponent = null; // the viewcomponent of the Slides
+  private List<PresentationObserver> observers =
+      new ArrayList<>(); // observers for the Observer pattern
 
   public Presentation() {
-    slideViewComponent = null;
     clear();
   }
 
-  public Presentation(SlideViewerComponent slideViewerComponent) {
-    this.slideViewComponent = slideViewerComponent;
-    clear();
+  /**
+   * Add an observer to the presentation
+   *
+   * @param observer The observer to add
+   */
+  public void addObserver(PresentationObserver observer) {
+    observers.add(observer);
+  }
+
+  /**
+   * Remove an observer from the presentation
+   *
+   * @param observer The observer to remove
+   */
+  public void removeObserver(PresentationObserver observer) {
+    observers.remove(observer);
+  }
+
+  /** Notify all observers of a change */
+  private void notifyObservers() {
+    Slide currentSlide = getCurrentSlide();
+    for (PresentationObserver observer : observers) {
+      observer.update(this, currentSlide);
+    }
   }
 
   public int getSize() {
@@ -41,21 +65,15 @@ public class Presentation {
     showTitle = nt;
   }
 
-  public void setShowView(SlideViewerComponent slideViewerComponent) {
-    this.slideViewComponent = slideViewerComponent;
-  }
-
   // give the number of the current slide
   public int getSlideNumber() {
     return currentSlideNumber;
   }
 
-  // change the current slide number and signal it to the window
+  // change the current slide number and signal it to the observers
   public void setSlideNumber(int number) {
     currentSlideNumber = number;
-    if (slideViewComponent != null) {
-      slideViewComponent.update(this, getCurrentSlide());
-    }
+    notifyObservers();
   }
 
   // go to the previous slide unless your at the beginning of the presentation
@@ -73,7 +91,7 @@ public class Presentation {
   }
 
   // Delete the presentation to be ready for the next one.
-  void clear() {
+  public void clear() {
     showList = new ArrayList<Slide>();
     setSlideNumber(-1);
   }

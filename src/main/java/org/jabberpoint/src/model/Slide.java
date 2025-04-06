@@ -1,3 +1,5 @@
+package org.jabberpoint.src.model;
+
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.image.ImageObserver;
@@ -17,7 +19,7 @@ import java.util.Vector;
 public class Slide {
   public static final int WIDTH = 1200;
   public static final int HEIGHT = 800;
-  protected String title; // title is saved separately
+  protected String title = ""; // title is saved separately and initialized to empty string
   protected Vector<SlideItem> items; // slide items are saved in a Vector
 
   public Slide() {
@@ -31,12 +33,12 @@ public class Slide {
 
   // give the title of the slide
   public String getTitle() {
-    return title;
+    return title == null ? "" : title;
   }
 
   // change the title of the slide
   public void setTitle(String newTitle) {
-    title = newTitle;
+    title = newTitle == null ? "" : newTitle;
   }
 
   // Create TextItem of String, and add the TextItem

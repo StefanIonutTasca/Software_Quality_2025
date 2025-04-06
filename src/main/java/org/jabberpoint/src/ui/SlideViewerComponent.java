@@ -1,3 +1,5 @@
+package org.jabberpoint.src.ui;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -5,6 +7,9 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.model.PresentationObserver;
+import org.jabberpoint.src.model.Slide;
 
 /**
  * SlideViewerComponent is a graphical component that can show slides.
@@ -17,7 +22,7 @@ import javax.swing.JFrame;
  * @version 1.5 2010/03/03 Sylvia Stuurman
  * @version 1.6 2014/05/16 Sylvia Stuurman
  */
-public class SlideViewerComponent extends JComponent {
+public class SlideViewerComponent extends JComponent implements PresentationObserver {
 
   private Slide slide; // current slide
   private Font labelFont = null; // font for labels
@@ -39,24 +44,26 @@ public class SlideViewerComponent extends JComponent {
     presentation = pres;
     labelFont = new Font(FONTNAME, FONTSTYLE, FONTHEIGHT);
     this.frame = frame;
+
+    // Register as an observer
+    presentation.addObserver(this);
   }
 
   public Dimension getPreferredSize() {
     return new Dimension(Slide.WIDTH, Slide.HEIGHT);
   }
 
-  public void update(Presentation presentation, Slide data) {
-    if (data == null) {
+  public void update(Presentation presentation, Slide slide) {
+    if (slide == null) {
       repaint();
       return;
     }
-    this.presentation = presentation;
-    this.slide = data;
+    this.slide = slide;
     repaint();
     frame.setTitle(presentation.getTitle());
   }
 
-  // draw the slide
+  // Draw the slide
   public void paintComponent(Graphics g) {
     g.setColor(BGCOLOR);
     g.fillRect(0, 0, getSize().width, getSize().height);

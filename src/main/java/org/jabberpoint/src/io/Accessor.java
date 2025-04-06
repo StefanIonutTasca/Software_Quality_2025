@@ -1,4 +1,7 @@
+package org.jabberpoint.src.io;
+
 import java.io.IOException;
+import org.jabberpoint.src.model.Presentation;
 
 /**
  * Een Accessor maakt het mogelijk om gegevens voor een presentatie te lezen of te schrijven.

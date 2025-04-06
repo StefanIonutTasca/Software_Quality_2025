@@ -1,9 +1,7 @@
 name: Code Quality Check
 
 on:
-  push:
-    branches: [ development, testing, acceptance, main ]
-  pull_request:
+  pull_request: 
     branches: [ development, testing, acceptance, main ]
 
 jobs:

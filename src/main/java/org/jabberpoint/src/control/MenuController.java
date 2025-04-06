@@ -1,3 +1,5 @@
+package org.jabberpoint.src.control;
+
 import java.awt.Frame;
 import java.awt.Menu;
 import java.awt.MenuBar;
@@ -7,6 +9,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import javax.swing.JOptionPane;
+import org.jabberpoint.src.io.Accessor;
+import org.jabberpoint.src.io.XMLAccessor;
+import org.jabberpoint.src.model.Presentation;
+import org.jabberpoint.src.ui.AboutBox;
 
 /**
  * The controller for the menu
@@ -39,8 +45,8 @@ public class MenuController extends MenuBar {
   protected static final String SAVE = "Save";
   protected static final String VIEW = "View";
 
-  protected static final String TESTFILE = "test.xml";
-  protected static final String SAVEFILE = "dump.xml";
+  protected static final String TESTFILE = "src/main/java/org/jabberpoint/OurPresentation.xml";
+  protected static final String SAVEFILE = "src/main/java/org/jabberpoint/dump.xml";
 
   protected static final String IOEX = "IO Exception: ";
   protected static final String LOADERR = "Load Error";

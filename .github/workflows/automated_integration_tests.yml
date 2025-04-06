@@ -1,10 +1,9 @@
 name: Integration Tests
 
 on:
-  push:
-    branches: [ testing, acceptance, main ]
   pull_request:
     branches: [ testing, acceptance, main ]
+    types: [opened, synchronize, reopened]
 
 jobs:
   integration-test:
@@ -25,16 +24,12 @@ jobs:
       
     - name: Run Integration Tests
       run: |
-        # This is where we would execute integration tests
-        # For now, we'll just echo a message since we haven't 
-        # created the actual integration tests yet
-        echo "Running integration tests..."
-        # Example command for when integration tests are created
-        # mvn -B verify -P integration-test
+        # Run tests with the integration tag
+        mvn -B test -Dgroups="integration"
         
-    - name: Upload Test Results
+    - name: Upload Integration Test Results
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: integration-test-results
-        path: target/integration-test-reports/
+        path: target/surefire-reports/

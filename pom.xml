@@ -38,10 +38,56 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- Mockito for mocking in tests -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.3.1</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Mockito JUnit Jupiter integration -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>5.3.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <!-- Build Helper Plugin to ensure Maven recognizes the correct source and test paths -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/main/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-test-source</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/test/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- Maven Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -50,6 +96,10 @@
                 <configuration>
                     <source>17</source>
                     <target>17</target>
+                    <!-- Ensure the compiler recognizes the default package classes -->
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
                 </configuration>
             </plugin>
             
@@ -60,6 +110,10 @@
                 <version>3.1.2</version>
                 <configuration>
                     <excludedGroups>integration</excludedGroups>
+                    <!-- Additional classpath entries to ensure test classes can find main classes -->
+                    <additionalClasspathElements>
+                        <additionalClasspathElement>${project.build.sourceDirectory}</additionalClasspathElement>
+                    </additionalClasspathElements>
                 </configuration>
             </plugin>
             
@@ -90,6 +144,24 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.10</version>
+                <configuration>
+                    <!-- Ensure all classes are included in coverage -->
+                    <includes>
+                        <include>**/*</include>
+                    </includes>
+                    <!-- Exclude UI components and other hard-to-test classes -->
+                    <excludes>
+                        <exclude>**/JabberPoint.class</exclude>
+                        <exclude>**/MenuController.class</exclude>
+                        <exclude>**/DemoPresentation.class</exclude>
+                        <exclude>**/SlideViewerComponent.class</exclude>
+                        <exclude>**/SlideViewerFrame.class</exclude>
+                        <exclude>**/AboutBox.class</exclude>
+                        <exclude>**/MenuController$*ActionListener*.class</exclude>
+                        <exclude>**/SlideViewerFrame$*WindowAdapter*.class</exclude>
+                        <exclude>**/DummyComponent.class</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -104,6 +176,7 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
+                    <!-- Re-enable the check with appropriate thresholds -->
                     <execution>
                         <id>check</id>
                         <goals>
@@ -117,12 +190,27 @@
                                         <limit>
                                             <counter>INSTRUCTION</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.70</minimum>
+                                            <minimum>0.80</minimum>
                                         </limit>
                                         <limit>
                                             <counter>BRANCH</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.60</minimum>
+                                            <minimum>0.75</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.80</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>METHOD</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.75</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>CLASS</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.65</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
