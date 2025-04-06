@@ -66,4 +66,26 @@ Our GitHub Actions workflow automatically runs:
 1. Code compilation
 2. Unit tests
 3. JaCoCo code coverage reports
-4. (Future) Deployment to appropriate environments based on the branch
+4. Integration tests on pull requests to testing, acceptance, and main branches
+
+### Workflow Configuration
+
+Our workflow files are configured to optimize the CI/CD pipeline and prevent duplicate runs:
+
+- **ci-cd.yml**: Runs on push to development branch and pull requests to main branches
+- **build.yml**: Runs only on push to development branch
+- **automated_integration_tests.yml**: Runs only on pull requests to testing, acceptance, and main branches (not on push events)
+
+This configuration ensures that:
+1. Development branch has continuous integration
+2. Integration tests run only when needed (on pull requests to stable branches)
+3. No duplicate workflow runs occur when creating or updating pull requests
+
+## Running the Project
+
+It's important to note that Maven is not required for simply running the Jabberpoint application. It's only needed if you want to:
+- Build the project from source
+- Run the automated tests
+- Generate code coverage reports
+
+For users who just want to run the application, a pre-built JAR file is available in the Releases section of the repository.
