@@ -1,8 +1,6 @@
 package org.jabberpoint.src.io;
+
 import org.jabberpoint.src.model.BitmapItem;
-import org.jabberpoint.src.io.Accessor;
-import org.jabberpoint.src.model.Style;
-import org.jabberpoint.src.app.JabberPoint;
 import org.jabberpoint.src.model.Presentation;
 import org.jabberpoint.src.model.Slide;
 
