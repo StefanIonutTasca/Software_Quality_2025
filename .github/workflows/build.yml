@@ -2,7 +2,7 @@ name: Java Build
 
 on:
   push:
-    branches: [ development, testing, acceptance, main ]
+    branches: [ development]
     paths:
       - 'src/**'
       - 'pom.xml'
