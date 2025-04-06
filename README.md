@@ -134,4 +134,14 @@ Test reports and code coverage reports are automatically generated during CI/CD 
 2. Make your changes
 3. Submit a pull request following the guidelines in [Contributing](docs/Contributing.md)
 4. Ensure all CI checks pass
-5. Get your PR reviewed and merged
+5. Get your PR reviewed and merged to `development`
+6. For promotion through the DTAP street:
+   - Changes in `development` are merged to `testing` for thorough testing
+   - After passing tests, changes move to `acceptance` for stakeholder review
+   - Finally, approved changes are merged to `main` (production)
+
+Note: Our GitHub Actions workflows are optimized to prevent duplicate runs:
+- Integration tests only run on pull requests to testing, acceptance, and main branches
+- Build workflow runs on push to development branch and pull requests to development, testing, acceptance, and main branches when specific files are modified
+- Code quality checks run on pull requests to all main branches
+- Google Java Format ensures consistent code style across the codebase
