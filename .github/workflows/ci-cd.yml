@@ -1,4 +1,4 @@
-name: Java CI/CD with Maven
+name: JaCoCo Code Coverage - Java CI/CD with Maven
 
 on:
   push:
